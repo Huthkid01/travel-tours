@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { NavLink } from "@/components/ui/NavLink";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
-import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
+import { IS_DEMO_MODE, NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Menu, Moon, Plane, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -56,9 +56,15 @@ export function Navbar() {
 
   return (
     <>
+      {IS_DEMO_MODE && (
+        <div className="fixed top-0 right-0 left-0 z-[210] bg-gold-500 py-1.5 text-center text-xs font-medium text-navy-950">
+          Demo mode — no env setup required · forms &amp; payments are simulated
+        </div>
+      )}
       <header
         className={cn(
-          "pointer-events-auto fixed top-0 right-0 left-0 z-[200]",
+          "pointer-events-auto fixed right-0 left-0 z-[200]",
+          IS_DEMO_MODE ? "top-9" : "top-0",
           scrolled
             ? "bg-white/95 shadow-lg backdrop-blur-xl dark:bg-navy-950/95"
             : "bg-gradient-to-b from-navy-950/80 to-transparent"
@@ -143,11 +149,19 @@ export function Navbar() {
         <>
           <button
             type="button"
-            className="fixed top-20 right-0 bottom-0 left-0 z-[150] bg-navy-950/50 lg:hidden"
+            className={cn(
+              "fixed right-0 bottom-0 left-0 z-[150] bg-navy-950/50 lg:hidden",
+              IS_DEMO_MODE ? "top-[5.75rem]" : "top-20"
+            )}
             aria-label="Close menu"
             onClick={closeMobile}
           />
-          <div className="fixed top-20 right-0 left-0 z-[160] border-b border-navy-100 bg-white shadow-2xl dark:border-navy-800 dark:bg-navy-950 lg:hidden">
+          <div
+            className={cn(
+              "fixed right-0 left-0 z-[160] border-b border-navy-100 bg-white shadow-2xl dark:border-navy-800 dark:bg-navy-950 lg:hidden",
+              IS_DEMO_MODE ? "top-[5.75rem]" : "top-20"
+            )}
+          >
             <div className="container-custom flex max-h-[calc(100vh-5rem)] flex-col gap-1 overflow-y-auto px-4 py-4">
               {NAV_LINKS.map((link) => (
                 <button

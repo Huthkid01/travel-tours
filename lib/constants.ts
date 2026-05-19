@@ -3,13 +3,24 @@ export const CURRENCY = {
   locale: "en-NG",
 } as const;
 
+function getSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+}
+
+/** Demo defaults work on Vercel with zero env variables */
 export const SITE_CONFIG = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || "Voyage Elite Travel",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@voyageelite.com",
-  phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "+1 (234) 567-8900",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "1234567890",
-  address: "123 Luxury Avenue, Suite 500, New York, NY 10001",
+  url: getSiteUrl(),
+  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "hello@voyageelite.com",
+  phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "+234 801 234 5678",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678",
+  address: "12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria",
   description:
     "Premium travel and tour agency offering curated luxury experiences worldwide. Explore destinations, book tours, and travel with confidence.",
 };
@@ -32,6 +43,9 @@ export const PAYMENT_KEYS = {
   flutterwave: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || "FLWPUBK_TEST-demo",
   paystack: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_demo",
 };
+
+export const IS_DEMO_MODE =
+  FORMSPREE.reservation.startsWith("demo_") && PAYMENT_KEYS.paystack.includes("demo");
 
 export const WHATSAPP_BASE = "https://wa.me";
 
