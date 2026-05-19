@@ -44,9 +44,6 @@ export const PAYMENT_KEYS = {
   paystack: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_demo",
 };
 
-export const IS_DEMO_MODE =
-  FORMSPREE.reservation.startsWith("demo_") && PAYMENT_KEYS.paystack.includes("demo");
-
 export const WHATSAPP_BASE = "https://wa.me";
 
 export function getWhatsAppUrl(message?: string) {

@@ -149,7 +149,7 @@ export function PaymentCards() {
         </div>
 
         <p className="mt-4 text-center text-xs text-navy-500">
-          Demo mode — payments use test keys. No real charges will be made.
+          Secure payment powered by Flutterwave &amp; Paystack
         </p>
       </div>
     </div>
