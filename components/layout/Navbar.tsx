@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { NavLink } from "@/components/ui/NavLink";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
-import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
+import { BRAND, NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Menu, Moon, Plane, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -75,8 +75,8 @@ export function Navbar() {
                 scrolled ? "text-navy-900 dark:text-white" : "text-white"
               )}
             >
-              {SITE_CONFIG.name.split(" ")[0]}
-              <span className="text-gold-500"> Elite</span>
+              {BRAND.logoPrimary}
+              <span className="text-gold-500"> {BRAND.logoAccent}</span>
             </span>
           </NavLink>
 

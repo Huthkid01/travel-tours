@@ -82,7 +82,7 @@ export default function HomePage() {
         <div className="container-custom">
           <SectionHeading
             label="Why Us"
-            title="Why Choose Voyage Elite"
+            title="Why Choose Darboi Consults"
             description="We go above and beyond to make every journey extraordinary"
           />
           <WhyChooseUs />

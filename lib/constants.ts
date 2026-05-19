@@ -13,11 +13,18 @@ function getSiteUrl(): string {
   return "http://localhost:3000";
 }
 
+export const BRAND = {
+  name: "Darboi Consults Limited",
+  short: "Darboi Consults",
+  logoPrimary: "Darboi",
+  logoAccent: "Consults Limited",
+} as const;
+
 /** Demo defaults work on Vercel with zero env variables */
 export const SITE_CONFIG = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || "Voyage Elite Travel",
+  name: process.env.NEXT_PUBLIC_SITE_NAME || BRAND.name,
   url: getSiteUrl(),
-  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "hello@voyageelite.com",
+  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "info@darboiconsults.com",
   phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "+234 801 234 5678",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678",
   address: "12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria",

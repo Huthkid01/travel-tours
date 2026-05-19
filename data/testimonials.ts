@@ -8,7 +8,7 @@ export const testimonials: Testimonial[] = [
     avatar:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80",
     rating: 5,
-    text: "Our Dubai trip exceeded every expectation. From the moment we landed to our departure, every detail was flawlessly executed. Voyage Elite made us feel like VIPs throughout.",
+    text: "Our Dubai trip exceeded every expectation. From the moment we landed to our departure, every detail was flawlessly executed. Darboi Consults made us feel like VIPs throughout.",
     tour: "Dubai Luxury Tour",
   },
   {
@@ -28,7 +28,7 @@ export const testimonials: Testimonial[] = [
     avatar:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80",
     rating: 5,
-    text: "Europe Adventure was the trip of a lifetime. Skip-the-line access, Michelin dining, and boutique hotels in every city. I cannot recommend Voyage Elite highly enough.",
+    text: "Europe Adventure was the trip of a lifetime. Skip-the-line access, Michelin dining, and boutique hotels in every city. I cannot recommend Darboi Consults highly enough.",
     tour: "Europe Adventure",
   },
   {

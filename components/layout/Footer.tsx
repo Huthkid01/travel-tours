@@ -1,4 +1,4 @@
-import { NAV_LINKS, SITE_CONFIG, getWhatsAppUrl } from "@/lib/constants";
+import { BRAND, NAV_LINKS, SITE_CONFIG, getWhatsAppUrl } from "@/lib/constants";
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
 import Link from "next/link";
 
@@ -9,7 +9,7 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="font-display text-2xl font-bold text-white">
-              Voyage <span className="text-gold-500">Elite</span>
+              {BRAND.logoPrimary} <span className="text-gold-500">{BRAND.logoAccent}</span>
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-navy-300">
               {SITE_CONFIG.description}

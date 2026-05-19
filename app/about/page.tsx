@@ -34,7 +34,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHero
-        title="About Voyage Elite"
+        title="About Darboi Consults Limited"
         subtitle="Your trusted partner in luxury travel since 2012"
         image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80"
       />
@@ -105,7 +105,7 @@ export default function AboutPage() {
           <SectionHeading
             label="Why Us"
             title="Why Customers Choose Us"
-            description="The Voyage Elite difference sets us apart"
+            description="The Darboi Consults difference sets us apart"
           />
           <WhyChooseUs />
         </div>

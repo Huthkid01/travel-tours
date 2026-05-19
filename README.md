@@ -1,4 +1,4 @@
-# Voyage Elite Travel — Premium Travel & Tour Agency
+# Darboi Consults Limited — Premium Travel & Tour Agency
 
 A modern travel agency website built with Next.js 15, TypeScript, and Tailwind CSS.
 

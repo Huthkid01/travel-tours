@@ -95,5 +95,5 @@ export function initiatePaystackPayment(config: PaymentConfig): void {
 }
 
 export function generatePaymentReference(): string {
-  return `VE-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  return `DCL-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 }
