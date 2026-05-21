@@ -8,6 +8,7 @@ import { TestimonialCarousel } from "@/components/home/TestimonialCarousel";
 import { FeaturedProgramsSection } from "@/components/programs/FeaturedProgramsSection";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
+import { VisaProofsGallery } from "@/components/proofs/VisaProofsGallery";
 import { MediaShowcase } from "@/components/media/MediaShowcase";
 import { SocialMediaSection } from "@/components/social/SocialMediaSection";
 import { Button } from "@/components/ui/Button";
@@ -24,6 +25,21 @@ export default function HomePage() {
       <Hero />
 
       <FeaturedProgramsSection />
+
+      <section className="section-padding bg-navy-50 dark:bg-navy-900/40">
+        <div className="container-custom">
+          <SectionHeading
+            label="Success Proofs"
+            title="Visa Approval Samples"
+            description="Real outcomes from our clients — personal details redacted for privacy."
+            align="center"
+            className="[&_h2]:text-navy-900 dark:[&_h2]:text-white"
+          />
+          <div className="mt-12">
+            <VisaProofsGallery />
+          </div>
+        </div>
+      </section>
 
       <section className="section-padding bg-white dark:bg-navy-950">
         <div className="container-custom">

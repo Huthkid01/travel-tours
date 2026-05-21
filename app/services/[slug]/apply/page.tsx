@@ -44,7 +44,11 @@ export default function ApplyPage() {
       <section className="section-padding">
         <div className="container-custom max-w-3xl">
           <div className="rounded-2xl border border-navy-100 bg-white p-8 shadow-xl dark:border-navy-800 dark:bg-navy-900">
-            <ApplicationForm serviceTitle={service.title} onSubmit={handleSubmit} />
+            <ApplicationForm
+              serviceSlug={slug}
+              serviceTitle={service.title}
+              onSubmit={handleSubmit}
+            />
           </div>
         </div>
       </section>

@@ -23,7 +23,7 @@ export const BRAND = {
 export const SITE_CONFIG = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || BRAND.name,
   url: getSiteUrl(),
-  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "darboilimited@gmail.com",
+  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "darboiconsults@gmail.com",
   phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "08038178843",
   /** E.164 for tel: links (same line as phone / WhatsApp) */
   phoneTel: "+2348038178843",

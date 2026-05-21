@@ -11,6 +11,12 @@ Drop client flyer images here. Each program uses a **slug-based filename**.
 | Student Visa Support | `student-visa.png` |
 | France Tourist Visa | `france-tourist-visa.png` |
 | Turkey Tourist Visa | `turkey-tourist-visa.png` |
+| Italy Visa Package — Fast & Guaranteed | `italy-visa.png` |
+| FIFA World Cup 2026 — Mexico Visa | `mexico-world-cup-2026.png` |
+| Kosovo 3-Month Tourist Visa | `kosovo-tourist-visa.png` |
+| Turkey Visa — Ambassador Contact | `turkey-visa-ambassador.png` |
+| Schengen Working Visa — EU Jobs | `schengen-work-visa.png` |
+| Japan Teaching Visa — September Intake | `japan-teaching-visa.png` |
 
 ## Add or replace a flyer
 

@@ -10,6 +10,12 @@ export const PROGRAM_FLYER_FILES: Record<string, string> = {
   "student-visa": "student-visa.png",
   "france-tourist-visa": "france-tourist-visa.png",
   "turkey-tourist-visa": "turkey-tourist-visa.png",
+  "italy-visa": "italy-visa.png",
+  "mexico-world-cup-2026": "mexico-world-cup-2026.png",
+  "kosovo-tourist-visa": "kosovo-tourist-visa.png",
+  "turkey-visa-ambassador": "turkey-visa-ambassador.png",
+  "schengen-work-visa": "schengen-work-visa.png",
+  "japan-teaching-visa": "japan-teaching-visa.png",
 };
 
 export function getProgramFlyerPath(slug: string): string {

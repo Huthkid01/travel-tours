@@ -1,12 +1,15 @@
 "use client";
 
+import { ApplicationForm } from "@/components/forms/ApplicationForm";
 import { DarboiApplicationForm } from "@/components/forms/DarboiApplicationForm";
 import { WhatsAppCTA } from "@/components/layout/WhatsAppCTA";
-import { mapDarboiToApplicationData } from "@/lib/application-mapper";
+import { serviceUsesVisaForm } from "@/data/service-application-forms";
 import { getConsultationWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
 import { getProgramBySlug } from "@/data/programs";
 import { services } from "@/data/services";
 import { PASSPORT_MATCH_NOTE } from "@/data/darboi-application-form";
+import { createApplication } from "@/services/applications";
+import { uploadApplicationFiles } from "@/services/storage";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo } from "react";
 import { toast } from "sonner";
@@ -48,38 +51,72 @@ function ConsultationContent() {
       <section className="section-padding">
         <div className="container-custom max-w-3xl">
           <p className="mb-6 text-sm text-navy-600 dark:text-navy-300">
-            Complete the same application form used for our Google Form. {PASSPORT_MATCH_NOTE}
+            {programSlug || (serviceSlug && !serviceUsesVisaForm(serviceSlug))
+              ? "Complete only the details and documents required for this service."
+              : `Complete the application form for this request. ${PASSPORT_MATCH_NOTE}`}
           </p>
           <div className="rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:p-8 dark:border-navy-800 dark:bg-navy-900">
-            <DarboiApplicationForm
-              contextLabel={label}
-              submitLabel={paymentHref ? "Save & Continue to Service Payment" : "Submit & Contact via WhatsApp"}
-              showPaymentInfo
-              onSubmit={async (data, files) => {
-                const mapped = mapDarboiToApplicationData(data);
-                sessionStorage.setItem(
-                  "consultation_draft",
-                  JSON.stringify({ ...mapped, filesCount: files.passportPhoto.length + files.passportBioPage.length })
-                );
+            {programSlug ? (
+              <DarboiApplicationForm
+                contextLabel={label}
+                submitLabel="Submit & Contact via WhatsApp"
+                showPaymentInfo
+                onSubmit={async (data) => {
+                  toast.success("Application submitted! Opening WhatsApp...");
+                  const details = [
+                    `Name: ${data.fullLegalName}`,
+                    `Country: ${data.countryOfChoice}`,
+                    `Programme: ${data.preferredProgramme}`,
+                    `Passport: ${data.passportNumber}`,
+                  ].join("\n");
+                  window.location.href = openWhatsApp(
+                    `${getConsultationWhatsAppMessage(label)}\n\n${details}`
+                  );
+                }}
+              />
+            ) : serviceSlug ? (
+              <ApplicationForm
+                serviceSlug={serviceSlug}
+                serviceTitle={label}
+                onSubmit={async (data, files) => {
+                  if (paymentHref) {
+                    try {
+                      const appId = crypto.randomUUID();
+                      const uploaded = await uploadApplicationFiles(serviceSlug, appId, files);
+                      const application = await createApplication(label, data, uploaded, appId);
+                      sessionStorage.setItem("pending_application_id", application.id);
+                      toast.success("Application saved. Continue to payment.");
+                      router.push(`${paymentHref}/payment?applicationId=${application.id}`);
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Failed to save application");
+                    }
+                    return;
+                  }
 
-                if (paymentHref) {
-                  toast.success("Application saved. Continue on the service apply page.");
-                  router.push(paymentHref);
-                  return;
-                }
-
-                toast.success("Application submitted! Opening WhatsApp...");
-                const details = [
-                  `Name: ${data.fullLegalName}`,
-                  `Country: ${data.countryOfChoice}`,
-                  `Programme: ${data.preferredProgramme}`,
-                  `Passport: ${data.passportNumber}`,
-                ].join("\n");
-                window.location.href = openWhatsApp(
-                  `${getConsultationWhatsAppMessage(label)}\n\n${details}`
-                );
-              }}
-            />
+                  toast.success("Application submitted! Opening WhatsApp...");
+                  window.location.href = openWhatsApp(
+                    `${getConsultationWhatsAppMessage(label)}\n\nName: ${data.fullName}\nPhone: ${data.phone}`
+                  );
+                }}
+              />
+            ) : (
+              <DarboiApplicationForm
+                contextLabel={label}
+                submitLabel="Submit & Contact via WhatsApp"
+                showPaymentInfo
+                onSubmit={async (data) => {
+                  toast.success("Application submitted! Opening WhatsApp...");
+                  const details = [
+                    `Name: ${data.fullLegalName}`,
+                    `Country: ${data.countryOfChoice}`,
+                    `Programme: ${data.preferredProgramme}`,
+                  ].join("\n");
+                  window.location.href = openWhatsApp(
+                    `${getConsultationWhatsAppMessage(label)}\n\n${details}`
+                  );
+                }}
+              />
+            )}
             <div className="mt-6 border-t border-navy-100 pt-6 dark:border-navy-800">
               <WhatsAppCTA
                 message={getConsultationWhatsAppMessage(label)}
