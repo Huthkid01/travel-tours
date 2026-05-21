@@ -1,10 +1,10 @@
-import { ProgramsCarousel } from "@/components/programs/ProgramsCarousel";
 import { ProgramCard } from "@/components/programs/ProgramCard";
 import { AnnouncementSidebar } from "@/components/announcements/AnnouncementSidebar";
 import { PageHero } from "@/components/layout/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { fetchPrograms } from "@/services/cms";
 import { buildPageMetadata } from "@/lib/seo";
+
 export const metadata = buildPageMetadata({
   title: "Featured Programs",
   description: "Explore travel packages, promotions, and special consultation programs.",
@@ -30,17 +30,9 @@ export default async function ProgramsPage() {
                 title="Current Offers & Campaigns"
                 description="Browse our featured programs. Pricing available on request after consultation."
               />
-              <div className="mt-10 hidden lg:block">
-                <ProgramsCarousel programs={programs} />
-              </div>
-              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:hidden">
+              <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6">
                 {programs.map((p, i) => (
-                  <ProgramCard key={p.id} program={p} index={i} />
-                ))}
-              </div>
-              <div className="mt-10 hidden gap-6 lg:grid lg:grid-cols-2">
-                {programs.map((p, i) => (
-                  <ProgramCard key={`g-${p.id}`} program={p} index={i} />
+                  <ProgramCard key={p.id} program={p} index={i} variant="compact" />
                 ))}
               </div>
             </div>
