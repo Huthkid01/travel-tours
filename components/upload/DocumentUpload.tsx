@@ -9,9 +9,10 @@ interface DocumentUploadProps {
   files: File[];
   onChange: (files: File[]) => void;
   error?: string;
+  maxFiles?: number;
 }
 
-export function DocumentUpload({ files, onChange, error }: DocumentUploadProps) {
+export function DocumentUpload({ files, onChange, error, maxFiles = 5 }: DocumentUploadProps) {
   const [dragActive, setDragActive] = useState(false);
 
   const validateAndAdd = useCallback(
@@ -23,9 +24,10 @@ export function DocumentUpload({ files, onChange, error }: DocumentUploadProps) 
           (ACCEPTED_FILE_TYPES.includes(f.type) || f.name.match(/\.(pdf|doc|docx|jpe?g|png|webp)$/i)) &&
           f.size <= maxBytes
       );
-      onChange([...files, ...valid]);
+      const merged = [...files, ...valid].slice(0, maxFiles);
+      onChange(merged);
     },
-    [files, onChange]
+    [files, onChange, maxFiles]
   );
 
   const onDrop = (e: React.DragEvent) => {
@@ -65,7 +67,7 @@ export function DocumentUpload({ files, onChange, error }: DocumentUploadProps) 
         <Upload className="mx-auto h-10 w-10 text-gold-500" />
         <p className="mt-3 font-medium text-navy-900 dark:text-white">Drag & drop files here</p>
         <p className="mt-1 text-sm text-navy-500">
-          Passport photo, PDF, PNG, JPEG, DOCX — max {MAX_FILE_SIZE_MB}MB each
+          PDF, document, or image — up to {maxFiles} files, max {MAX_FILE_SIZE_MB}MB each
         </p>
       </div>
 

@@ -5,7 +5,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { createApplication } from "@/services/applications";
 import { uploadApplicationFiles } from "@/services/storage";
 import { getServiceBySlug } from "@/data/services";
-import type { ApplicationFormValues } from "@/lib/validations";
+import type { ApplicationFormData } from "@/types";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMemo } from "react";
@@ -24,7 +24,7 @@ export default function ApplyPage() {
     );
   }
 
-  const handleSubmit = async (data: ApplicationFormValues, files: File[]) => {
+  const handleSubmit = async (data: ApplicationFormData, files: File[]) => {
     try {
       const appId = crypto.randomUUID();
       const uploaded = await uploadApplicationFiles(slug, appId, files);
@@ -42,7 +42,7 @@ export default function ApplyPage() {
     <>
       <PageHero title="Application Form" subtitle={`Apply for ${service.title}`} />
       <section className="section-padding">
-        <div className="container-custom max-w-2xl">
+        <div className="container-custom max-w-3xl">
           <div className="rounded-2xl border border-navy-100 bg-white p-8 shadow-xl dark:border-navy-800 dark:bg-navy-900">
             <ApplicationForm serviceTitle={service.title} onSubmit={handleSubmit} />
           </div>

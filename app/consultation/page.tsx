@@ -1,60 +1,93 @@
 "use client";
 
-import { DynamicConsultationForm } from "@/components/forms/DynamicConsultationForm";
-import { PageHero } from "@/components/layout/PageHero";
-import { getConsultationSchema } from "@/data/consultation-forms";
+import { DarboiApplicationForm } from "@/components/forms/DarboiApplicationForm";
+import { WhatsAppCTA } from "@/components/layout/WhatsAppCTA";
+import { mapDarboiToApplicationData } from "@/lib/application-mapper";
+import { getConsultationWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
 import { getProgramBySlug } from "@/data/programs";
 import { services } from "@/data/services";
-import { useSearchParams } from "next/navigation";
+import { PASSPORT_MATCH_NOTE } from "@/data/darboi-application-form";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo } from "react";
+import { toast } from "sonner";
 
 function ConsultationContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const programSlug = searchParams.get("program");
   const serviceSlug = searchParams.get("service");
 
-  const { schema, label, paymentHref } = useMemo(() => {
+  const { label, paymentHref } = useMemo(() => {
     if (programSlug) {
       const program = getProgramBySlug(programSlug);
       return {
-        schema: getConsultationSchema("program", program?.title ?? programSlug),
         label: program?.title ?? programSlug,
-        paymentHref: undefined,
+        paymentHref: undefined as string | undefined,
       };
     }
     if (serviceSlug) {
       const service = services.find((s) => s.slug === serviceSlug);
       return {
-        schema: getConsultationSchema("service", service?.title ?? serviceSlug),
         label: service?.title ?? serviceSlug,
         paymentHref: `/services/${serviceSlug}/apply`,
       };
     }
-    return {
-      schema: getConsultationSchema("general"),
-      label: "General Consultation",
-      paymentHref: undefined,
-    };
+    return { label: "General Consultation", paymentHref: undefined as string | undefined };
   }, [programSlug, serviceSlug]);
 
   return (
     <>
-      <PageHero
-        title="Start Your Consultation"
-        subtitle={label}
-        image="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1920&q=80"
-      />
+      <section className="bg-navy-950 pt-24 pb-8 sm:pt-28">
+        <div className="container-custom px-4 text-center sm:px-6 sm:text-left">
+          <p className="text-xs font-semibold tracking-wider text-gold-400 uppercase">Consultation</p>
+          <h1 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">Application Form</h1>
+          <p className="mt-2 text-navy-300">{label}</p>
+        </div>
+      </section>
+
       <section className="section-padding">
-        <div className="container-custom max-w-2xl">
-          <div className="mb-8 rounded-2xl border border-gold-500/20 bg-gold-500/5 p-4 text-sm text-navy-700 dark:text-navy-200">
-            <strong>Flow:</strong> Service Selection → Consultation Form → Payment (if applicable) → Case Review → WhatsApp
-          </div>
-          <div className="rounded-2xl border border-navy-100 bg-white p-8 shadow-xl dark:border-navy-800 dark:bg-navy-900">
-            <DynamicConsultationForm
-              schema={schema}
+        <div className="container-custom max-w-3xl">
+          <p className="mb-6 text-sm text-navy-600 dark:text-navy-300">
+            Complete the same application form used for our Google Form. {PASSPORT_MATCH_NOTE}
+          </p>
+          <div className="rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:p-8 dark:border-navy-800 dark:bg-navy-900">
+            <DarboiApplicationForm
               contextLabel={label}
-              redirectToPayment={paymentHref}
+              submitLabel={paymentHref ? "Save & Continue to Service Payment" : "Submit & Contact via WhatsApp"}
+              showPaymentInfo
+              onSubmit={async (data, files) => {
+                const mapped = mapDarboiToApplicationData(data);
+                sessionStorage.setItem(
+                  "consultation_draft",
+                  JSON.stringify({ ...mapped, filesCount: files.passportPhoto.length + files.passportBioPage.length })
+                );
+
+                if (paymentHref) {
+                  toast.success("Application saved. Continue on the service apply page.");
+                  router.push(paymentHref);
+                  return;
+                }
+
+                toast.success("Application submitted! Opening WhatsApp...");
+                const details = [
+                  `Name: ${data.fullLegalName}`,
+                  `Country: ${data.countryOfChoice}`,
+                  `Programme: ${data.preferredProgramme}`,
+                  `Passport: ${data.passportNumber}`,
+                ].join("\n");
+                window.location.href = openWhatsApp(
+                  `${getConsultationWhatsAppMessage(label)}\n\n${details}`
+                );
+              }}
             />
+            <div className="mt-6 border-t border-navy-100 pt-6 dark:border-navy-800">
+              <WhatsAppCTA
+                message={getConsultationWhatsAppMessage(label)}
+                variant="link"
+                label="Prefer WhatsApp only?"
+                service={label}
+              />
+            </div>
           </div>
         </div>
       </section>
