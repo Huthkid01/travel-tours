@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
@@ -46,8 +45,6 @@ export function Button({
   onClick,
   ...props
 }: ButtonProps) {
-  const router = useRouter();
-
   const classes = cn(
     "relative z-10 inline-flex cursor-pointer items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
     variants[variant],
@@ -56,15 +53,14 @@ export function Button({
   );
 
   if (href) {
-    const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>) => {
-      onClick?.(e as unknown as MouseEvent<HTMLButtonElement>);
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.preventDefault();
-      router.push(href);
-    };
+    const handleLinkClick = onClick
+      ? (e: MouseEvent<HTMLAnchorElement>) => {
+          onClick(e as unknown as MouseEvent<HTMLButtonElement>);
+        }
+      : undefined;
 
     return (
-      <Link href={href} className={classes} prefetch onClick={handleLinkClick}>
+      <Link href={href} prefetch className={classes} onClick={handleLinkClick}>
         {children}
       </Link>
     );

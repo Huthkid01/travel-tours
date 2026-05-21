@@ -2,9 +2,9 @@
 export const images = {
   hero1: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1920&q=75",
   hero2:
-    "https://images.unsplash.com/photo-1771692822812-0e63a421a124?auto=format&fit=crop&w=1920&q=75",
+    "https://images.unsplash.com/photo-1469854523086-cc02afe5c88d?auto=format&fit=crop&w=1920&q=75",
   hero3:
-    "https://images.unsplash.com/photo-1758558364663-8adad550f518?auto=format&fit=crop&w=1920&q=75",
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1920&q=75",
   dubai: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=75",
   turkey: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=75",
   uk: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=75",

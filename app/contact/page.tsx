@@ -1,96 +1,75 @@
-import { PageHero } from "@/components/layout/PageHero";
 import { ContactForm } from "@/components/forms/ContactForm";
-import { SectionHeading } from "@/components/ui/SectionHeading";
+import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
+import { MapEmbed } from "@/components/layout/MapEmbed";
+import { SocialLinks } from "@/components/social/SocialLinks";
+import { SocialGallery } from "@/components/social/SocialGallery";
+import { socialPostPreviews } from "@/data/social-posts";
+import { PageHero } from "@/components/layout/PageHero";
 import { SITE_CONFIG, getWhatsAppUrl } from "@/lib/constants";
-import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
-
 export const metadata: Metadata = {
   title: "Contact Us",
-  description: `Get in touch with ${SITE_CONFIG.name}. Send a message, call us, or chat on WhatsApp.`,
+  description: `Contact ${SITE_CONFIG.name} — ${SITE_CONFIG.address}`,
 };
 
 export default function ContactPage() {
   return (
     <>
-      <PageHero
-        title="Contact Us"
-        subtitle="We're here to help plan your perfect journey"
-        image="https://images.unsplash.com/photo-1423666639045-f560003c2af3?w=1920&q=80"
-      />
-
+      <PageHero title="Contact Us" subtitle="We're here to help with your documentation needs" />
       <section className="section-padding">
         <div className="container-custom">
           <div className="grid gap-12 lg:grid-cols-2">
             <div>
-              <SectionHeading
-                label="Get in Touch"
-                title="We'd Love to Hear From You"
-                align="left"
-                className="mb-8"
-              />
-
-              <div className="space-y-6">
-                <div className="flex items-start gap-4 rounded-xl bg-navy-50 p-5 dark:bg-navy-900">
-                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold-500" />
+              <h2 className="font-display text-2xl font-bold text-navy-900 dark:text-white">Get in Touch</h2>
+              <ul className="mt-8 space-y-6">
+                <li className="flex items-start gap-4">
+                  <MapPin className="mt-1 h-5 w-5 text-gold-500" />
                   <div>
-                    <p className="font-medium text-navy-900 dark:text-white">Address</p>
-                    <p className="mt-1 text-sm text-navy-600 dark:text-navy-400">{SITE_CONFIG.address}</p>
+                    <p className="font-medium">Address</p>
+                    <p className="text-navy-600 dark:text-navy-300">{SITE_CONFIG.address}</p>
                   </div>
-                </div>
-
-                <div className="flex items-start gap-4 rounded-xl bg-navy-50 p-5 dark:bg-navy-900">
-                  <Phone className="mt-0.5 h-5 w-5 shrink-0 text-gold-500" />
+                </li>
+                <li className="flex items-center gap-4">
+                  <Phone className="h-5 w-5 text-gold-500" />
                   <div>
-                    <p className="font-medium text-navy-900 dark:text-white">Phone</p>
-                    <a href={`tel:${SITE_CONFIG.phone}`} className="mt-1 text-sm text-gold-600 hover:underline">
+                    <p className="font-medium">Phone</p>
+                    <a href={`tel:${SITE_CONFIG.phone}`} className="text-gold-600 hover:underline">
                       {SITE_CONFIG.phone}
                     </a>
                   </div>
-                </div>
-
-                <div className="flex items-start gap-4 rounded-xl bg-navy-50 p-5 dark:bg-navy-900">
-                  <Mail className="mt-0.5 h-5 w-5 shrink-0 text-gold-500" />
+                </li>
+                <li className="flex items-center gap-4">
+                  <Mail className="h-5 w-5 text-gold-500" />
                   <div>
-                    <p className="font-medium text-navy-900 dark:text-white">Email</p>
-                    <a href={`mailto:${SITE_CONFIG.email}`} className="mt-1 text-sm text-gold-600 hover:underline">
+                    <p className="font-medium">Email</p>
+                    <a href={`mailto:${SITE_CONFIG.email}`} className="text-gold-600 hover:underline">
                       {SITE_CONFIG.email}
                     </a>
                   </div>
-                </div>
-
-                <a
-                  href={getWhatsAppUrl("Hello! I'd like to inquire about your travel services.")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 rounded-xl bg-green-600 p-5 text-white transition-colors hover:bg-green-500"
-                >
-                  <MessageCircle className="h-6 w-6" />
-                  <div>
-                    <p className="font-medium">Chat on WhatsApp</p>
-                    <p className="text-sm text-green-100">Available 24/7 for instant support</p>
-                  </div>
-                </a>
-              </div>
-
-              <div className="mt-8 overflow-hidden rounded-2xl">
-                <iframe
-                  title="Office Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.00425878428698!3d40.74076684379132!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259a9b3117469%3A0xd134e199a405a163!2sEmpire%20State%20Building!5e0!3m2!1sen!2sus!4v1635959222670!5m2!1sen!2sus"
-                  width="100%"
-                  height="280"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="grayscale transition-all hover:grayscale-0"
-                />
+                </li>
+              </ul>
+              <SocialLinks variant="footer" className="mt-6" />
+              <a
+                href={getWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex rounded-full bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-500"
+              >
+                Chat on WhatsApp
+              </a>
+              <div className="mt-10">
+                <MapEmbed />
               </div>
             </div>
-
-            <div>
-              <ContactForm />
-            </div>
+            <ContactForm />
+          </div>
+          <div className="mt-16">
+            <GoogleFormEmbed />
+          </div>
+          <div className="mt-16">
+            <h2 className="mb-6 font-display text-2xl font-bold">Follow Our Journey</h2>
+            <SocialGallery postPreview={socialPostPreviews} />
           </div>
         </div>
       </section>

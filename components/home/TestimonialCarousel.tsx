@@ -3,7 +3,7 @@
 import { testimonials } from "@/data/testimonials";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
-import Image from "next/image";
+import { RemoteImage } from "@/components/ui/RemoteImage";
 import { useState } from "react";
 
 export function TestimonialCarousel() {
@@ -34,7 +34,7 @@ export function TestimonialCarousel() {
             &ldquo;{testimonial.text}&rdquo;
           </p>
           <div className="mt-8 flex items-center gap-4">
-            <Image
+            <RemoteImage
               src={testimonial.avatar}
               alt={testimonial.name}
               width={56}
@@ -43,8 +43,8 @@ export function TestimonialCarousel() {
             />
             <div>
               <p className="font-semibold text-navy-900 dark:text-white">{testimonial.name}</p>
-              <p className="text-sm text-navy-500">{testimonial.location}</p>
-              <p className="text-xs text-gold-600">{testimonial.tour}</p>
+              <p className="text-sm text-navy-500">{testimonial.role}</p>
+              <p className="text-xs text-gold-600">{testimonial.service}</p>
             </div>
           </div>
         </motion.div>

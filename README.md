@@ -1,63 +1,82 @@
-# Darboi Consults Limited — Premium Travel & Tour Agency
+# Da Boi Consults Limited — Business Portal
 
-A modern travel agency website built with Next.js 15, TypeScript, and Tailwind CSS.
+Premium multi-service documentation and travel consultation portal.
+
+**Address:** 24, Olowu Street, Ikeja, Lagos, Nigeria
+
+## Stack
+
+- **Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion
+- **Forms:** React Hook Form + Zod
+- **Database & Storage:** Supabase
+- **Email:** EmailJS
+- **Payments:** Paystack & Flutterwave (demo keys included)
 
 ## Features
 
-- Luxury travel UI with dark/light mode
-- Tour packages, reservations, payments (Flutterwave & Paystack demo)
-- Formspree email + WhatsApp redirect workflow
-- Mobile-responsive navigation
-- Prices in Nigerian Naira (₦)
+- 16 professional services with search & category filters
+- Dynamic application forms with drag-and-drop document upload
+- Supabase Storage (`documents/{service}/{application-id}/`)
+- Automatic email notifications to admin (EmailJS)
+- Paystack / Flutterwave payments (booking fee, deposit, full)
+- WhatsApp redirect after successful submission
+- Dark mode, SEO, floating WhatsApp, sticky navbar
 
-## Quick Start
+## Demo Mode
+
+Works without environment variables:
+
+- Applications stored in `sessionStorage`
+- Email logged to console
+- Payment shows demo alerts
+
+## Setup
 
 ```bash
 npm install
-cp .env.example .env.local
-# Edit .env.local with your details
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+### Supabase
 
-## Deploy to Vercel
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run `supabase/schema.sql` in the SQL Editor
+3. Add env vars from `.env.example`
 
-1. Push this project to GitHub
-2. Go to [vercel.com](https://vercel.com) → **Add New Project**
-3. Import your GitHub repository
-4. Add environment variables from `.env.example`
-5. Click **Deploy**
+### EmailJS
 
-Vercel auto-detects Next.js. No extra config required.
+1. Create templates per `supabase/emailjs-template.md`
+2. Add service ID, template IDs, and public key to `.env.local`
 
-### Required environment variables (Vercel)
+### Payments
 
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SITE_URL` | Your live URL e.g. `https://your-app.vercel.app` |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | WhatsApp number (country code, no +) |
-| `NEXT_PUBLIC_ADMIN_EMAIL` | Business email |
-| `NEXT_PUBLIC_ADMIN_PHONE` | Display phone |
-| `NEXT_PUBLIC_FORMSPREE_RESERVATION_ID` | Formspree form ID |
-| `NEXT_PUBLIC_FORMSPREE_CONTACT_ID` | Formspree contact form ID |
-| `NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY` | Flutterwave public key (optional demo) |
-| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack public key (optional demo) |
+Replace demo keys with live Paystack/Flutterwave public keys.
 
-## Build locally
+## Client logo
 
-```bash
-npm run build
-npm start
+Add files to **`public/branding/`** (see `public/branding/README.md`):
+
+- `logo.png` — main logo (recommended)
+- Optional: `logo-light.png`, `logo-dark.png` for different navbar backgrounds
+
+## Project Structure
+
+```
+public/branding/  Client logo files (PNG/SVG)
+app/              Pages (home, services, apply, payment, success, about, contact)
+components/       UI, forms, upload, payment, layout
+data/             Services, FAQs, testimonials, stats
+lib/              Constants, validations, utils
+services/         Supabase applications, storage, email, payment
+supabase/         SQL schema, setup guides
+types/            TypeScript interfaces
 ```
 
-## Tech Stack
+## Flow
 
-- Next.js 15 (App Router)
-- React 19 · TypeScript · Tailwind CSS v4
-- Framer Motion · React Hook Form · Zod
-- Formspree · Lucide Icons
+1. User selects a service → `/services/[slug]`
+2. Applies → form + document upload
+3. Pays → Paystack or Flutterwave
+4. Data saved to Supabase → EmailJS notification → WhatsApp redirect
 
-## License
-
-MIT
+No admin dashboard — fully automated client-facing portal.

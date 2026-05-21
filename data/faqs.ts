@@ -3,32 +3,38 @@ import type { FAQ } from "@/types";
 export const faqs: FAQ[] = [
   {
     id: "1",
-    question: "How do I book a tour package?",
+    question: "How does the application process work?",
     answer:
-      "Simply browse our tours, select your preferred package, and fill out the reservation form. After submission, you'll receive a confirmation email and be connected with our team via WhatsApp to finalize details.",
+      "Choose your service, complete the online form, upload required documents, make payment, and our team will contact you via WhatsApp to continue processing.",
   },
   {
     id: "2",
     question: "What payment options are available?",
     answer:
-      "We accept payments via Flutterwave and Paystack. You can pay a booking fee, deposit (30%), or the full amount upfront. All transactions are secure and encrypted.",
+      "You can pay a booking fee, a 30% deposit, or the full service amount via Paystack or Flutterwave on our secure payment page.",
   },
   {
     id: "3",
-    question: "Can I customize my travel itinerary?",
+    question: "How long does processing take?",
     answer:
-      "Absolutely! All our packages can be customized to your preferences. Mention your requirements in the reservation form or discuss directly with our travel consultants on WhatsApp.",
+      "Processing times vary by service — typically from 24 hours for travel reservations to 30 days for complex land documentation. Each service page lists estimated timelines.",
   },
   {
     id: "4",
-    question: "What is your cancellation policy?",
+    question: "What file formats can I upload?",
     answer:
-      "Cancellations made 30+ days before departure receive a full refund minus processing fees. 15-29 days: 50% refund. Less than 15 days: non-refundable. Travel insurance is included in all packages.",
+      "We accept JPEG, PNG, PDF, and DOCX files up to 10MB each. You can upload multiple documents including passport photographs and certificates.",
   },
   {
     id: "5",
-    question: "Do you handle visa applications?",
+    question: "Is my information secure?",
     answer:
-      "Yes, we provide comprehensive visa assistance for all destinations in our packages. Our team will guide you through documentation and application processes.",
+      "Yes. Documents are stored securely in Supabase Storage with private access. Only authorized personnel can view your submissions.",
+  },
+  {
+    id: "6",
+    question: "Can I track my application?",
+    answer:
+      "After submission, you will receive a payment reference. Contact us on WhatsApp with your reference for real-time updates from our team.",
   },
 ];

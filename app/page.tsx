@@ -1,78 +1,68 @@
-import dynamic from "next/dynamic";
-import { HeroSlider } from "@/components/home/HeroSlider";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Button } from "@/components/ui/Button";
-import { destinations } from "@/data/destinations";
-import { getFeaturedTours } from "@/data/tours";
+import { FAQAccordion } from "@/components/faq/FAQAccordion";
 import { faqs } from "@/data/faqs";
-
-const DestinationCard = dynamic(
-  () => import("@/components/destinations/DestinationCard").then((m) => m.DestinationCard),
-  { loading: () => <div className="skeleton aspect-[3/4] rounded-2xl" /> }
-);
-
-const TourCard = dynamic(
-  () => import("@/components/tours/TourCard").then((m) => m.TourCard),
-  { loading: () => <div className="skeleton aspect-[4/3] rounded-2xl" /> }
-);
-
-const WhyChooseUs = dynamic(
-  () => import("@/components/home/WhyChooseUs").then((m) => m.WhyChooseUs)
-);
-
-const StatsSection = dynamic(
-  () => import("@/components/home/StatsSection").then((m) => m.StatsSection)
-);
-
-const TestimonialCarousel = dynamic(
-  () => import("@/components/home/TestimonialCarousel").then((m) => m.TestimonialCarousel)
-);
-
-const FAQAccordion = dynamic(
-  () => import("@/components/faq/FAQAccordion").then((m) => m.FAQAccordion)
-);
-
-const CTABanner = dynamic(
-  () => import("@/components/home/CTABanner").then((m) => m.CTABanner)
-);
+import { CTABanner } from "@/components/home/CTABanner";
+import { Hero } from "@/components/home/Hero";
+import { ProcessSection } from "@/components/home/ProcessSection";
+import { StatsSection } from "@/components/home/StatsSection";
+import { TestimonialCarousel } from "@/components/home/TestimonialCarousel";
+import { FeaturedProgramsSection } from "@/components/programs/FeaturedProgramsSection";
+import { ServiceCard } from "@/components/services/ServiceCard";
+import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
+import { MediaShowcase } from "@/components/media/MediaShowcase";
+import { SocialMediaSection } from "@/components/social/SocialMediaSection";
+import { Button } from "@/components/ui/Button";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { services } from "@/data/services";
+import { SITE_CONFIG } from "@/lib/constants";
+import { ArrowRight } from "lucide-react";
 
 export default function HomePage() {
-  const featuredTours = getFeaturedTours();
+  const featured = services.filter((s) => s.featured).slice(0, 6);
 
   return (
     <>
-      <HeroSlider />
+      <Hero />
+
+      <FeaturedProgramsSection />
 
       <section className="section-padding bg-white dark:bg-navy-950">
         <div className="container-custom">
           <SectionHeading
-            label="Destinations"
-            title="Popular Destinations"
-            description="Discover breathtaking locations handpicked by our travel experts"
+            label="About Us"
+            title="Your Trusted Documentation Partner"
+            description={`${SITE_CONFIG.name} delivers premium documentation, certification, and travel consultation from our Ikeja office.`}
           />
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6 lg:gap-6">
-            {destinations.map((dest, i) => (
-              <DestinationCard key={dest.id} destination={dest} index={i} />
-            ))}
+          <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-center">
+            <p className="text-lg leading-relaxed text-navy-600 dark:text-navy-300">
+              We simplify complex paperwork — from marriage certificates and police clearance to proof of funds,
+              flight reservations, and embassy appointments. Our automated portal ensures every application is stored
+              securely and our team is notified instantly.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button href="/about" variant="outline">
+                Learn More
+              </Button>
+              <Button href="/contact">Contact Us</Button>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="section-padding bg-navy-50 dark:bg-navy-900/50">
+      <section className="section-padding bg-navy-50 dark:bg-navy-900/30">
         <div className="container-custom">
           <SectionHeading
-            label="Packages"
-            title="Featured Tour Packages"
-            description="Exclusive curated experiences for the discerning traveler"
+            label="Our Services"
+            title="16+ Professional Services"
+            description="Documentation, travel, legal, and certification support under one roof."
           />
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {featuredTours.map((tour, i) => (
-              <TourCard key={tour.id} tour={tour} index={i} />
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((service, i) => (
+              <ServiceCard key={service.slug} service={service} index={i} />
             ))}
           </div>
-          <div className="mt-12 text-center">
-            <Button href="/tours" variant="outline" size="lg">
-              View All Packages
+          <div className="mt-10 text-center">
+            <Button href="/services" variant="secondary">
+              View All Services <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -81,43 +71,73 @@ export default function HomePage() {
       <section className="section-padding">
         <div className="container-custom">
           <SectionHeading
-            label="Why Us"
-            title="Why Choose Darboi Consults"
-            description="We go above and beyond to make every journey extraordinary"
+            label="How It Works"
+            title="Simple 5-Step Process"
+            description="From service selection to WhatsApp assistance — fully automated."
           />
-          <WhyChooseUs />
+          <div className="mt-12">
+            <ProcessSection />
+          </div>
         </div>
       </section>
 
-      <section className="section-padding bg-navy-900">
+      <section className="section-padding bg-navy-950">
         <div className="container-custom">
           <StatsSection />
         </div>
       </section>
 
+      <SocialMediaSection />
+
       <section className="section-padding">
         <div className="container-custom">
           <SectionHeading
-            label="Testimonials"
-            title="What Our Travelers Say"
-            description="Real stories from real adventurers around the world"
+            label="Showcase"
+            title="Our Work & Highlights"
+            description="Travel highlights, documentation success, and social previews."
+            align="center"
           />
-          <TestimonialCarousel />
+          <div className="mt-12">
+            <MediaShowcase />
+          </div>
         </div>
       </section>
 
-      <section className="section-padding bg-navy-50 dark:bg-navy-900/50">
+      <section className="section-padding bg-white dark:bg-navy-950">
         <div className="container-custom max-w-3xl">
-          <SectionHeading label="FAQ" title="Frequently Asked Questions" />
-          <FAQAccordion items={faqs} />
+          <GoogleFormEmbed
+            title="Consultation Form"
+            description="Our Google Form consultation will be linked here. Until then, use the consultation page or WhatsApp."
+          />
+        </div>
+      </section>
+
+      <section className="section-padding bg-navy-50 dark:bg-navy-900/30">
+        <div className="container-custom">
+          <SectionHeading label="Testimonials" title="What Our Clients Say" />
+          <div className="mt-12">
+            <TestimonialCarousel />
+          </div>
         </div>
       </section>
 
       <section className="section-padding">
-        <div className="container-custom">
-          <CTABanner />
+        <div className="container-custom max-w-3xl">
+          <SectionHeading label="FAQ" title="Frequently Asked Questions" align="center" />
+          <div className="mt-10">
+            <FAQAccordion items={faqs} />
+          </div>
         </div>
       </section>
+
+      <CTABanner
+        title="Ready to Get Started?"
+        description="Choose a service, submit your documents, and pay securely online."
+        primaryLabel="Browse Services"
+        primaryHref="/services"
+        secondaryLabel="Contact Us"
+        secondaryHref="/contact"
+      />
     </>
   );
 }

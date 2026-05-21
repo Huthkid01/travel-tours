@@ -1,0 +1,34 @@
+import { fetchAnnouncements } from "@/services/cms";
+import { Megaphone } from "lucide-react";
+import Link from "next/link";
+
+export async function AnnouncementSidebar() {
+  const items = await fetchAnnouncements();
+
+  if (items.length === 0) return null;
+
+  return (
+    <aside className="rounded-2xl border border-navy-100 bg-white p-6 shadow-lg dark:border-navy-800 dark:bg-navy-900">
+      <div className="mb-4 flex items-center gap-2">
+        <Megaphone className="h-5 w-5 text-gold-500" />
+        <h3 className="font-semibold text-navy-900 dark:text-white">Latest Updates</h3>
+      </div>
+      <ul className="space-y-3">
+        {items.slice(0, 5).map((a) => (
+          <li key={a.id} className="border-b border-navy-100 pb-3 last:border-0 dark:border-navy-800">
+            {a.link ? (
+              <Link href={a.link} className="text-sm text-navy-600 hover:text-gold-600 dark:text-navy-300">
+                {a.message}
+              </Link>
+            ) : (
+              <p className="text-sm text-navy-600 dark:text-navy-300">{a.message}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+      <Link href="/announcements" className="mt-4 inline-block text-sm font-medium text-gold-600 hover:underline">
+        View all announcements →
+      </Link>
+    </aside>
+  );
+}

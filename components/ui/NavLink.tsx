@@ -2,8 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { MouseEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface NavLinkProps {
   href: string;
@@ -12,21 +11,10 @@ interface NavLinkProps {
   onNavigate?: () => void;
 }
 
-/** Reliable client navigation — works inside overlays and animated parents */
+/** Client nav link — uses Next.js prefetch for fast route changes */
 export function NavLink({ href, className, children, onNavigate }: NavLinkProps) {
-  const router = useRouter();
-
-  const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    onNavigate?.();
-
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-
-    e.preventDefault();
-    router.push(href);
-  };
-
   return (
-    <Link href={href} className={cn("relative z-10", className)} onClick={handleClick}>
+    <Link href={href} prefetch className={cn("relative z-10", className)} onClick={onNavigate}>
       {children}
     </Link>
   );

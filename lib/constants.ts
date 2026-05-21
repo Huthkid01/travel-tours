@@ -20,30 +20,49 @@ export const BRAND = {
   logoAccent: "Consults Limited",
 } as const;
 
-/** Demo defaults work on Vercel with zero env variables */
 export const SITE_CONFIG = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || BRAND.name,
   url: getSiteUrl(),
-  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "info@darboiconsults.com",
+  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "info@daboi-consults.com",
   phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "+234 801 234 5678",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678",
-  address: "12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria",
+  address: "24, Olowu Street, Ikeja, Lagos, Nigeria",
   description:
-    "Premium travel and tour agency offering curated luxury experiences worldwide. Explore destinations, book tours, and travel with confidence.",
+    "Premium documentation, certification, and travel consultation services. Professional support from application to delivery.",
+  mapEmbedUrl:
+    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.0!2d3.35!3d6.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzYnMDAuMCJOIDPCsDIxJzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1",
 };
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/services", label: "Services" },
+  { href: "/programs", label: "Programs" },
+  { href: "/consultation", label: "Consultation" },
   { href: "/about", label: "About" },
-  { href: "/tours", label: "Tours" },
-  { href: "/reservation", label: "Reservation" },
-  { href: "/payment", label: "Payment" },
   { href: "/contact", label: "Contact" },
 ];
 
-export const FORMSPREE = {
-  reservation: process.env.NEXT_PUBLIC_FORMSPREE_RESERVATION_ID || "demo_reservation",
-  contact: process.env.NEXT_PUBLIC_FORMSPREE_CONTACT_ID || "demo_contact",
+export const SOCIAL_LINKS = {
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com",
+  tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "https://tiktok.com",
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://facebook.com",
+  instagramHandle: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "@daboi_consults",
+  tiktokHandle: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "@daboi_consults",
+} as const;
+
+export type SocialPlatform = keyof Pick<typeof SOCIAL_LINKS, "instagram" | "tiktok" | "facebook">;
+
+export const SUPABASE_CONFIG = {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+};
+
+export const EMAILJS_CONFIG = {
+  serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "demo_service",
+  templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "demo_template",
+  contactTemplateId: process.env.NEXT_PUBLIC_EMAILJS_CONTACT_TEMPLATE_ID || "demo_contact",
+  publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "demo_key",
+  adminEmail: process.env.NEXT_PUBLIC_ADMIN_EMAIL || SITE_CONFIG.email,
 };
 
 export const PAYMENT_KEYS = {
@@ -53,11 +72,33 @@ export const PAYMENT_KEYS = {
 
 export const WHATSAPP_BASE = "https://wa.me";
 
+export const APPLICATION_WHATSAPP_MESSAGE =
+  "Hello, I just submitted my application through your website. I would like assistance with the next steps.";
+
 export function getWhatsAppUrl(message?: string) {
   const number = SITE_CONFIG.whatsapp.replace(/\D/g, "");
   const text = message ? `?text=${encodeURIComponent(message)}` : "";
   return `${WHATSAPP_BASE}/${number}${text}`;
 }
 
-export const RESERVATION_WHATSAPP_MESSAGE =
-  "Hello, I just submitted a travel reservation through your website. I'd like to continue planning my trip.";
+export const ACCEPTED_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
+export const ACCEPTED_FILE_EXTENSIONS = ".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx";
+
+export const MAX_FILE_SIZE_MB = 10;
+
+export function isSupabaseConfigured(): boolean {
+  return Boolean(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
+}
+
+export function isEmailJsConfigured(): boolean {
+  const { serviceId, templateId, publicKey } = EMAILJS_CONFIG;
+  return !serviceId.includes("demo") && !templateId.includes("demo") && !publicKey.includes("demo");
+}

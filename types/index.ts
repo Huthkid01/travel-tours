@@ -1,45 +1,198 @@
-export interface Tour {
+export type PaymentStatus = "pending" | "paid" | "failed";
+export type PaymentType = "deposit" | "full" | "booking-fee";
+export type PaymentProvider = "paystack" | "flutterwave";
+
+export type ProgramStatus = "active" | "draft" | "archived";
+export type AnnouncementType = "promo" | "service" | "notice";
+
+export type VisitorActionType =
+  | "form_submit"
+  | "service_click"
+  | "program_click"
+  | "whatsapp_click"
+  | "social_click"
+  | "payment_attempt"
+  | "page_view"
+  | "consultation_start";
+
+export interface UploadedFileMeta {
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  path?: string;
+}
+
+export interface Application {
+  id: string;
+  service_name: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  country: string;
+  address: string;
+  purpose: string;
+  notes: string | null;
+  uploaded_files: UploadedFileMeta[];
+  payment_status: PaymentStatus;
+  payment_reference: string | null;
+  payment_type?: string | null;
+  payment_amount?: number | null;
+  payment_provider?: string | null;
+  created_at: string;
+}
+
+export interface ApplicationFormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  country: string;
+  address: string;
+  purpose: string;
+  notes?: string;
+}
+
+export interface Program {
   id: string;
   slug: string;
   title: string;
-  country: string;
-  duration: string;
-  price: number;
-  currency: string;
-  image: string;
-  gallery: string[];
   description: string;
-  highlights: string[];
-  included: string[];
-  featured?: boolean;
-  rating?: number;
-  reviews?: number;
+  image: string;
+  status: ProgramStatus;
+  badge?: string;
+  date: string;
+  ctaLink: string;
+  optionalPrice?: number | null;
+  sortOrder?: number;
 }
 
-export interface Destination {
+/** @deprecated Use Program */
+export type FeaturedProgram = Program;
+
+export interface MediaShowcaseItem {
+  id: string;
+  type: "image" | "video";
+  title: string;
+  category: "travel" | "documents" | "success" | "social";
+  src: string;
+  externalUrl?: string;
+}
+
+export interface SocialPostPreview {
+  id: string;
+  platform: "instagram" | "tiktok";
+  image: string;
+  caption: string;
+  url: string;
+}
+
+export interface Lead {
   id: string;
   name: string;
-  country: string;
-  image: string;
-  tours: number;
+  phone: string;
+  email: string;
+  interest: string;
+  created_at: string;
+}
+
+export interface SiteEvent {
+  id: string;
+  event_type: string;
+  page: string;
+  metadata: Record<string, string> | null;
+  created_at: string;
+}
+
+export interface Announcement {
+  id: string;
+  message: string;
+  type: AnnouncementType;
+  link?: string | null;
+  active: boolean;
+  sortOrder?: number;
+  startsAt?: string | null;
+  endsAt?: string | null;
+}
+
+export interface VisitorActivity {
+  id: string;
+  action_type: VisitorActionType;
+  service: string | null;
+  source: string | null;
+  metadata?: Record<string, string> | null;
+  created_at: string;
+}
+
+export interface ServiceItem {
+  slug: string;
+  title: string;
+  shortDescription: string;
   description: string;
+  requirements: string[];
+  pricing: {
+    deposit: number;
+    full: number;
+    bookingFee: number;
+  };
+  category: ServiceCategory;
+  icon: string;
+  processingTime: string;
+  featured?: boolean;
+}
+
+export type ServiceCategory =
+  | "documentation"
+  | "travel"
+  | "legal"
+  | "certification"
+  | "booking";
+
+export type FormFieldType =
+  | "text"
+  | "email"
+  | "phone"
+  | "textarea"
+  | "select"
+  | "file"
+  | "checkbox"
+  | "country";
+
+export interface FormFieldOption {
+  label: string;
+  value: string;
+}
+
+export interface FormFieldConfig {
+  name: string;
+  label: string;
+  type: FormFieldType;
+  required?: boolean;
+  placeholder?: string;
+  options?: FormFieldOption[];
+  /** Show field only when another field equals value */
+  showWhen?: { field: string; value: string };
+  accept?: string;
+}
+
+export interface ConsultationFormSchema {
+  id: string;
+  title: string;
+  serviceSlug?: string;
+  programSlug?: string;
+  description?: string;
+  fields: FormFieldConfig[];
+  enablePayment?: boolean;
+  enableFileUpload?: boolean;
 }
 
 export interface Testimonial {
   id: string;
   name: string;
-  location: string;
+  role: string;
   avatar: string;
   rating: number;
   text: string;
-  tour: string;
-}
-
-export interface Stat {
-  id: string;
-  value: string;
-  label: string;
-  icon: string;
+  service: string;
 }
 
 export interface FAQ {
@@ -48,31 +201,27 @@ export interface FAQ {
   answer: string;
 }
 
-export interface ReservationFormData {
-  fullName: string;
-  email: string;
-  phone: string;
-  destination: string;
-  departureDate: string;
-  returnDate: string;
-  travelType: string;
-  travelers: number;
-  notes?: string;
-}
-
 export interface ContactFormData {
   name: string;
   email: string;
+  phone: string;
+  subject: string;
   message: string;
 }
 
-export type PaymentType = "deposit" | "full" | "booking-fee";
-export type PaymentProvider = "flutterwave" | "paystack";
-
-export interface PaymentOption {
-  id: PaymentType;
-  title: string;
-  description: string;
-  percentage?: number;
-  fixedAmount?: number;
+export interface EmailApplicationPayload {
+  applicationId: string;
+  serviceName: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  country: string;
+  address: string;
+  purpose: string;
+  notes: string;
+  fileLinks: string;
+  paymentReference: string;
+  paymentStatus: string;
+  paymentAmount: string;
+  timestamp: string;
 }

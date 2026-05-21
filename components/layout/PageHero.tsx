@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { RemoteImage } from "@/components/ui/RemoteImage";
 
 interface PageHeroProps {
   title: string;
@@ -16,7 +16,7 @@ export function PageHero({
 }: PageHeroProps) {
   return (
     <section className="relative flex h-[40vh] min-h-[320px] items-center justify-center overflow-hidden">
-      <Image src={image} alt={title} fill className="object-cover" priority sizes="100vw" />
+      <RemoteImage src={image} alt={title} fill className="object-cover" priority sizes="100vw" />
       <div className="absolute inset-0 bg-navy-950/70" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -1,0 +1,50 @@
+import {
+  Award,
+  BadgeCheck,
+  Briefcase,
+  CalendarCheck,
+  Car,
+  Clock,
+  FilePen,
+  FileText,
+  Heart,
+  Hotel,
+  Landmark,
+  Lock,
+  MessageCircle,
+  Newspaper,
+  Plane,
+  Shield,
+  ShieldCheck,
+  Syringe,
+  TrendingUp,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
+
+const iconMap: Record<string, LucideIcon> = {
+  Heart,
+  ShieldCheck,
+  Syringe,
+  Briefcase,
+  Landmark,
+  BadgeCheck,
+  TrendingUp,
+  Newspaper,
+  FilePen,
+  Wallet,
+  Plane,
+  Shield,
+  Hotel,
+  Car,
+  CalendarCheck,
+  Award,
+  Lock,
+  Clock,
+  MessageCircle,
+  FileText,
+};
+
+export function getLucideIcon(name: string): LucideIcon {
+  return iconMap[name] ?? FileText;
+}
