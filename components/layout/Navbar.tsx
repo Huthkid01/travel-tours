@@ -5,7 +5,6 @@ import { NavLink } from "@/components/ui/NavLink";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 import { SocialLinks } from "@/components/social/SocialLinks";
-import { useAnnouncementVisible } from "@/components/layout/AnnouncementContext";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Menu, Moon, Sun, X } from "lucide-react";
@@ -34,7 +33,6 @@ export function Navbar() {
     };
   }, [mobileOpen]);
 
-  const announcementVisible = useAnnouncementVisible();
   const isHome = pathname === "/";
   const lightNav = isHome && !scrolled;
 
@@ -60,8 +58,7 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "pointer-events-auto fixed right-0 left-0 z-[200] transition-[top] duration-300",
-          announcementVisible ? "top-10" : "top-0",
+          "pointer-events-auto fixed top-0 right-0 left-0 z-[200]",
           lightNav
             ? "bg-gradient-to-b from-navy-950/80 to-transparent"
             : "bg-white/95 shadow-lg backdrop-blur-xl dark:bg-navy-950/95"
@@ -142,8 +139,7 @@ export function Navbar() {
           />
           <div
             className={cn(
-              "fixed right-0 left-0 z-[160] border-b border-navy-100 bg-white shadow-2xl dark:border-navy-800 dark:bg-navy-950 lg:hidden transition-[top] duration-300",
-              announcementVisible ? "top-[7.5rem]" : "top-20"
+              "fixed top-20 right-0 left-0 z-[160] border-b border-navy-100 bg-white shadow-2xl dark:border-navy-800 dark:bg-navy-950 lg:hidden"
             )}
           >
             <div className="container-custom flex max-h-[calc(100vh-5rem)] flex-col gap-1 overflow-y-auto px-4 py-4">

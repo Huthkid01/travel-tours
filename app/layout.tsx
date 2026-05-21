@@ -1,4 +1,3 @@
-import { AnnouncementProvider } from "@/components/layout/AnnouncementContext";
 import { LayoutShell } from "@/components/layout/LayoutShell";
 import { LeadTrackerProvider } from "@/components/providers/LeadTrackerProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -34,10 +33,8 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider>
           <LeadTrackerProvider>
-            <AnnouncementProvider>
-              <LayoutShell>{children}</LayoutShell>
-              <Toaster position="top-right" richColors closeButton />
-            </AnnouncementProvider>
+            <LayoutShell>{children}</LayoutShell>
+            <Toaster position="top-right" richColors closeButton />
           </LeadTrackerProvider>
         </ThemeProvider>
       </body>
