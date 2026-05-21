@@ -12,9 +12,9 @@ export const announcements: Announcement[] = [
   },
   {
     id: "2",
-    message: "Upcoming travel package — Holiday Offers launching soon",
+    message: "Serbia warehouse jobs & work permits — apply now",
     type: "promo",
-    link: "/programs/holiday-offers",
+    link: "/programs/serbia-warehouse-jobs",
     active: true,
     sortOrder: 2,
   },
@@ -28,9 +28,9 @@ export const announcements: Announcement[] = [
   },
   {
     id: "4",
-    message: "Special consultation notice — Visa Campaign consultations available",
+    message: "France & Turkey tourist visa support — book consultation",
     type: "notice",
-    link: "/programs/visa-campaign",
+    link: "/programs/france-tourist-visa",
     active: true,
     sortOrder: 4,
   },

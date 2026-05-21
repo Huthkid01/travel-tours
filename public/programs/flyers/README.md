@@ -1,34 +1,21 @@
 # Program flyer graphics
 
-Drop your client flyer images here. Each file is matched to a program by **slug** (filename).
+Drop client flyer images here. Each program uses a **slug-based filename**.
 
-## File naming
+## Current programs (active)
 
-Use the program slug as the filename:
+| Program | Filename |
+|---------|----------|
+| Serbia — Warehouse Jobs & Work Permits | `serbia-warehouse-jobs.png` |
+| Serbia Visa Program | `serbia-visa.png` |
+| Student Visa Support | `student-visa.png` |
+| France Tourist Visa | `france-tourist-visa.png` |
+| Turkey Tourist Visa | `turkey-tourist-visa.png` |
 
-| Program | Filename (any one format) |
-|---------|---------------------------|
-| Katana Flex Program | `katana-flex-program.jpg` |
-| Special Travel Packages | `special-travel-packages.jpg` |
-| Holiday Offers | `holiday-offers.jpg` |
-| Visa Campaign | `visa-campaign.jpg` |
-| Consultation Announcement | `consultation-announcement.jpg` |
+## Add or replace a flyer
 
-Supported formats: **`.jpg`**, **`.jpeg`**, **`.png`**, **`.webp`**
+1. Save image as `{slug}.png` (see table above), or update `PROGRAM_FLYER_FILES` in `lib/program-flyers.ts`.
+2. Update copy in `data/programs.ts` if the title or description changes.
+3. Hard refresh the browser (Cmd+Shift+R).
 
-## Tips
-
-- Portrait flyers (phone poster size) work best — cards show the full graphic without cropping.
-- Recommended width: **800–1200px**
-- After adding files, refresh the browser (hard refresh: Cmd+Shift+R).
-
-## Example
-
-```
-public/programs/flyers/
-  katana-flex-program.png
-  special-travel-packages.jpg
-  holiday-offers.jpg
-  visa-campaign.jpg
-  consultation-announcement.jpg
-```
+Recommended width: **800–1200px**, portrait flyers work best on mobile.
