@@ -1,3 +1,4 @@
+import { FEATURED_VIDEO } from "@/data/featured-video";
 import type { MediaShowcaseItem } from "@/types";
 
 export const mediaShowcaseItems: MediaShowcaseItem[] = [
@@ -28,7 +29,7 @@ export const mediaShowcaseItems: MediaShowcaseItem[] = [
     title: "Travel Highlights",
     category: "travel",
     src: "https://images.unsplash.com/photo-1469854523086-cc02afe5c88d?w=600&q=80",
-    externalUrl: "https://tiktok.com",
+    externalUrl: "/#video",
   },
   {
     id: "5",

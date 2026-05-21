@@ -28,7 +28,11 @@ export function MediaShowcase() {
   const openItem = (item: MediaShowcaseItem) => {
     trackEvent({ eventType: "button_click", element: `media_${item.id}`, metadata: { category: item.category } });
     if (item.externalUrl) {
-      window.open(item.externalUrl, "_blank");
+      if (item.externalUrl.startsWith("/")) {
+        window.location.href = item.externalUrl;
+      } else {
+        window.open(item.externalUrl, "_blank");
+      }
       return;
     }
     setSelected(item);

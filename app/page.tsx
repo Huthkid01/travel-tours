@@ -10,6 +10,7 @@ import { ServiceCard } from "@/components/services/ServiceCard";
 import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
 import { VisaProofsGallery } from "@/components/proofs/VisaProofsGallery";
 import { MediaShowcase } from "@/components/media/MediaShowcase";
+import { FeaturedVideoSection } from "@/components/social/FeaturedVideoSection";
 import { SocialMediaSection } from "@/components/social/SocialMediaSection";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -102,6 +103,8 @@ export default function HomePage() {
           <StatsSection />
         </div>
       </section>
+
+      <FeaturedVideoSection />
 
       <SocialMediaSection />
 

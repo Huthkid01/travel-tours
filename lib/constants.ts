@@ -47,10 +47,10 @@ export const NAV_LINKS = [
 
 export const SOCIAL_LINKS = {
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com",
-  tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "https://tiktok.com",
+  tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "https://www.tiktok.com/@darboiconsults",
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://facebook.com",
-  instagramHandle: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "@daboi_consults",
-  tiktokHandle: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "@daboi_consults",
+  instagramHandle: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "@darboiconsults",
+  tiktokHandle: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "@darboiconsults",
 } as const;
 
 export type SocialPlatform = keyof Pick<typeof SOCIAL_LINKS, "instagram" | "tiktok" | "facebook">;
