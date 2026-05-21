@@ -11,7 +11,12 @@ export function RoutePrefetcher() {
   const router = useRouter();
 
   useEffect(() => {
-    const routes = [...new Set([...NAV_LINKS.map((l) => l.href), ...EXTRA_ROUTES])];
+    const routes = [
+      ...new Set([
+        ...NAV_LINKS.map((l) => l.href.split("#")[0] || "/").filter(Boolean),
+        ...EXTRA_ROUTES,
+      ]),
+    ];
     routes.forEach((href) => {
       try {
         router.prefetch(href);

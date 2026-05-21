@@ -1,5 +1,5 @@
 import { ContactForm } from "@/components/forms/ContactForm";
-import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
+import { GoogleFormSection } from "@/components/forms/GoogleFormSection";
 import { MapEmbed } from "@/components/layout/MapEmbed";
 import { TikTokIcon } from "@/components/social/TikTokIcon";
 import { PageHero } from "@/components/layout/PageHero";
@@ -78,7 +78,7 @@ export default function ContactPage() {
             <ContactForm />
           </div>
           <div className="mt-16">
-            <GoogleFormEmbed />
+            <GoogleFormSection />
           </div>
         </div>
       </section>

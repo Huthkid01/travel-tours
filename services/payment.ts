@@ -43,10 +43,10 @@ export function initiateFlutterwavePayment(config: PaymentConfig): void {
 
   if (PAYMENT_KEYS.flutterwave.includes("demo")) {
     console.log("[Flutterwave Demo]", { amount, email, name, reference });
-    alert(
-      `Flutterwave Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nIn production, Flutterwave checkout opens here.`
+    const confirmed = window.confirm(
+      `Flutterwave Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nClick OK when done to continue to WhatsApp.`
     );
-    onSuccess?.();
+    if (confirmed) onSuccess?.();
     return;
   }
 
@@ -75,10 +75,10 @@ export function initiatePaystackPayment(config: PaymentConfig): void {
 
   if (PAYMENT_KEYS.paystack.includes("demo")) {
     console.log("[Paystack Demo]", { amount, email, name, reference });
-    alert(
-      `Paystack Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nIn production, Paystack popup opens here.`
+    const confirmed = window.confirm(
+      `Paystack Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nClick OK when done to continue to WhatsApp.`
     );
-    onSuccess?.();
+    if (confirmed) onSuccess?.();
     return;
   }
 

@@ -40,6 +40,7 @@ export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
   { href: "/programs", label: "Programs" },
+  { href: "/#consultation-form", label: "Google Form" },
   { href: "/consultation", label: "Consultation" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -60,13 +61,10 @@ export const SUPABASE_CONFIG = {
   anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
 };
 
-export const EMAILJS_CONFIG = {
-  serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "demo_service",
-  templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "demo_template",
-  contactTemplateId: process.env.NEXT_PUBLIC_EMAILJS_CONTACT_TEMPLATE_ID || "demo_contact",
-  publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "demo_key",
-  adminEmail: process.env.NEXT_PUBLIC_ADMIN_EMAIL || SITE_CONFIG.email,
-};
+export const FORMSUBMIT_EMAIL =
+  process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL ||
+  process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+  SITE_CONFIG.email;
 
 export const PAYMENT_KEYS = {
   flutterwave: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || "FLWPUBK_TEST-demo",
@@ -101,7 +99,9 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
 }
 
-export function isEmailJsConfigured(): boolean {
-  const { serviceId, templateId, publicKey } = EMAILJS_CONFIG;
-  return !serviceId.includes("demo") && !templateId.includes("demo") && !publicKey.includes("demo");
+export function isFormSubmitConfigured(): boolean {
+  return Boolean(FORMSUBMIT_EMAIL && FORMSUBMIT_EMAIL.includes("@"));
 }
+
+/** @deprecated Use isFormSubmitConfigured */
+export const isEmailJsConfigured = isFormSubmitConfigured;

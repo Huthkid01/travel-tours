@@ -5,16 +5,16 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { getServiceBySlug } from "@/data/services";
 import { getApplication, updateApplicationPayment } from "@/services/applications";
-import { sendApplicationEmail } from "@/services/email";
+import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
+import { notifyOwnerOnPayment } from "@/lib/notify-owner";
 import type { Application, PaymentProvider, PaymentType } from "@/types";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function PaymentPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const slug = params.slug as string;
   const applicationId = searchParams.get("applicationId");
 
@@ -51,13 +51,28 @@ export default function PaymentPage() {
       });
 
       if (updated) {
-        await sendApplicationEmail(updated, amount);
-        toast.success("Payment recorded successfully!");
-        router.push(`/success?applicationId=${application.id}`);
+        await notifyOwnerOnPayment(updated, amount);
+        toast.success("Payment complete! Opening WhatsApp…");
+        const message = getApplicationWhatsAppMessage({
+          applicationId: updated.id,
+          reference,
+          serviceName: service.title,
+          paymentAmount: amount,
+          applicantName: updated.full_name,
+        });
+        redirectToWhatsApp(message);
       }
     } catch {
-      toast.error("Payment recorded locally. Contact support with your reference.");
-      router.push(`/success?applicationId=${application.id}&ref=${reference}`);
+      toast.error("Payment recorded. Opening WhatsApp with your reference.");
+      redirectToWhatsApp(
+        getApplicationWhatsAppMessage({
+          applicationId: application.id,
+          reference,
+          serviceName: service.title,
+          paymentAmount: amount,
+          applicantName: application.full_name,
+        })
+      );
     }
   };
 

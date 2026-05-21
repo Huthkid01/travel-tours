@@ -2,8 +2,7 @@
 
 import { ApplicationForm } from "@/components/forms/ApplicationForm";
 import { PageHero } from "@/components/layout/PageHero";
-import { createApplication } from "@/services/applications";
-import { uploadApplicationFiles } from "@/services/storage";
+import { submitApplicationWithNotify } from "@/lib/submit-application";
 import { getServiceBySlug } from "@/data/services";
 import type { ApplicationFormData } from "@/types";
 import { useParams, useRouter } from "next/navigation";
@@ -26,12 +25,20 @@ export default function ApplyPage() {
 
   const handleSubmit = async (data: ApplicationFormData, files: File[]) => {
     try {
-      const appId = crypto.randomUUID();
-      const uploaded = await uploadApplicationFiles(slug, appId, files);
-      const application = await createApplication(service.title, data, uploaded, appId);
+      const { application, emailSent } = await submitApplicationWithNotify(
+        slug,
+        service.title,
+        data,
+        files
+      );
 
       sessionStorage.setItem("pending_application_id", application.id);
-      toast.success("Application saved. Proceed to payment.");
+      if (emailSent) {
+        toast.success("Application submitted! Darboi Consults has been notified by email.");
+      } else {
+        toast.success("Application saved. Proceed to payment.");
+        toast.warning("Email notification could not be sent. Your application is still saved.");
+      }
       router.push(`/services/${slug}/apply/payment?applicationId=${application.id}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit application");

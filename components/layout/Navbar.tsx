@@ -40,6 +40,26 @@ export function Navbar() {
 
   const closeMobile = () => setMobileOpen(false);
 
+  const scrollToHash = (href: string) => {
+    const hashIndex = href.indexOf("#");
+    if (hashIndex === -1) return false;
+    const basePath = href.slice(0, hashIndex) || "/";
+    const id = href.slice(hashIndex + 1);
+    if (pathname !== basePath) return false;
+    const el = document.getElementById(id);
+    if (!el) return false;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.pushState(null, "", href);
+    return true;
+  };
+
+  const handleNavClick = (href: string) => (e: React.MouseEvent) => {
+    if (scrollToHash(href)) {
+      e.preventDefault();
+    }
+    closeMobile();
+  };
+
   const linkClass = (href: string, mobile = false) =>
     cn(
       mobile
@@ -74,7 +94,12 @@ export function Navbar() {
 
           <div className="hidden flex-1 items-center justify-center gap-6 lg:flex xl:gap-8">
             {NAV_LINKS.map((link) => (
-              <NavLink key={link.href} href={link.href} className={linkClass(link.href)}>
+              <NavLink
+                key={link.href}
+                href={link.href}
+                className={linkClass(link.href)}
+                onNavigate={handleNavClick(link.href)}
+              >
                 {link.label}
               </NavLink>
             ))}
@@ -156,7 +181,7 @@ export function Navbar() {
                   href={link.href}
                   prefetch
                   className={linkClass(link.href, true)}
-                  onClick={closeMobile}
+                  onClick={handleNavClick(link.href)}
                 >
                   {link.label}
                 </Link>

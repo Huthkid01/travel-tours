@@ -3,86 +3,67 @@
 import { FEATURED_VIDEO } from "@/data/featured-video";
 import { SOCIAL_LINKS } from "@/lib/constants";
 import { trackEvent } from "@/lib/analytics";
-import { ExternalLink, Pause, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ExternalLink } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 
-/**
- * Self-hosted video with play/pause controls. Falls back to TikTok link only if file missing.
- */
+/** Self-hosted MP4 — first frame visible; no HEAD check (reliable on Vercel) */
 export function FeaturedVideoPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasLocalVideo, setHasLocalVideo] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const src = FEATURED_VIDEO.localSrc;
 
-  useEffect(() => {
-    fetch(FEATURED_VIDEO.localSrc, { method: "HEAD" })
-      .then((res) => setHasLocalVideo(res.ok))
-      .catch(() => setHasLocalVideo(false));
-  }, []);
-
-  const togglePlay = () => {
+  const showFirstFrame = useCallback(() => {
     const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      void video.play();
-      setIsPlaying(true);
-      trackEvent({ eventType: "button_click", element: "featured_video_play" });
-    } else {
-      video.pause();
-      setIsPlaying(false);
-      trackEvent({ eventType: "button_click", element: "featured_video_pause" });
+    if (!video || video.readyState < 1) return;
+    try {
+      if (video.currentTime < 0.05) {
+        video.currentTime = 0.01;
+      }
+    } catch {
+      /* some browsers block seek before enough data */
     }
-  };
-
-  if (!hasLocalVideo) {
-    return (
-      <div className="mx-auto max-w-md text-center">
-        <p className="text-navy-600 dark:text-navy-300">
-          Video file not found. Add <code className="text-gold-600">public/video/featured.mp4</code>
-        </p>
-        <a
-          href={FEATURED_VIDEO.tiktokUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-2 text-gold-600 hover:underline"
-        >
-          Watch on TikTok
-          <ExternalLink className="h-4 w-4" />
-        </a>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <div className="mx-auto w-full max-w-sm sm:max-w-md">
       <div className="overflow-hidden rounded-2xl border border-navy-200 bg-navy-950 shadow-xl dark:border-navy-800">
-        <div className="relative bg-navy-950">
+        {!videoError ? (
           <video
             ref={videoRef}
-            className="mx-auto max-h-[min(50vh,320px)] w-full object-contain sm:max-h-[400px]"
+            key={src}
+            className="aspect-[9/16] max-h-[min(70vh,420px)] w-full bg-navy-900 object-contain sm:max-h-[480px]"
             playsInline
-            preload="metadata"
+            preload="auto"
             controls
             controlsList="nodownload"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
+            poster="/branding/logo.png"
+            onLoadedMetadata={showFirstFrame}
+            onLoadedData={showFirstFrame}
+            onError={() => setVideoError(true)}
+            onPlay={() => trackEvent({ eventType: "button_click", element: "featured_video_play" })}
           >
-            <source src={FEATURED_VIDEO.localSrc} type="video/mp4" />
+            <source src={src} type="video/mp4" />
             Your browser does not support video playback.
           </video>
-          <button
-            type="button"
-            onClick={togglePlay}
-            className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-navy-950/85 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20 backdrop-blur-sm transition hover:bg-gold-500 hover:text-navy-950 sm:hidden"
-            aria-label={isPlaying ? "Pause video" : "Play video"}
-          >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
-            {isPlaying ? "Pause" : "Play"}
-          </button>
-        </div>
+        ) : (
+          <div className="flex aspect-[9/16] max-h-[min(70vh,420px)] flex-col items-center justify-center gap-3 bg-navy-900 p-6 text-center sm:max-h-[480px]">
+            <p className="text-sm text-navy-300">
+              Video could not load. Ensure{" "}
+              <code className="text-gold-400">public/video/featured.mp4</code> is deployed, or watch on
+              TikTok.
+            </p>
+            <a
+              href={FEATURED_VIDEO.tiktokUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gold-500 hover:underline"
+            >
+              Watch on TikTok
+            </a>
+          </div>
+        )}
         <p className="px-3 py-2 text-center text-xs text-navy-400">
-          Tap play to watch · Use controls to pause
+          Tap the play button on the video to watch
         </p>
       </div>
 

@@ -7,9 +7,9 @@ import { StatsSection } from "@/components/home/StatsSection";
 import { TestimonialCarousel } from "@/components/home/TestimonialCarousel";
 import { FeaturedProgramsSection } from "@/components/programs/FeaturedProgramsSection";
 import { ServiceCard } from "@/components/services/ServiceCard";
-import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
+import { GoogleFormSection } from "@/components/forms/GoogleFormSection";
 import { VisaProofsGallery } from "@/components/proofs/VisaProofsGallery";
-import { MediaShowcase } from "@/components/media/MediaShowcase";
+import { HashScrollOnLoad } from "@/components/layout/HashScrollOnLoad";
 import { FeaturedVideoSection } from "@/components/social/FeaturedVideoSection";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -22,6 +22,7 @@ export default function HomePage() {
 
   return (
     <>
+      <HashScrollOnLoad />
       <Hero />
 
       <FeaturedProgramsSection />
@@ -105,23 +106,17 @@ export default function HomePage() {
 
       <FeaturedVideoSection />
 
-      <section className="section-padding">
-        <div className="container-custom">
+      <section id="consultation-form" className="section-padding bg-navy-50 dark:bg-navy-900/40">
+        <div className="container-custom max-w-3xl">
           <SectionHeading
-            label="Showcase"
-            title="Our Work & Highlights"
-            description="Travel highlights, documentation success, and social previews."
+            label="Apply"
+            title="Consultation Form"
+            description="Complete our official Google Form after allowing cookies in the site popup."
             align="center"
           />
-          <div className="mt-12">
-            <MediaShowcase />
+          <div className="mt-8">
+            <GoogleFormSection title="Consultation Form" />
           </div>
-        </div>
-      </section>
-
-      <section className="section-padding bg-white dark:bg-navy-950">
-        <div className="container-custom max-w-3xl">
-          <GoogleFormEmbed title="Consultation Form" />
         </div>
       </section>
 

@@ -8,7 +8,7 @@ interface NavLinkProps {
   href: string;
   children: ReactNode;
   className?: string;
-  onNavigate?: () => void;
+  onNavigate?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 /** Client nav link — uses Next.js prefetch for fast route changes */

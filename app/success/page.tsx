@@ -1,37 +1,44 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { APPLICATION_WHATSAPP_MESSAGE, getWhatsAppUrl } from "@/lib/constants";
+import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
+import { getApplication } from "@/services/applications";
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function SuccessPage() {
   const searchParams = useSearchParams();
   const applicationId = searchParams.get("applicationId");
   const ref = searchParams.get("ref");
-  const [countdown, setCountdown] = useState(5);
-
-  const whatsappMessage = ref
-    ? `${APPLICATION_WHATSAPP_MESSAGE} Reference: ${ref}`
-    : applicationId
-      ? `${APPLICATION_WHATSAPP_MESSAGE} Application ID: ${applicationId}`
-      : APPLICATION_WHATSAPP_MESSAGE;
+  const [applicantName, setApplicantName] = useState<string | undefined>();
+  const [serviceName, setServiceName] = useState<string | undefined>();
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(timer);
-          window.location.href = getWhatsAppUrl(whatsappMessage);
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [whatsappMessage]);
+    if (!applicationId) return;
+    getApplication(applicationId).then((app) => {
+      if (app) {
+        setApplicantName(app.full_name);
+        setServiceName(app.service_name);
+      }
+    });
+  }, [applicationId]);
+
+  const whatsappMessage = useMemo(
+    () =>
+      getApplicationWhatsAppMessage({
+        applicationId,
+        reference: ref,
+        serviceName,
+        applicantName,
+      }),
+    [applicationId, ref, serviceName, applicantName]
+  );
+
+  const handleDone = () => {
+    redirectToWhatsApp(whatsappMessage);
+  };
 
   return (
     <section className="flex min-h-[70vh] items-center justify-center section-padding">
@@ -42,20 +49,20 @@ export default function SuccessPage() {
       >
         <CheckCircle className="mx-auto h-20 w-20 text-green-500" />
         <h1 className="mt-6 font-display text-3xl font-bold text-navy-900 dark:text-white">
-          Application Submitted Successfully
+          Payment Successful
         </h1>
         <p className="mt-4 text-navy-600 dark:text-navy-300">
-          Thank you! Your application has been received and our team has been notified by email.
+          Thank you! Your payment was recorded and Darboi Consults has been notified by email.
         </p>
         {applicationId && (
-          <p className="mt-2 text-sm text-navy-500">Reference: {applicationId.slice(0, 8)}...</p>
+          <p className="mt-2 text-sm text-navy-500">Reference: {applicationId.slice(0, 8)}…</p>
         )}
-        <p className="mt-6 text-sm text-gold-600">
-          Redirecting to WhatsApp in {countdown} seconds...
+        <p className="mt-6 text-sm text-navy-600 dark:text-navy-400">
+          Tap <strong>Done</strong> below to open WhatsApp with your application details.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button href={getWhatsAppUrl(whatsappMessage)} size="lg">
-            Open WhatsApp Now
+          <Button type="button" onClick={handleDone} size="lg">
+            Done — Open WhatsApp
           </Button>
           <Button href="/services" variant="outline">
             Back to Services

@@ -44,10 +44,10 @@ npm run dev
 2. Run `supabase/schema.sql` in the SQL Editor
 3. Add env vars from `.env.example`
 
-### EmailJS
+### FormSubmit (email notifications)
 
-1. Create templates per `supabase/emailjs-template.md`
-2. Add service ID, template IDs, and public key to `.env.local`
+1. Set `NEXT_PUBLIC_FORMSUBMIT_EMAIL=darboiconsults@gmail.com` in `.env.local` and Vercel
+2. See `supabase/formsubmit-setup.md` — confirm the inbox once via FormSubmit’s activation email
 
 ### Payments
 
