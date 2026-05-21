@@ -20,7 +20,7 @@ export const announcements: Announcement[] = [
   },
   {
     id: "3",
-    message: "Holiday update — Office hours extended for December consultations",
+    message: "Office hours extended for December consultations",
     type: "notice",
     link: "/contact",
     active: true,

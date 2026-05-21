@@ -23,7 +23,7 @@ const items = [
 
 export function FloatingSocials() {
   return (
-    <div className="fixed left-4 bottom-24 z-[75] flex flex-col gap-2 sm:left-6">
+    <div className="fixed right-4 bottom-20 z-[75] flex flex-col gap-2 sm:bottom-24 sm:left-6 sm:right-auto">
       {items.map(({ key, href, Icon, color, event, title }, i) => (
         <motion.a
           key={key}

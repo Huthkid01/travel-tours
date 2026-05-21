@@ -39,7 +39,7 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (items.length <= 1 || dismissed) return;
-    const timer = setInterval(() => setIndex((i) => (i + 1) % items.length), 5000);
+    const timer = setInterval(() => setIndex((i) => (i + 1) % items.length), 6000);
     return () => clearInterval(timer);
   }, [items.length, dismissed]);
 
@@ -53,42 +53,55 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
   return (
     <AnnouncementContext.Provider value={{ visible }}>
       {visible && (
-        <div className="fixed top-0 right-0 left-0 z-[210] h-10 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950">
+        <div
+          className="fixed top-0 right-0 left-0 z-[210] flex h-8 items-center bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950 sm:h-9"
+          role="region"
+          aria-label="Site announcements"
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={current?.id}
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              className="container-custom flex h-10 items-center justify-between gap-4 px-4 text-sm font-medium"
+              exit={{ opacity: 0, y: 6 }}
+              className="flex w-full min-w-0 items-center gap-1.5 px-2 sm:container-custom sm:gap-3 sm:px-4"
             >
-              {current?.link ? (
-                <Link
-                  href={current.link}
-                  prefetch
-                  className="flex flex-1 items-center justify-center gap-1 truncate hover:underline"
-                >
-                  {current.message}
-                  <ChevronRight className="h-4 w-4 shrink-0" />
-                </Link>
-              ) : (
-                <p className="flex-1 truncate text-center">{current?.message}</p>
-              )}
-              <Link
-                href="/announcements"
-                prefetch
-                className="hidden shrink-0 text-xs font-semibold underline-offset-2 hover:underline sm:inline"
-              >
-                All updates
-              </Link>
               <button
                 type="button"
                 onClick={dismiss}
-                className="shrink-0 rounded p-1 hover:bg-navy-950/10"
-                aria-label="Dismiss announcements"
+                className="shrink-0 rounded p-0.5 hover:bg-navy-950/10 sm:p-1"
+                aria-label="Dismiss announcement"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
+
+              <div className="min-w-0 flex-1 overflow-hidden">
+                {current?.link ? (
+                  <Link
+                    href={current.link}
+                    prefetch
+                    className="block truncate text-[10px] leading-tight font-medium hover:underline sm:text-xs"
+                  >
+                    <span className="sm:hidden">{current.message}</span>
+                    <span className="hidden items-center gap-0.5 sm:inline-flex sm:text-xs">
+                      {current.message}
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                    </span>
+                  </Link>
+                ) : (
+                  <p className="truncate text-center text-[10px] leading-tight font-medium sm:text-xs">
+                    {current?.message}
+                  </p>
+                )}
+              </div>
+
+              <Link
+                href="/announcements"
+                prefetch
+                className="hidden shrink-0 text-[10px] font-semibold underline-offset-2 hover:underline sm:inline sm:text-xs"
+              >
+                All updates
+              </Link>
             </motion.div>
           </AnimatePresence>
         </div>
