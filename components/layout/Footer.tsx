@@ -1,6 +1,6 @@
 import { BrandLogo } from "@/components/layout/BrandLogo";
-import { SocialLinks } from "@/components/social/SocialLinks";
-import { NAV_LINKS, SITE_CONFIG, getWhatsAppUrl } from "@/lib/constants";
+import { TikTokIcon } from "@/components/social/TikTokIcon";
+import { NAV_LINKS, SITE_CONFIG, SOCIAL_LINKS, getWhatsAppUrl } from "@/lib/constants";
 import { Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 
@@ -14,7 +14,6 @@ export function Footer() {
             <p className="mt-4 text-sm leading-relaxed text-navy-300">
               {SITE_CONFIG.description}
             </p>
-            <SocialLinks variant="footer" className="mt-6" />
           </div>
 
           <div>
@@ -60,6 +59,17 @@ export function Footer() {
                 <Mail className="h-4 w-4 shrink-0 text-gold-500" />
                 <a href={`mailto:${SITE_CONFIG.email}`} className="text-navy-300 hover:text-gold-400">
                   {SITE_CONFIG.email}
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <TikTokIcon className="h-4 w-4 shrink-0 text-gold-500" />
+                <a
+                  href={SOCIAL_LINKS.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-navy-300 hover:text-gold-400"
+                >
+                  {SOCIAL_LINKS.tiktokHandle}
                 </a>
               </li>
             </ul>

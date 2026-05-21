@@ -11,7 +11,6 @@ import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
 import { VisaProofsGallery } from "@/components/proofs/VisaProofsGallery";
 import { MediaShowcase } from "@/components/media/MediaShowcase";
 import { FeaturedVideoSection } from "@/components/social/FeaturedVideoSection";
-import { SocialMediaSection } from "@/components/social/SocialMediaSection";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { services } from "@/data/services";
@@ -105,8 +104,6 @@ export default function HomePage() {
       </section>
 
       <FeaturedVideoSection />
-
-      <SocialMediaSection />
 
       <section className="section-padding">
         <div className="container-custom">

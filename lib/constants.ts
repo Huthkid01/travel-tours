@@ -53,7 +53,7 @@ export const SOCIAL_LINKS = {
   tiktokHandle: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "@darboiconsults",
 } as const;
 
-export type SocialPlatform = keyof Pick<typeof SOCIAL_LINKS, "instagram" | "tiktok" | "facebook">;
+export type SocialPlatform = "tiktok";
 
 export const SUPABASE_CONFIG = {
   url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",

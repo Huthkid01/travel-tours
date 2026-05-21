@@ -1,11 +1,9 @@
 import { ContactForm } from "@/components/forms/ContactForm";
 import { GoogleFormEmbed } from "@/components/forms/GoogleFormEmbed";
 import { MapEmbed } from "@/components/layout/MapEmbed";
-import { SocialLinks } from "@/components/social/SocialLinks";
-import { SocialGallery } from "@/components/social/SocialGallery";
-import { socialPostPreviews } from "@/data/social-posts";
+import { TikTokIcon } from "@/components/social/TikTokIcon";
 import { PageHero } from "@/components/layout/PageHero";
-import { SITE_CONFIG, getWhatsAppUrl } from "@/lib/constants";
+import { SITE_CONFIG, SOCIAL_LINKS, getWhatsAppUrl } from "@/lib/constants";
 import { Mail, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
 export const metadata: Metadata = {
@@ -50,8 +48,21 @@ export default function ContactPage() {
                     </a>
                   </div>
                 </li>
+                <li className="flex items-center gap-4">
+                  <TikTokIcon className="h-5 w-5 shrink-0 text-gold-500" />
+                  <div>
+                    <p className="font-medium">TikTok</p>
+                    <a
+                      href={SOCIAL_LINKS.tiktok}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gold-600 hover:underline"
+                    >
+                      {SOCIAL_LINKS.tiktokHandle}
+                    </a>
+                  </div>
+                </li>
               </ul>
-              <SocialLinks variant="footer" className="mt-6" />
               <a
                 href={getWhatsAppUrl()}
                 target="_blank"
@@ -68,10 +79,6 @@ export default function ContactPage() {
           </div>
           <div className="mt-16">
             <GoogleFormEmbed />
-          </div>
-          <div className="mt-16">
-            <h2 className="mb-6 font-display text-2xl font-bold">Follow Our Journey</h2>
-            <SocialGallery postPreview={socialPostPreviews} />
           </div>
         </div>
       </section>
