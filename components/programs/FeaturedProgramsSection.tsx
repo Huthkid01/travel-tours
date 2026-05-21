@@ -1,4 +1,3 @@
-import { ProgramsCarousel } from "@/components/programs/ProgramsCarousel";
 import { ProgramCard } from "@/components/programs/ProgramCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
@@ -21,13 +20,9 @@ export async function FeaturedProgramsSection() {
           className="[&_h2]:text-white [&_p]:text-navy-300 [&_span]:text-gold-400"
         />
 
-        <div className="mt-12 hidden lg:block">
-          <ProgramsCarousel programs={programs} />
-        </div>
-
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:hidden">
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-3">
           {programs.map((program, i) => (
-            <ProgramCard key={program.id} program={program} index={i} />
+            <ProgramCard key={program.id} program={program} index={i} variant="compact" />
           ))}
         </div>
 

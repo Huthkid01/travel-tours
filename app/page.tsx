@@ -27,16 +27,16 @@ export default function HomePage() {
 
       <FeaturedProgramsSection />
 
-      <section className="section-padding bg-navy-50 dark:bg-navy-900/40">
+      <section id="visa-proofs" className="section-padding bg-navy-950">
         <div className="container-custom">
           <SectionHeading
             label="Success Proofs"
             title="Visa Approval Samples"
             description="Real outcomes from our clients — personal details redacted for privacy."
             align="center"
-            className="[&_h2]:text-navy-900 dark:[&_h2]:text-white"
+            className="[&_h2]:text-white [&_p]:text-navy-300 [&_span]:text-gold-400"
           />
-          <div className="mt-12">
+          <div className="mt-10 sm:mt-12">
             <VisaProofsGallery />
           </div>
         </div>

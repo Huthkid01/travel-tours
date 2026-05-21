@@ -18,9 +18,16 @@ interface ProgramCardProps {
   program: Program;
   index?: number;
   layout?: "grid" | "carousel";
+  /** Home grid: title, description, consultation only (matches featured layout) */
+  variant?: "compact" | "full";
 }
 
-export function ProgramCard({ program, index = 0, layout = "grid" }: ProgramCardProps) {
+export function ProgramCard({
+  program,
+  index = 0,
+  layout = "grid",
+  variant = "full",
+}: ProgramCardProps) {
   const track = useLeadTrackerContext();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const isFlyer = isProgramFlyerImage(program.image, program.imageType);
@@ -58,7 +65,11 @@ export function ProgramCard({ program, index = 0, layout = "grid" }: ProgramCard
           aria-label={`View full size: ${program.title}`}
           className={cn(
             "relative block w-full cursor-zoom-in overflow-hidden bg-navy-950 text-left",
-            isFlyer ? "aspect-[3/4] sm:aspect-[4/5]" : "aspect-[16/10]"
+            isFlyer
+              ? variant === "compact"
+                ? "aspect-[3/4]"
+                : "aspect-[3/4] sm:aspect-[4/5]"
+              : "aspect-[16/10]"
           )}
         >
           <ProgramFlyerImage
@@ -89,50 +100,66 @@ export function ProgramCard({ program, index = 0, layout = "grid" }: ProgramCard
           </span>
         </button>
 
-        <div className="flex flex-1 flex-col p-4 sm:p-6">
+        <div className={cn("flex flex-1 flex-col", variant === "compact" ? "p-3 sm:p-4" : "p-4 sm:p-6")}>
           <Link href={`/programs/${program.slug}`} prefetch onClick={handleView}>
-            <h3 className="font-display text-lg font-bold text-white transition-colors group-hover:text-gold-400 sm:text-xl">
+            <h3
+              className={cn(
+                "font-display font-bold text-white transition-colors group-hover:text-gold-400",
+                variant === "compact" ? "text-sm leading-snug sm:text-base" : "text-lg sm:text-xl"
+              )}
+            >
               {program.title}
             </h3>
           </Link>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-navy-300 line-clamp-3 sm:mt-3">{program.description}</p>
-
-          <div className="mt-3 sm:mt-4">
-            <PriceLabel variant="consultation" />
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2 sm:mt-6 sm:gap-3">
-            <Link
-              href={`/programs/${program.slug}`}
-              prefetch
-              onClick={handleView}
-              className="inline-flex flex-1 items-center justify-center rounded-full border-2 border-gold-500/50 px-4 py-2 text-xs font-semibold text-gold-400 transition-all hover:bg-gold-500/10 sm:flex-none sm:px-5 sm:text-sm"
-            >
-              Learn More
-            </Link>
-            <Link
-              href={program.ctaLink}
-              prefetch
-              onClick={() => track({ actionType: "program_click", service: program.slug, source: "apply_now" })}
-              className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-gold-500 px-4 py-2 text-xs font-semibold text-navy-950 transition-all hover:bg-gold-400 sm:flex-none sm:gap-2 sm:px-5 sm:text-sm"
-            >
-              Apply Now
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <a
-            href={openWhatsApp(getProgramWhatsAppMessage(program.title))}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              track({ actionType: "whatsapp_click", service: program.slug, source: "program_card" });
-              trackEvent({ eventType: "whatsapp_click", element: program.slug });
-            }}
-            className="mt-3 text-xs text-navy-400 transition-colors hover:text-green-400 sm:mt-4"
+          <p
+            className={cn(
+              "mt-2 flex-1 leading-relaxed text-navy-300 line-clamp-3",
+              variant === "compact" ? "text-xs sm:text-sm" : "text-sm sm:mt-3"
+            )}
           >
-            Or chat on WhatsApp →
-          </a>
+            {program.description}
+          </p>
+
+          <div className={cn("mt-2", variant === "compact" ? "mt-3" : "mt-3 sm:mt-4")}>
+            <PriceLabel variant="consultation" className={variant === "compact" ? "text-xs sm:text-sm" : undefined} />
+          </div>
+
+          {variant === "full" && (
+            <>
+              <div className="mt-4 flex flex-wrap gap-2 sm:mt-6 sm:gap-3">
+                <Link
+                  href={`/programs/${program.slug}`}
+                  prefetch
+                  onClick={handleView}
+                  className="inline-flex flex-1 items-center justify-center rounded-full border-2 border-gold-500/50 px-4 py-2 text-xs font-semibold text-gold-400 transition-all hover:bg-gold-500/10 sm:flex-none sm:px-5 sm:text-sm"
+                >
+                  Learn More
+                </Link>
+                <Link
+                  href={program.ctaLink}
+                  prefetch
+                  onClick={() => track({ actionType: "program_click", service: program.slug, source: "apply_now" })}
+                  className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-gold-500 px-4 py-2 text-xs font-semibold text-navy-950 transition-all hover:bg-gold-400 sm:flex-none sm:gap-2 sm:px-5 sm:text-sm"
+                >
+                  Apply Now
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+
+              <a
+                href={openWhatsApp(getProgramWhatsAppMessage(program.title))}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  track({ actionType: "whatsapp_click", service: program.slug, source: "program_card" });
+                  trackEvent({ eventType: "whatsapp_click", element: program.slug });
+                }}
+                className="mt-3 text-xs text-navy-400 transition-colors hover:text-green-400 sm:mt-4"
+              >
+                Or chat on WhatsApp →
+              </a>
+            </>
+          )}
         </div>
       </motion.article>
 
