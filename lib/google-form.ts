@@ -1,20 +1,35 @@
-/** Google Form share or embed URL from env */
-const raw = process.env.NEXT_PUBLIC_GOOGLE_FORM_URL?.trim() ?? "";
+/** Resolved embed URL for https://forms.gle/CgsEKQ8JudSTRaVY9 */
+export const GOOGLE_FORM_EMBED_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSfG3s8g_bMYl-p0vV4rP_S8ElTgTLNhHznL2EmuTL_0NFtlNw/viewform?embedded=true";
 
-/** URL suitable for iframe embed (?embedded=true) */
-export function getGoogleFormEmbedUrl(): string | undefined {
-  if (!raw) return undefined;
+export const GOOGLE_FORM_SHARE_URL = "https://forms.gle/CgsEKQ8JudSTRaVY9";
+
+const GLE_REDIRECTS: Record<string, string> = {
+  [GOOGLE_FORM_SHARE_URL]: GOOGLE_FORM_EMBED_URL,
+};
+
+const raw = process.env.NEXT_PUBLIC_GOOGLE_FORM_URL?.trim() || GOOGLE_FORM_EMBED_URL;
+
+/** URL suitable for iframe embed */
+export function getGoogleFormEmbedUrl(): string {
+  if (GLE_REDIRECTS[raw]) return GLE_REDIRECTS[raw];
 
   try {
     const url = new URL(raw);
-    if (!url.hostname.includes("docs.google.com")) return raw;
-    if (!url.searchParams.has("embedded")) {
-      url.searchParams.set("embedded", "true");
+    if (url.hostname === "forms.gle") {
+      return GLE_REDIRECTS[raw] ?? GOOGLE_FORM_EMBED_URL;
     }
-    return url.toString();
-  } catch {
+    if (url.hostname.includes("docs.google.com") && url.pathname.includes("/forms/")) {
+      if (!url.searchParams.has("embedded")) {
+        url.searchParams.set("embedded", "true");
+      }
+      url.searchParams.delete("usp");
+      return url.toString();
+    }
     return raw;
+  } catch {
+    return GOOGLE_FORM_EMBED_URL;
   }
 }
 
-export const hasGoogleForm = Boolean(getGoogleFormEmbedUrl());
+export const hasGoogleForm = true;
