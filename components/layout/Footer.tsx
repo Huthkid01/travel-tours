@@ -45,11 +45,13 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
-                <span className="text-navy-300">{SITE_CONFIG.address}</span>
+                <span className="whitespace-pre-line text-navy-300">
+                  {SITE_CONFIG.addressLines.join("\n")}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 shrink-0 text-gold-500" />
-                <a href={`tel:${SITE_CONFIG.phone}`} className="text-navy-300 hover:text-gold-400">
+                <a href={`tel:${SITE_CONFIG.phoneTel}`} className="text-navy-300 hover:text-gold-400">
                   {SITE_CONFIG.phone}
                 </a>
               </li>

@@ -2,7 +2,8 @@
 
 Premium multi-service documentation and travel consultation portal.
 
-**Address:** 24, Olowu Street, Ikeja, Lagos, Nigeria
+**Address:** Head Office, 24 Olowu Road, Ikeja, Lagos, Nigeria  
+**Phone / WhatsApp:** 08038178843
 
 ## Stack
 

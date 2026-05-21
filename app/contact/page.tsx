@@ -27,14 +27,16 @@ export default function ContactPage() {
                   <MapPin className="mt-1 h-5 w-5 text-gold-500" />
                   <div>
                     <p className="font-medium">Address</p>
-                    <p className="text-navy-600 dark:text-navy-300">{SITE_CONFIG.address}</p>
+                    <p className="whitespace-pre-line text-navy-600 dark:text-navy-300">
+                      {SITE_CONFIG.addressLines.join("\n")}
+                    </p>
                   </div>
                 </li>
                 <li className="flex items-center gap-4">
                   <Phone className="h-5 w-5 text-gold-500" />
                   <div>
                     <p className="font-medium">Phone</p>
-                    <a href={`tel:${SITE_CONFIG.phone}`} className="text-gold-600 hover:underline">
+                    <a href={`tel:${SITE_CONFIG.phoneTel}`} className="text-gold-600 hover:underline">
                       {SITE_CONFIG.phone}
                     </a>
                   </div>

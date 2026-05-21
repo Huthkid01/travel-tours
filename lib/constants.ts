@@ -24,13 +24,16 @@ export const SITE_CONFIG = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || BRAND.name,
   url: getSiteUrl(),
   email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "info@daboi-consults.com",
-  phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "+234 801 234 5678",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678",
-  address: "24, Olowu Street, Ikeja, Lagos, Nigeria",
+  phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "08038178843",
+  /** E.164 for tel: links (same line as phone / WhatsApp) */
+  phoneTel: "+2348038178843",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348038178843",
+  address: "Head Office, 24 Olowu Road, Ikeja, Lagos, Nigeria",
+  addressLines: ["Head Office", "24 Olowu Road, Ikeja, Lagos, Nigeria"] as const,
   description:
     "Premium documentation, certification, and travel consultation services. Professional support from application to delivery.",
   mapEmbedUrl:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.0!2d3.35!3d6.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzYnMDAuMCJOIDPCsDIxJzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1",
+    "https://maps.google.com/maps?q=24+Olowu+Road,+Ikeja,+Lagos,+Nigeria&hl=en&z=16&output=embed",
 };
 
 export const NAV_LINKS = [
