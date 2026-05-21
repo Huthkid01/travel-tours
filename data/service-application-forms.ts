@@ -167,6 +167,9 @@ export const SERVICE_APPLICATION_FORMS: Record<string, ServiceApplicationFormCon
       { key: "passportPhoto", label: "Passport photograph", required: true },
     ],
   },
+  "proof-of-fund": {
+    useVisaForm: true,
+  },
   "flight-reservation": {
     fields: {
       dateOfBirth: true,
