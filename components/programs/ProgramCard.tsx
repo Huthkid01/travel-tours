@@ -92,9 +92,6 @@ export function ProgramCard({
               {program.badge}
             </span>
           )}
-          <span className="pointer-events-none absolute top-3 right-3 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] backdrop-blur sm:top-4 sm:right-4 sm:px-3 sm:text-xs">
-            <PriceLabel variant="request" />
-          </span>
           <span className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-navy-950/70 p-2 text-white opacity-0 transition-opacity group-hover:opacity-100">
             <ZoomIn className="h-4 w-4" />
           </span>

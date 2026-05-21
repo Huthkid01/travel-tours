@@ -84,7 +84,6 @@ export default async function ServiceDetailPage({ params }: Props) {
                   <div className="mt-4 space-y-2">
                     <PriceLabel variant="consultation" className="text-base" />
                     <PriceLabel variant="contact" className="text-sm" />
-                    <PriceLabel variant="request" className="text-sm" />
                     <PricingBlock className="mt-4" />
                   </div>
                 )}

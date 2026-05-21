@@ -66,9 +66,6 @@ export function VisaProofsGallery() {
                   <BadgeCheck className="h-3 w-3" />
                   Approved
                 </span>
-                <span className="pointer-events-none absolute top-2 right-2 rounded-full bg-navy-950/80 px-2 py-0.5 text-[10px] backdrop-blur sm:top-3 sm:right-3 sm:px-3 sm:text-xs">
-                  <PriceLabel variant="request" className="text-[10px] sm:text-xs" />
-                </span>
                 <span className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-navy-950/70 p-1.5 text-white sm:bottom-3 sm:right-3 sm:p-2">
                   <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </span>
