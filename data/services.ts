@@ -113,19 +113,6 @@ export const services: ServiceItem[] = [
     processingTime: "14–21 business days",
   },
   {
-    slug: "proof-of-fund",
-    title: "Proof of Fund",
-    shortDescription: "Proof of funds documentation for visa and immigration.",
-    description:
-      "Professional preparation and presentation of proof of funds documentation for visa applications and embassy requirements.",
-    requirements: ["Bank statements (6 months)", "Account officer letter", "Valid passport", "Purpose of funds letter"],
-    pricing: { deposit: 100_000, full: 300_000, bookingFee: 50_000 },
-    category: "documentation",
-    icon: "Wallet",
-    processingTime: "5–10 business days",
-    featured: true,
-  },
-  {
     slug: "flight-reservation",
     title: "Flight Reservation",
     shortDescription: "Verifiable flight reservations for visa applications.",

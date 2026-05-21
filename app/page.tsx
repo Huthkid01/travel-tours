@@ -51,8 +51,8 @@ export default function HomePage() {
           />
           <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-center">
             <p className="text-lg leading-relaxed text-navy-600 dark:text-navy-300">
-              We simplify complex paperwork — from marriage certificates and police clearance to proof of funds,
-              flight reservations, and embassy appointments. Our automated portal ensures every application is stored
+              We simplify complex paperwork — from marriage certificates and police clearance to flight
+              reservations, visas, and embassy appointments. Our automated portal ensures every application is stored
               securely and our team is notified instantly.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -69,7 +69,7 @@ export default function HomePage() {
         <div className="container-custom">
           <SectionHeading
             label="Our Services"
-            title="16+ Professional Services"
+            title="15+ Professional Services"
             description="Documentation, travel, legal, and certification support under one roof."
           />
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -7,8 +7,8 @@ export const testimonials: Testimonial[] = [
     role: "Business Owner",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80",
     rating: 5,
-    text: "Da Boi Consults handled my proof of funds documentation flawlessly. Professional, fast, and always available on WhatsApp.",
-    service: "Proof of Fund",
+    text: "Darboi Consults handled my visa documentation flawlessly. Professional, fast, and always available on WhatsApp.",
+    service: "Appointment Booking",
   },
   {
     id: "2",

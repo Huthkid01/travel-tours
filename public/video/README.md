@@ -4,13 +4,13 @@ Optional self-hosted videos for the homepage player.
 
 ## Featured video (optional)
 
-Save your exported TikTok or promo clip as:
+Save your video as:
 
 ```
 featured.mp4
 ```
 
-The site will try to play this file first. If it is missing, the TikTok embed from your share link is shown instead.
+The homepage player uses native **play / pause** controls. Your WhatsApp export can be copied to this filename (already set up if `featured.mp4` exists).
 
 ## Supported formats
 

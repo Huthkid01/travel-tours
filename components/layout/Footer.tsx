@@ -33,7 +33,7 @@ export function Footer() {
           <div>
             <h4 className="mb-4 font-semibold text-white">Popular Services</h4>
             <ul className="space-y-2 text-sm text-navy-300">
-              <li><Link href="/services/proof-of-fund" className="hover:text-gold-400">Proof of Fund</Link></li>
+              <li><Link href="/services/marriage-certificate" className="hover:text-gold-400">Marriage Certificate</Link></li>
               <li><Link href="/services/police-character-certificate" className="hover:text-gold-400">Police Character Certificate</Link></li>
               <li><Link href="/services/flight-reservation" className="hover:text-gold-400">Flight Reservation</Link></li>
               <li><Link href="/services/appointment-booking" className="hover:text-gold-400">Appointment Booking</Link></li>

@@ -1,5 +1,5 @@
 export const stats = [
-  { id: "services", label: "Services Offered", value: "16+", icon: "globe" },
+  { id: "services", label: "Services Offered", value: "15+", icon: "globe" },
   { id: "clients", label: "Happy Clients", value: "2,500+", icon: "users" },
   { id: "experience", label: "Years Experience", value: "12+", icon: "award" },
   { id: "success", label: "Success Rate", value: "98%", icon: "heart" },
