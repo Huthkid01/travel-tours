@@ -105,10 +105,7 @@ export default function HomePage() {
 
       <section className="section-padding bg-white dark:bg-navy-950">
         <div className="container-custom max-w-3xl">
-          <GoogleFormEmbed
-            title="Consultation Form"
-            description="Our Google Form consultation will be linked here. Until then, use the consultation page or WhatsApp."
-          />
+          <GoogleFormEmbed title="Consultation Form" />
         </div>
       </section>
 

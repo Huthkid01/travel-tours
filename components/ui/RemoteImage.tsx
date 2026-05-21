@@ -6,12 +6,12 @@ import { useState } from "react";
 
 const FALLBACK = images.travel;
 
-type RemoteImageProps = Omit<ImageProps, "src" | "onError"> & {
+type RemoteImageProps = Omit<ImageProps, "src"> & {
   src: string;
 };
 
 /** Reliable external images with fallback when CDN/optimizer fails */
-export function RemoteImage({ src, alt, ...props }: RemoteImageProps) {
+export function RemoteImage({ src, alt, onError, ...props }: RemoteImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
 
   return (
@@ -20,7 +20,8 @@ export function RemoteImage({ src, alt, ...props }: RemoteImageProps) {
       src={imgSrc}
       alt={alt}
       unoptimized
-      onError={() => {
+      onError={(e) => {
+        onError?.(e);
         if (imgSrc !== FALLBACK) setImgSrc(FALLBACK);
       }}
     />

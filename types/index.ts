@@ -52,12 +52,16 @@ export interface ApplicationFormData {
   notes?: string;
 }
 
+export type ProgramImageType = "flyer" | "photo";
+
 export interface Program {
   id: string;
   slug: string;
   title: string;
   description: string;
   image: string;
+  /** flyer = show full graphic (object-contain); photo = cover crop */
+  imageType?: ProgramImageType;
   status: ProgramStatus;
   badge?: string;
   date: string;
