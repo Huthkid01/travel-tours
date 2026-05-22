@@ -20,7 +20,7 @@ Premium multi-service documentation and travel consultation portal.
 
 ### Public site
 
-- Homepage hero with welcome loading animation on every visit
+- Homepage hero with one-time welcome loading animation (first visit per browser)
 - 16+ services with search and category filters
 - Travel programs with flyer images
 - Dynamic application and consultation forms with document upload
