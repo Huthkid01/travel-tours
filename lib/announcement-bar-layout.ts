@@ -1,12 +1,27 @@
 /** Shared layout tokens for the fixed announcement bar + navbar stack */
 
+export const announcementBarShellClass =
+  "fixed top-0 right-0 left-0 z-210 flex bg-linear-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950";
+
 export const announcementBarHeightClass = "h-9 sm:h-11";
+
+export const navbarShellClass =
+  "pointer-events-auto fixed right-0 left-0 z-200 transition-[top] duration-300";
+
+export const navbarHomeGradientClass =
+  "bg-linear-to-b from-navy-950/80 to-transparent";
+
+export const mobileMenuBackdropClass =
+  "fixed right-0 bottom-0 left-0 z-150 bg-navy-950/50 lg:hidden";
+
+export const mobileMenuPanelClass =
+  "fixed right-0 left-0 z-160 border-b border-navy-100 bg-white shadow-2xl dark:border-navy-800 dark:bg-navy-950 lg:hidden";
 
 /** Navbar offset when the announcement bar is visible */
 export const announcementNavbarTopClass = "top-9 sm:top-11";
 
-/** Main content top padding (banner + h-20 navbar) */
-export const announcementMainPadClass = "pt-[7.25rem] sm:pt-[7.75rem]";
+/** Main content top padding (banner 36/44px + h-20 navbar) */
+export const announcementMainPadClass = "pt-29 sm:pt-31";
 
 /** Announcement message — mobile smaller, desktop a step larger */
 export const announcementMessageClass =

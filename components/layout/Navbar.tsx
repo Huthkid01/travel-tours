@@ -9,6 +9,10 @@ import { useAnnouncementVisible } from "@/components/layout/AnnouncementContext"
 import {
   announcementMainPadClass,
   announcementNavbarTopClass,
+  mobileMenuBackdropClass,
+  mobileMenuPanelClass,
+  navbarHomeGradientClass,
+  navbarShellClass,
 } from "@/lib/announcement-bar-layout";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -16,7 +20,7 @@ import { Menu, Moon, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 export function Navbar() {
   const scrolled = useScrollPosition();
@@ -57,7 +61,7 @@ export function Navbar() {
     return true;
   };
 
-  const handleNavClick = (href: string) => (e: React.MouseEvent) => {
+  const handleNavClick = (href: string) => (e: MouseEvent) => {
     if (scrollToHash(href)) {
       e.preventDefault();
     }
@@ -84,11 +88,9 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "pointer-events-auto fixed right-0 left-0 z-[200] transition-[top] duration-300",
+          navbarShellClass,
           announcementVisible ? announcementNavbarTopClass : "top-0",
-          lightNav
-            ? "bg-gradient-to-b from-navy-950/80 to-transparent"
-            : "bg-white/95 shadow-lg backdrop-blur-xl dark:bg-navy-950/95"
+          lightNav ? navbarHomeGradientClass : "bg-white/95 shadow-lg backdrop-blur-xl dark:bg-navy-950/95"
         )}
       >
         <nav className="container-custom flex h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -166,7 +168,7 @@ export function Navbar() {
           <button
             type="button"
             className={cn(
-              "fixed right-0 bottom-0 left-0 z-[150] bg-navy-950/50 lg:hidden",
+              mobileMenuBackdropClass,
               announcementVisible ? announcementMainPadClass : "top-20"
             )}
             aria-label="Close menu"
@@ -174,7 +176,7 @@ export function Navbar() {
           />
           <div
             className={cn(
-              "fixed right-0 left-0 z-[160] border-b border-navy-100 bg-white shadow-2xl dark:border-navy-800 dark:bg-navy-950 lg:hidden",
+              mobileMenuPanelClass,
               announcementVisible ? announcementMainPadClass : "top-20"
             )}
           >

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@source "../lib/**/*.ts";
+@source "../components/**/*.tsx";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -28,6 +31,14 @@
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-display: var(--font-playfair), Georgia, serif;
+
+  /* Announcement bar + navbar stack (see lib/announcement-bar-layout.ts) */
+  --spacing-29: 7.25rem;
+  --spacing-31: 7.75rem;
+  --z-index-150: 150;
+  --z-index-160: 160;
+  --z-index-200: 200;
+  --z-index-210: 210;
 }
 
 .font-display {
@@ -47,7 +58,7 @@ body {
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-gold-400 via-gold-300 to-gold-500 bg-clip-text text-transparent;
+  @apply bg-linear-to-r from-gold-400 via-gold-300 to-gold-500 bg-clip-text text-transparent;
 }
 
 .glass {

@@ -3,6 +3,7 @@
 import { useLiveCms } from "@/hooks/use-live-cms";
 import {
   announcementBarHeightClass,
+  announcementBarShellClass,
   announcementMessageClass,
 } from "@/lib/announcement-bar-layout";
 import type { Announcement } from "@/types";
@@ -64,13 +65,11 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
   const visible = !isAdminRoute && items.length > 0 && !dismissed;
   const current = items[index];
 
-  const messageClass = announcementMessageClass;
-
   return (
     <AnnouncementContext.Provider value={{ visible }}>
       {visible && (
         <div
-          className={`fixed top-0 right-0 left-0 z-[210] flex ${announcementBarHeightClass} items-center bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950`}
+          className={`${announcementBarShellClass} ${announcementBarHeightClass} items-center`}
           role="region"
           aria-label="Site announcements"
         >
@@ -96,7 +95,7 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
                   <Link
                     href={current.link}
                     prefetch
-                    className={`block hover:underline ${messageClass}`}
+                    className={`block hover:underline ${announcementMessageClass}`}
                   >
                     <span className="inline-flex max-w-full items-center gap-0.5 sm:gap-1">
                       <span className="truncate">{current.message}</span>
@@ -104,7 +103,7 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
                     </span>
                   </Link>
                 ) : (
-                  <p className={`text-center ${messageClass}`}>{current?.message}</p>
+                  <p className={`text-center ${announcementMessageClass}`}>{current?.message}</p>
                 )}
               </div>
 

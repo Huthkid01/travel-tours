@@ -29,7 +29,7 @@ export function AnnouncementBar() {
   const current = items[index];
 
   return (
-    <div className="fixed top-0 right-0 left-0 z-[210] h-10 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950">
+    <div className="fixed top-0 right-0 left-0 z-210 flex h-10 bg-linear-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950">
       <AnimatePresence mode="wait">
         <motion.div
           key={current.id}
