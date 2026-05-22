@@ -58,21 +58,6 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const clearAdminOnly = async () => {
-    setClearing(true);
-    try {
-      const res = await fetch("/api/admin/visits?scope=admin-only", { method: "DELETE" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Clear failed");
-      toast.success("Removed old admin page visits");
-      void load();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Clear failed");
-    } finally {
-      setClearing(false);
-    }
-  };
-
   const pageViews = rows.filter((r) => r.action_type === "page_view");
 
   return (
@@ -80,20 +65,9 @@ export default function AdminVisitsPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-white">Site Visits</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Public site traffic only — <strong className="text-slate-300">/admin</strong> pages are not
-            recorded.
-          </p>
+          <p className="mt-1 text-sm text-slate-400">Page views and actions on the live website.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={clearAdminOnly}
-            disabled={clearing}
-            className="rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-60"
-          >
-            Remove admin visits only
-          </button>
           <button
             type="button"
             onClick={clearAll}
@@ -127,7 +101,7 @@ export default function AdminVisitsPage() {
             {!loading && rows.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
-                  No public visits recorded yet. Visits appear when someone opens the live site (not /admin).
+                  No visits recorded yet.
                 </td>
               </tr>
             )}
