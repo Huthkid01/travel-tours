@@ -19,7 +19,7 @@ function rowToForm(row: ProgramRow): AdminProgramForm {
     image: row.image || "",
     optional_price: row.optional_price ?? null,
     status: row.status || "active",
-    cta_link: row.cta_link || "/consultation",
+    cta_link: row.cta_link || "",
     badge: row.badge ?? null,
     sort_order: row.sort_order ?? 0,
   };

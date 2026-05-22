@@ -5,6 +5,7 @@ import {
 } from "@/data/payment-settings-default";
 import { programs as localPrograms } from "@/data/programs";
 import { services as localServices } from "@/data/services";
+import { normalizeProgramCtaLink } from "@/lib/admin-links";
 import { getProgramFlyerPath, isProgramFlyerImage } from "@/lib/program-flyers";
 import "server-only";
 
@@ -97,7 +98,7 @@ function mapProgram(row: Record<string, unknown>): Program {
     imageType,
     optionalPrice: row.optional_price != null ? Number(row.optional_price) : null,
     status: row.status as Program["status"],
-    ctaLink: String(row.cta_link ?? "/consultation"),
+    ctaLink: normalizeProgramCtaLink(String(row.slug), row.cta_link as string | null | undefined),
     badge: row.badge ? String(row.badge) : undefined,
     date: row.date ? String(row.date).slice(0, 10) : new Date().toISOString().slice(0, 10),
     sortOrder: row.sort_order != null ? Number(row.sort_order) : 0,

@@ -1,5 +1,6 @@
 "use client";
 
+import { buildProgramCtaLink, normalizeAnnouncementLink } from "@/lib/admin-links";
 import type { Announcement } from "@/types";
 import { Loader2, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -41,10 +42,12 @@ export function AdminAnnouncementModal({
   onSave,
 }: AdminAnnouncementModalProps) {
   const [form, setForm] = useState<AdminAnnouncementForm>(emptyAdminAnnouncement());
+  const [programSlug, setProgramSlug] = useState("");
 
   useEffect(() => {
     if (!open) return;
     setForm(initial ?? emptyAdminAnnouncement());
+    setProgramSlug("");
   }, [open, initial]);
 
   if (!open) return null;
@@ -52,10 +55,18 @@ export function AdminAnnouncementModal({
   const isEdit = Boolean(form.id);
 
   const handleSave = () => {
+    const customLink = form.link?.trim();
+    let link = customLink;
+    if (!link && programSlug.trim()) {
+      link = buildProgramCtaLink(programSlug);
+    } else if (!link) {
+      link = normalizeAnnouncementLink(null, { type: form.type }) ?? "/consultation";
+    }
+
     onSave({
       ...form,
       message: form.message.trim(),
-      link: form.link?.trim() || null,
+      link,
     });
   };
 
@@ -111,11 +122,24 @@ export function AdminAnnouncementModal({
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label className={labelClass}>Link (optional)</label>
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  Leave blank to auto-generate from program slug below, or by type (promo → /programs,
+                  service → /services)
+                </p>
                 <input
                   className={inputClass}
                   value={form.link ?? ""}
                   onChange={(e) => setForm((f) => ({ ...f, link: e.target.value || null }))}
-                  placeholder="/programs/serbia-warehouse-jobs or /services/appointment-booking"
+                  placeholder="/programs/serbia-warehouse-jobs or /consultation?program=..."
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className={labelClass}>Program slug (for auto link)</label>
+                <input
+                  className={inputClass}
+                  value={programSlug}
+                  onChange={(e) => setProgramSlug(e.target.value)}
+                  placeholder="serbia-warehouse-jobs — used only if link is blank"
                 />
               </div>
               <div>

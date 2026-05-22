@@ -5,6 +5,11 @@ import {
 import { announcements as localAnnouncements } from "@/data/announcements";
 import { programs as localPrograms } from "@/data/programs";
 import { services as localServices } from "@/data/services";
+import {
+  normalizeAnnouncementLink,
+  normalizeProgramCtaLink,
+  normalizeSlug,
+} from "@/lib/admin-links";
 import { isExcludedVisitPath } from "@/lib/visit-tracking";
 import { getAdminSupabase } from "@/supabase/admin";
 import type { Announcement, Application, Program, ProgramStatus, ServiceCategory } from "@/types";
@@ -274,7 +279,7 @@ export async function seedAdminProgramsFromLocal(): Promise<number> {
         image: p.image,
         optional_price: p.optionalPrice ?? null,
         status: "active",
-        cta_link: p.ctaLink ?? `/consultation?program=${p.slug}`,
+        cta_link: normalizeProgramCtaLink(p.slug, p.ctaLink),
         badge: p.badge ?? null,
         sort_order: p.sortOrder ?? 0,
         updated_at: new Date().toISOString(),
@@ -362,15 +367,17 @@ export async function upsertAdminProgram(
         ? "flyer"
         : "photo";
 
+  const slug = normalizeSlug(String(row.slug));
+
   const payload: Record<string, unknown> = {
-    slug: String(row.slug),
+    slug,
     title: String(row.title),
     description: String(row.description),
     image,
     image_type: imageType,
     optional_price: row.optional_price != null ? Number(row.optional_price) : null,
     status: (row.status as ProgramStatus) || "active",
-    cta_link: String(row.cta_link || "/consultation"),
+    cta_link: normalizeProgramCtaLink(slug, row.cta_link as string | null | undefined),
     badge: row.badge ? String(row.badge) : null,
     sort_order: Number(row.sort_order ?? 0),
     updated_at: new Date().toISOString(),
@@ -463,7 +470,9 @@ export async function upsertAdminAnnouncement(
   const payload = {
     message: row.message,
     type: row.type ?? "notice",
-    link: row.link ?? null,
+    link: normalizeAnnouncementLink(row.link, {
+      type: row.type as "promo" | "service" | "notice" | undefined,
+    }),
     active: row.active ?? true,
     sort_order: row.sortOrder ?? 0,
     starts_at: row.startsAt ?? null,
