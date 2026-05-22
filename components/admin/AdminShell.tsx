@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 import {
   Bell,
   Briefcase,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
+  ExternalLink,
   FileText,
   GraduationCap,
   LayoutDashboard,
@@ -16,7 +19,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+
+const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
 
 const NAV_SECTIONS = [
   {
@@ -44,7 +49,28 @@ const NAV_SECTIONS = [
 export function AdminShell({ children, email }: { children: ReactNode; email: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
 
   const logout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -59,70 +85,111 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-800 bg-slate-900 transition-transform lg:static lg:translate-x-0",
-          open ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-800 bg-slate-900 transition-[width,transform] duration-200 lg:static lg:translate-x-0",
+          collapsed ? "w-64 lg:w-[4.5rem]" : "w-64",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="border-b border-slate-800 p-5">
-          <p className="text-xs font-semibold tracking-wider text-gold-400 uppercase">Admin Panel</p>
-          <p className="mt-1 font-display text-lg font-bold">{BRAND.short}</p>
+        <div
+          className={cn(
+            "flex items-start gap-2 border-b border-slate-800",
+            collapsed ? "justify-center p-3" : "justify-between p-4"
+          )}
+        >
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold tracking-wider text-gold-400 uppercase">Admin Panel</p>
+              <p className="mt-1 font-display text-lg font-bold leading-tight">{BRAND.short}</p>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className={cn(
+              "shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white",
+              collapsed && "mx-auto"
+            )}
+            aria-label={collapsed ? "Open sidebar" : "Close sidebar"}
+            title={collapsed ? "Open sidebar" : "Close sidebar"}
+          >
+            {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          </button>
         </div>
-        <div className="border-b border-slate-800 px-4 py-3">
-          <p className="text-xs text-slate-500">Logged in as</p>
-          <p className="truncate text-sm font-medium text-slate-200">{email}</p>
-        </div>
-        <nav className="flex-1 overflow-y-auto p-3">
+
+        {!collapsed && (
+          <div className="border-b border-slate-800 px-4 py-3">
+            <p className="text-xs text-slate-500">Logged in as</p>
+            <p className="truncate text-sm font-medium text-slate-200">{email}</p>
+          </div>
+        )}
+
+        <nav className="flex-1 overflow-y-auto p-2">
           {NAV_SECTIONS.map((section) => (
-            <div key={section.title} className="mb-4">
-              <p className="mb-2 px-3 text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                {section.title}
-              </p>
+            <div key={section.title} className="mb-3">
+              {!collapsed && (
+                <p className="mb-2 px-3 text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                  {section.title}
+                </p>
+              )}
               <div className="space-y-0.5">
                 {section.items.map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => setMobileOpen(false)}
+                    title={collapsed ? label : undefined}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                      "flex items-center rounded-lg py-2.5 text-sm font-medium transition",
+                      collapsed ? "justify-center px-2" : "gap-3 px-3",
                       isActive(href)
                         ? "bg-blue-600/20 text-blue-300"
                         : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    {label}
+                    {!collapsed && <span>{label}</span>}
                   </Link>
                 ))}
               </div>
             </div>
           ))}
         </nav>
-        <div className="border-t border-slate-800 p-3">
+
+        <div className={cn("border-t border-slate-800 p-2", collapsed && "flex flex-col items-center gap-1")}>
           <Link
             href="/"
             target="_blank"
-            className="mb-2 block rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-white"
+            title="View live site"
+            className={cn(
+              "rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white",
+              collapsed
+                ? "flex h-10 w-10 items-center justify-center"
+                : "mb-2 block px-3 py-2 text-sm"
+            )}
           >
-            View live site →
+            {collapsed ? <ExternalLink className="h-4 w-4" /> : "View live site →"}
           </Link>
           <button
             type="button"
             onClick={logout}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
+            title="Log out"
+            className={cn(
+              "flex items-center rounded-lg text-sm text-red-400 hover:bg-red-500/10",
+              collapsed ? "h-10 w-10 justify-center" : "w-full gap-2 px-3 py-2"
+            )}
           >
-            <LogOut className="h-4 w-4" />
-            Log out
+            <LogOut className="h-4 w-4 shrink-0" />
+            {!collapsed && "Log out"}
           </button>
         </div>
       </aside>
 
-      {open && (
+      {mobileOpen && (
         <button
           type="button"
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           aria-label="Close menu"
-          onClick={() => setOpen(false)}
+          onClick={() => setMobileOpen(false)}
         />
       )}
 
@@ -131,10 +198,10 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
           <button
             type="button"
             className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 lg:hidden"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setMobileOpen((v) => !v)}
             aria-label="Menu"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <p className="text-sm text-slate-500 lg:hidden">Admin</p>
           <div className="ml-auto text-xs text-slate-500">Darboi Consults CMS</div>
