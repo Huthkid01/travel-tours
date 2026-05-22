@@ -7,6 +7,7 @@ import {
 } from "@/lib/confirm";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type PendingConfirm = ConfirmOptions & {
   resolve: (value: boolean) => void;
@@ -35,8 +36,45 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    registerConfirmHandler(confirm);
-    return () => registerConfirmHandler(null);
+    const unregister = registerConfirmHandler(confirm);
+    return unregister;
+  }, [confirm]);
+
+  /** Block native browser dialogs site-wide */
+  useEffect(() => {
+    const nativeConfirm = window.confirm.bind(window);
+    const nativeAlert = window.alert.bind(window);
+    const nativePrompt = window.prompt.bind(window);
+
+    window.confirm = (message?: string) => {
+      void confirm({
+        title: "Confirm",
+        description: String(message ?? "Continue?"),
+        confirmLabel: "OK",
+        cancelLabel: "Cancel",
+      });
+      return false;
+    };
+
+    window.alert = (message?: string) => {
+      void confirm({
+        title: "Notice",
+        description: String(message ?? ""),
+        confirmLabel: "OK",
+        alertOnly: true,
+      });
+    };
+
+    window.prompt = () => {
+      toast.error("This action is not supported in the browser prompt.");
+      return null;
+    };
+
+    return () => {
+      window.confirm = nativeConfirm;
+      window.alert = nativeAlert;
+      window.prompt = nativePrompt;
+    };
   }, [confirm]);
 
   useEffect(() => {
@@ -49,20 +87,21 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   }, [pending, close]);
 
   const variant = pending?.variant ?? "default";
+  const alertOnly = pending?.alertOnly ?? false;
 
   return (
     <>
       {children}
       {pending && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
           role="presentation"
         >
           <button
             type="button"
-            className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
             aria-label="Close dialog"
-            onClick={() => close(false)}
+            onClick={() => close(alertOnly ? true : false)}
           />
           <div
             role="alertdialog"
@@ -75,7 +114,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
               id="app-confirm-title"
               className="font-display text-lg font-bold text-slate-900 dark:text-white"
             >
-              {pending.title ?? "Confirm"}
+              {pending.title ?? (alertOnly ? "Notice" : "Confirm")}
             </h2>
             <p
               id="app-confirm-desc"
@@ -84,23 +123,25 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
               {pending.description}
             </p>
             <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => close(false)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
-              >
-                {pending.cancelLabel ?? "Cancel"}
-              </button>
+              {!alertOnly && (
+                <button
+                  type="button"
+                  onClick={() => close(false)}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  {pending.cancelLabel ?? "Cancel"}
+                </button>
+              )}
               <button
                 type="button"
                 autoFocus
                 onClick={() => close(true)}
                 className={cn(
                   "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                  confirmBtn[variant]
+                  alertOnly ? confirmBtn.default : confirmBtn[variant]
                 )}
               >
-                {pending.confirmLabel ?? "Confirm"}
+                {pending.confirmLabel ?? "OK"}
               </button>
             </div>
           </div>

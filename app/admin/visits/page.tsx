@@ -23,6 +23,7 @@ interface VisitSummary {
 }
 
 export default function AdminVisitsPage() {
+  const confirmDialog = useConfirm();
   const [visits, setVisits] = useState<VisitRow[]>([]);
   const [summary, setSummary] = useState<VisitSummary | null>(null);
   const [loading, setLoading] = useState(true);
