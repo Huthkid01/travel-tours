@@ -167,10 +167,28 @@ export async function fetchProgramBySlug(slug: string): Promise<Program | null> 
 /** @deprecated */
 export const fetchProgramBySlugLegacy = fetchProgramBySlug;
 
+function getLocalActiveAnnouncements(): Announcement[] {
+  return localAnnouncements
+    .filter((a) => a.active)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
+/** DB rows override same message; local fills defaults when table is empty */
+function mergeAnnouncementsWithLocal(dbRows: Announcement[]): Announcement[] {
+  const local = getLocalActiveAnnouncements();
+  if (!dbRows.length) return local;
+
+  const byMessage = new Map(local.map((a) => [a.message, a]));
+  for (const a of dbRows) {
+    byMessage.set(a.message, a);
+  }
+  return Array.from(byMessage.values()).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
 export async function fetchAnnouncements(): Promise<Announcement[]> {
   const supabase = getServerSupabase();
   if (!supabase) {
-    return localAnnouncements.filter((a) => a.active).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    return getLocalActiveAnnouncements();
   }
 
   const { data, error } = await supabase
@@ -179,10 +197,12 @@ export async function fetchAnnouncements(): Promise<Announcement[]> {
     .eq("active", true)
     .order("sort_order", { ascending: true });
 
-  if (error || !data?.length) {
-    return localAnnouncements.filter((a) => a.active);
+  if (error) {
+    return getLocalActiveAnnouncements();
   }
-  return data.map(mapAnnouncement);
+
+  const dbRows = (data ?? []).map(mapAnnouncement);
+  return mergeAnnouncementsWithLocal(dbRows);
 }
 
 function mapPaymentSettings(row: Record<string, unknown>): PaymentSettings {

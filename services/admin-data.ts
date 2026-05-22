@@ -2,8 +2,10 @@ import {
   DEFAULT_PAYMENT_SETTINGS,
   type PaymentSettings,
 } from "@/data/payment-settings-default";
+import { announcements as localAnnouncements } from "@/data/announcements";
 import { programs as localPrograms } from "@/data/programs";
 import { services as localServices } from "@/data/services";
+import { isExcludedVisitPath } from "@/lib/visit-tracking";
 import { getAdminSupabase } from "@/supabase/admin";
 import type { Announcement, Application, Program, ProgramStatus, ServiceCategory } from "@/types";
 
@@ -99,12 +101,14 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
     supabase
       .from("visitor_activity")
       .select("*", { count: "exact", head: true })
-      .eq("action_type", "page_view"),
+      .eq("action_type", "page_view")
+      .or("source.is.null,source.not.ilike./admin%"),
     supabase
       .from("visitor_activity")
       .select("*", { count: "exact", head: true })
       .eq("action_type", "page_view")
-      .gte("created_at", todayIso),
+      .gte("created_at", todayIso)
+      .or("source.is.null,source.not.ilike./admin%"),
     supabase.from("services").select("*", { count: "exact", head: true }),
     supabase
       .from("services")
@@ -397,6 +401,38 @@ export async function deleteAdminProgram(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function seedAdminAnnouncementsFromLocal(): Promise<number> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  let count = 0;
+  for (const a of localAnnouncements) {
+    const { data: existing } = await supabase
+      .from("announcements")
+      .select("id")
+      .eq("message", a.message)
+      .maybeSingle();
+
+    const payload = {
+      message: a.message,
+      type: a.type,
+      link: a.link ?? null,
+      active: a.active,
+      sort_order: a.sortOrder ?? 0,
+    };
+
+    if (existing?.id) {
+      const { error } = await supabase.from("announcements").update(payload).eq("id", existing.id);
+      if (!error) count += 1;
+    } else {
+      const { error } = await supabase.from("announcements").insert(payload);
+      if (!error) count += 1;
+    }
+  }
+
+  return count;
+}
+
 export async function fetchAdminAnnouncements(): Promise<Announcement[]> {
   const supabase = getAdminSupabase();
   if (!supabase) return [];
@@ -459,14 +495,35 @@ export async function fetchRecentVisits(limit = 30): Promise<
   const { data, error } = await supabase
     .from("visitor_activity")
     .select("id, action_type, source, service, created_at")
+    .or("source.is.null,source.not.ilike./admin%")
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .limit(limit * 2);
   if (error) throw new Error(error.message);
-  return (data ?? []) as {
+  const rows = (data ?? []) as {
     id: string;
     action_type: string;
     source: string | null;
     service: string | null;
     created_at: string;
   }[];
+  return rows.filter((r) => !isExcludedVisitPath(r.source)).slice(0, limit);
+}
+
+/** Remove all visit/activity rows (admin dashboard reset) */
+export async function clearAllVisitorActivity(): Promise<void> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+  const { error } = await supabase
+    .from("visitor_activity")
+    .delete()
+    .gte("created_at", "1970-01-01T00:00:00Z");
+  if (error) throw new Error(error.message);
+}
+
+/** Remove only rows recorded from /admin paths (legacy cleanup) */
+export async function clearAdminPathVisitorActivity(): Promise<void> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+  const { error } = await supabase.from("visitor_activity").delete().ilike("source", "/admin%");
+  if (error) throw new Error(error.message);
 }

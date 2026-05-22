@@ -1,3 +1,4 @@
+import { isExcludedVisitPath } from "@/lib/visit-tracking";
 import { trackSiteEvent } from "@/services/events";
 
 export type AnalyticsEventType =
@@ -36,6 +37,7 @@ export function isGaConfigured(): boolean {
 /** GA4 + optional Supabase site_events */
 export function trackEvent(event: AnalyticsEvent): void {
   const page = event.page ?? (typeof window !== "undefined" ? window.location.pathname : "");
+  if (isExcludedVisitPath(page)) return;
   const meta = {
     ...event.metadata,
     element: event.element ?? "",

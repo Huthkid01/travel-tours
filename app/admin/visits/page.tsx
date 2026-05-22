@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Loader2, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface VisitRow {
   id: string;
@@ -13,22 +15,105 @@ interface VisitRow {
 export default function AdminVisitsPage() {
   const [rows, setRows] = useState<VisitRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/visits");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load");
+      setRows(Array.isArray(data) ? data : []);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to load visits");
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetch("/api/admin/visits")
-      .then((r) => r.json())
-      .then((data) => setRows(Array.isArray(data) ? data : []))
-      .finally(() => setLoading(false));
-  }, []);
+    void load();
+  }, [load]);
+
+  const clearAll = async () => {
+    if (
+      !confirm(
+        "Clear ALL visit data? This removes every row in visitor_activity so you can monitor fresh public traffic only."
+      )
+    ) {
+      return;
+    }
+    setClearing(true);
+    try {
+      const res = await fetch("/api/admin/visits", { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Clear failed");
+      toast.success("Visit data cleared");
+      void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Clear failed");
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  const clearAdminOnly = async () => {
+    setClearing(true);
+    try {
+      const res = await fetch("/api/admin/visits?scope=admin-only", { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Clear failed");
+      toast.success("Removed old admin page visits");
+      void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Clear failed");
+    } finally {
+      setClearing(false);
+    }
+  };
 
   const pageViews = rows.filter((r) => r.action_type === "page_view");
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-white">Site Visits</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Every time someone opens a page, it is saved in Supabase <code className="text-blue-400">visitor_activity</code>.
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-white">Site Visits</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Public site traffic only — <strong className="text-slate-300">/admin</strong> pages are not
+            recorded.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={clearAdminOnly}
+            disabled={clearing}
+            className="rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-60"
+          >
+            Remove admin visits only
+          </button>
+          <button
+            type="button"
+            onClick={clearAll}
+            disabled={clearing}
+            className="inline-flex items-center gap-2 rounded-lg bg-red-600/90 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60"
+          >
+            {clearing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            Clear all visit data
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-400">
+        <p>
+          To start monitoring again from zero, click <strong className="text-slate-200">Clear all visit data</strong>,
+          then browse the public site (home, services, programs) in a normal browser window — not while logged into
+          admin.
+        </p>
+        <p className="mt-2 text-xs text-slate-500">
+          Or in Supabase SQL Editor: <code className="text-blue-400">delete from public.visitor_activity;</code>
         </p>
       </div>
 
@@ -46,14 +131,14 @@ export default function AdminVisitsPage() {
             {loading && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
-                  Loading…
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin" />
                 </td>
               </tr>
             )}
             {!loading && rows.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
-                  No activity yet. Visit the public site to generate page views.
+                  No public visits yet. Open the live homepage in a private window to test.
                 </td>
               </tr>
             )}
@@ -81,7 +166,7 @@ export default function AdminVisitsPage() {
         </table>
       </div>
       <p className="text-xs text-slate-500">
-        Showing latest {rows.length} events ({pageViews.length} page views in this batch).
+        Showing latest {rows.length} public events ({pageViews.length} page views in this list).
       </p>
     </div>
   );

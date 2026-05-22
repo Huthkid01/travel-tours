@@ -5,7 +5,7 @@
 | Table | Purpose |
 |-------|---------|
 | **applications** | Service/consultation forms — names, contact, documents, payment status |
-| **visitor_activity** | Site visits & clicks (page views, WhatsApp clicks, etc.) |
+| **visitor_activity** | Public site visits & clicks only (`/admin` is excluded). Clear via Admin → Site visits → **Clear all visit data**, or SQL: `delete from public.visitor_activity;` |
 | **featured_programs** | Travel programs shown on home & `/programs` (editable in admin) |
 | **announcements** | Top banner messages on the site |
 | **services** | All services on the site (editable in admin) |
@@ -51,7 +51,8 @@ Open: **https://your-site.vercel.app/admin/login**
 
 ### Sidebar — Website content
 - **Services** — all services (like product list): add, edit, delete, featured flag  
-- **Programs** — travel programs on home & `/programs`  
+- **Programs** — travel programs on home & `/programs` (use **Import all site programs** if the list is empty)  
+- **Announcements** — banner/ticker messages (use **Import site announcements** if the list is empty)  
 - **Announcements** — top banner messages  
 - **Payment methods** — bank account, fee label, Paystack/Flutterwave on/off  
 
