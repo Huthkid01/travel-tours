@@ -163,7 +163,7 @@ export default function AdminProgramsPage() {
         <div>
           <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Program Management</h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Manage featured programs ({rows.length} total). Flyer images are stored in Supabase and shown on the site.
+            Manage featured programs ({rows.length} total). Flyer images appear on the site after upload.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -205,7 +205,7 @@ export default function AdminProgramsPage() {
               <th className="px-4 py-3">Title</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Badge</th>
-              <th className="px-4 py-3">Image (database)</th>
+              <th className="px-4 py-3">Flyer image</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Sort</th>
               <th className="px-4 py-3">Actions</th>

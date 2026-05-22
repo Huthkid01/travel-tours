@@ -99,7 +99,7 @@ export function AdminProgramModal({ open, initial, saving, onClose, onSave }: Ad
             <h2 id="program-modal-title" className="font-display text-xl font-bold text-white">
               {isEdit ? "Edit program" : "Add program"}
             </h2>
-            <p className="text-sm text-slate-400">Flyer, details, and publishing — saved to Supabase</p>
+            <p className="text-sm text-slate-400">Flyer, details, and publishing — saved automatically</p>
           </div>
           <button
             type="button"

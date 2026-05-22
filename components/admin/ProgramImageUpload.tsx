@@ -63,7 +63,7 @@ export function ProgramImageUpload({ image, slug, onImageChange }: ProgramImageU
           Program flyer image <span className="text-red-400">*</span>
         </p>
         <p className="mt-0.5 text-xs text-slate-400">
-          Shown on the home page, programs list, and program detail. Stored in Supabase when uploaded.
+          Shown on the home page, programs list, and program detail after upload.
         </p>
       </div>
 

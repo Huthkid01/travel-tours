@@ -1,4 +1,3 @@
-import { notifyOwnerOnApplicationSubmit } from "@/lib/notify-owner";
 import { createApplicationServer } from "@/services/applications.server";
 import { uploadApplicationFilesServer } from "@/services/storage.server";
 import type { ApplicationFormData } from "@/types";
@@ -52,16 +51,8 @@ export async function POST(request: Request) {
       applicationId
     );
 
-    let emailSent = false;
-    if (!payload.skipOwnerEmail) {
-      try {
-        emailSent = await notifyOwnerOnApplicationSubmit(application);
-      } catch (err) {
-        console.error("[applications/submit] email failed:", err);
-      }
-    }
-
-    return NextResponse.json({ application, emailSent });
+    /** Email via FormSubmit from the user's browser (server gets 403) */
+    return NextResponse.json({ application, emailSent: false });
   } catch (err) {
     return NextResponse.json(
       {

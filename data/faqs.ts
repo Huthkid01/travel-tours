@@ -5,13 +5,13 @@ export const faqs: FAQ[] = [
     id: "1",
     question: "How does the application process work?",
     answer:
-      "Choose your service, complete the online form, upload required documents, make payment, and our team will contact you via WhatsApp to continue processing.",
+      "Choose your service, complete the online form, upload required documents, and make payment. Once payment is made, you will be directed to WhatsApp to continue processing.",
   },
   {
     id: "2",
     question: "What payment options are available?",
     answer:
-      "You can pay a booking fee, a 30% deposit, or the full service amount via Paystack or Flutterwave on our secure payment page.",
+      "You pay a booking fee by bank transfer using the payment details shown in the application form. After you confirm payment, you are directed to WhatsApp with your application details.",
   },
   {
     id: "3",
@@ -29,12 +29,12 @@ export const faqs: FAQ[] = [
     id: "5",
     question: "Is my information secure?",
     answer:
-      "Yes. Documents are stored securely in Supabase Storage with private access. Only authorized personnel can view your submissions.",
+      "Yes. Your documents are stored securely with private access. Only authorized Darboi Consults personnel can view your submissions.",
   },
   {
     id: "6",
     question: "Can I track my application?",
     answer:
-      "After submission, you will receive a payment reference. Contact us on WhatsApp with your reference for real-time updates from our team.",
+      "After you complete payment, you will be directed to WhatsApp with your application details. Message us there with your payment reference for updates.",
   },
 ];

@@ -53,7 +53,7 @@ export default async function HomePage() {
             <p className="text-lg leading-relaxed text-navy-600 dark:text-navy-300">
               We simplify complex paperwork — from marriage certificates and police clearance to proof of funds,
               flight reservations, and embassy appointments. Our automated portal ensures every application is stored
-              securely and our team is notified instantly.
+              securely. Once payment is made, you are directed to WhatsApp to continue.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button href="/about" variant="outline">

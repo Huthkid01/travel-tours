@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   try {
     const supabase = getAdminSupabase();
     if (!supabase) {
-      return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+      return NextResponse.json({ error: "File storage is not configured" }, { status: 500 });
     }
 
     const formData = await request.formData();

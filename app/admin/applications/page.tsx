@@ -44,32 +44,28 @@ export default function AdminApplicationsPage() {
         tryBrowser?: boolean;
       };
 
-      if (res.ok && json.ok) {
-        toast.success(`Test email sent via ${json.method ?? "Gmail"} to ${json.to}. Check inbox.`);
+      const client = await sendContactViaFormSubmitClient({
+        name: "Darboi Admin (FormSubmit test)",
+        email: json.to ?? "darboiconsults@gmail.com",
+        phone: "—",
+        subject: "FormSubmit test from admin",
+        message: `Test at ${new Date().toISOString()}. If this is your first time, FormSubmit will email an activation link to ${json.to ?? "darboiconsults@gmail.com"}.`,
+      });
+
+      if (client.ok) {
+        toast.success("FormSubmit accepted. Check darboiconsults@gmail.com inbox and spam.");
+        toast.info(
+          "First time? Click the activation link from FormSubmit. Then all contact and application forms will email you.",
+          { duration: 12000 }
+        );
         return;
       }
 
-      if (json.tryBrowser || !json.ok) {
-        const client = await sendContactViaFormSubmitClient({
-          name: "Darboi Admin (browser test)",
-          email: json.to ?? "darboiconsults@gmail.com",
-          phone: "—",
-          subject: "FormSubmit activation test",
-          message: `Browser test at ${new Date().toISOString()}. FormSubmit only works from the visitor browser, not Vercel server.`,
-        });
-        if (client.ok) {
-          toast.success("FormSubmit accepted (from your browser). Check darboiconsults@gmail.com for mail or activation link.");
-          toast.info("For production, add GMAIL_APP_PASSWORD in Vercel so applications always email you.", {
-            duration: 10000,
-          });
-          return;
-        }
-        throw new Error(
+      throw new Error(
+        client.message ||
           json.error ||
-            client.message ||
-            "Email failed. Add GMAIL_APP_PASSWORD in Vercel and redeploy."
-        );
-      }
+          "FormSubmit failed. Open the live site Contact page in Chrome and submit once to activate."
+      );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not send test email");
     } finally {
@@ -83,7 +79,7 @@ export default function AdminApplicationsPage() {
         <div>
           <h1 className={adminH1}>Applications</h1>
           <p className={adminSubtitle}>
-            Submissions are saved here. Emails use Gmail on the server (set GMAIL_APP_PASSWORD in Vercel).
+            Submissions saved here. Owner email via FormSubmit from the visitor&apos;s browser.
           </p>
           {emailHint && <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">{emailHint}</p>}
         </div>

@@ -9,8 +9,8 @@ export const processSteps = [
   { step: 1, title: "Choose Service", description: "Browse our catalogue and select the service you need." },
   { step: 2, title: "Fill Form", description: "Complete the application form with your accurate details." },
   { step: 3, title: "Upload Documents", description: "Submit passport photos, PDFs, and certificates securely." },
-  { step: 4, title: "Pay", description: "Pay via Paystack or Flutterwave — booking fee, deposit, or full." },
-  { step: 5, title: "Get Assistance", description: "We notify you by email and connect on WhatsApp immediately." },
+  { step: 4, title: "Make Payment", description: "Pay the booking fee by bank transfer using the details in the form." },
+  { step: 5, title: "WhatsApp", description: "Once payment is made, you are directed to WhatsApp to continue." },
 ];
 
 export const trustIndicators = [

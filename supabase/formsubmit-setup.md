@@ -1,58 +1,44 @@
-# Owner email notifications
+# Owner email via FormSubmit
 
-Applications and contact forms save to **Supabase** and email **darboiconsults@gmail.com**.
+All forms email **darboiconsults@gmail.com** using FormSubmit from the **visitor’s browser**:
 
-## Important: FormSubmit 403 from Vercel
+`https://formsubmit.co/ajax/darboiconsults@gmail.com`
 
-FormSubmit **blocks** requests from Vercel/server (`403 Forbidden`). You will **not** get activation emails from **Admin → Test owner email** (server).
+(This is the AJAX version of `https://formsubmit.co/darboiconsults@gmail.com` from their docs.)
 
-| Where email is sent from | Works? |
-|--------------------------|--------|
-| **Gmail** (`GMAIL_APP_PASSWORD` in Vercel) | Yes — use this for applications & admin test |
-| **Browser** (contact form, admin browser test) | Yes — can trigger FormSubmit activation link |
-| **Vercel server** → FormSubmit ajax | No (403) |
+Server requests from Vercel are **not** used (FormSubmit returns 403).
 
-## Required for reliable email (recommended)
-
-In **Vercel → Environment Variables** (Production):
+## Vercel env
 
 ```env
 FORMSUBMIT_EMAIL=darboiconsults@gmail.com
-GMAIL_APP_PASSWORD=your-google-app-password
-SMTP_USER=darboiconsults@gmail.com
 ```
 
-Create App Password: https://myaccount.google.com/apppasswords (needs 2-Step Verification).
+Gmail (`GMAIL_APP_PASSWORD`) is optional — not required if you use FormSubmit only.
 
-**Redeploy** after adding variables.
+## Activate FormSubmit (once)
 
-## FormSubmit URLs (reference)
+1. On the **live site**, open **Contact** and send a test message (use Chrome, not a preview iframe).
+2. Check **darboiconsults@gmail.com** and **spam** for email from FormSubmit.
+3. Click the **activation link** in that email.
+4. After that, contact, consultation, and lead forms will deliver to your inbox.
 
-| Use case | URL |
-|----------|-----|
-| Plain HTML form | `https://formsubmit.co/darboiconsults@gmail.com` |
-| Browser / AJAX (contact form) | `https://formsubmit.co/ajax/darboiconsults@gmail.com` |
+Or: **Admin → Applications → Test owner email** (sends from your browser the same way).
 
-## Activate FormSubmit (optional)
+## What sends when
 
-Only if you want FormSubmit in addition to Gmail:
+| Form | When email sends |
+|------|------------------|
+| Contact | On submit (browser FormSubmit) |
+| Consultation | After “I've made payment” (browser FormSubmit) |
+| Lead popup | On submit (browser FormSubmit) |
+| Service apply | On submit + after payment (browser FormSubmit) |
 
-1. On the live site, submit the **Contact** form once (from Chrome on your phone/PC).
-2. Check **darboiconsults@gmail.com** for FormSubmit’s **confirmation link** and click it.
+Data is always saved in the admin dashboard even if email fails.
 
-Or in Admin → Applications → **Test owner email** (tries Gmail first, then browser FormSubmit).
+## If email still fails
 
-## What sends email
-
-| Form | How |
-|------|-----|
-| Contact | Browser FormSubmit, then Gmail backup via API |
-| Consultation (after payment) | Gmail server |
-| Lead popup | Gmail server |
-| Admin test | Gmail server, then browser FormSubmit fallback |
-
-## Troubleshooting
-
-- **403 FormSubmit** — expected on server; set `GMAIL_APP_PASSWORD`.
-- **Admin test fails** — `GMAIL_APP_PASSWORD` missing on Vercel (not only `.env.local`).
-- **No mail at all** — check spam; verify App Password; Admin → Test owner email.
+- Confirm activation link was clicked.
+- Submit from the real URL `travel-tours-eight.vercel.app`, not localhost only.
+- Check spam folder.
+- Try **Admin → Test owner email** while logged into admin on the live site.

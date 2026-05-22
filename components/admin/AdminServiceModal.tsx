@@ -95,7 +95,7 @@ export function AdminServiceModal({
             <h2 id="service-modal-title" className="font-display text-xl font-bold text-white">
               {isEdit ? "Edit service" : "Add service"}
             </h2>
-            <p className="text-sm text-slate-400">Details, pricing, and publishing — saved to Supabase</p>
+            <p className="text-sm text-slate-400">Details, pricing, and publishing — saved automatically</p>
           </div>
           <button
             type="button"

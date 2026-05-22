@@ -1,4 +1,3 @@
-import { notifyOwnerOnPayment } from "@/lib/notify-owner";
 import { fetchPaymentSettings } from "@/services/cms";
 import {
   getApplicationServer,
@@ -43,14 +42,7 @@ export async function POST(
       return NextResponse.json({ error: "Could not update payment" }, { status: 500 });
     }
 
-    let emailSent = false;
-    try {
-      emailSent = await notifyOwnerOnPayment(updated, amount);
-    } catch (err) {
-      console.error("[complete-payment] email failed:", err);
-    }
-
-    return NextResponse.json({ ok: true, application: updated, emailSent });
+    return NextResponse.json({ ok: true, application: updated, emailSent: false });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Payment recording failed" },

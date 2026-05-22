@@ -2,7 +2,8 @@
 
 import { usePaymentSettings } from "@/components/forms/usePaymentSettings";
 import { PaymentDetailsModal } from "@/components/payment/PaymentDetailsModal";
-import { toastPaymentComplete } from "@/lib/application-toast";
+import { toastApplicationSaved, toastPaymentComplete } from "@/lib/application-toast";
+import { sendApplicationViaFormSubmitClient } from "@/lib/formsubmit-client";
 import { submitApplicationViaApi } from "@/lib/submit-application-client";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
 import type { PaymentSettings } from "@/data/payment-settings-default";
@@ -49,22 +50,39 @@ export function ApplicationSubmitFlow({
   const { settings: liveSettings } = usePaymentSettings();
   const settings = paymentSettingsOverride ?? liveSettings;
 
+  const emailOwnerViaFormSubmit = async (
+    app: Application,
+    stage: "submitted" | "paid",
+    paymentAmount?: number
+  ): Promise<boolean> => {
+    const result = await sendApplicationViaFormSubmitClient(app, {
+      stage,
+      paymentAmount,
+    });
+    if (!result.ok) {
+      toast.error(
+        result.message ??
+          "Could not email Darboi via FormSubmit. Check darboiconsults@gmail.com for the activation link."
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleFormSubmit = async (data: ApplicationFormData, files: File[]) => {
     setSubmitting(true);
     try {
-      const { application, emailSent } = await submitApplicationViaApi(
+      const { application } = await submitApplicationViaApi(
         storageSlug,
         serviceName,
         data,
-        files
+        files,
+        undefined,
+        { skipOwnerEmail: true }
       );
       sessionStorage.setItem("pending_application_id", application.id);
-      if (emailSent) {
-        toast.success("Your application was submitted successfully!");
-        toast.info("A copy was sent to Darboi Consults by email.");
-      } else {
-        toast.success("Your application was submitted successfully!");
-      }
+      const emailSent = await emailOwnerViaFormSubmit(application, "submitted");
+      toastApplicationSaved({ emailSent });
       setSubmitted(application);
     } catch (err) {
       toast.error(
@@ -132,9 +150,10 @@ export function ApplicationSubmitFlow({
       if (!res.ok) throw new Error(json.error || "Could not record payment");
 
       const app = json.application ?? application;
+      const emailSent = await emailOwnerViaFormSubmit(app, "paid", amount);
       pendingRef.current = null;
       setModalOpen(false);
-      toastPaymentComplete({ emailSent: json.emailSent });
+      toastPaymentComplete({ emailSent });
       redirectToWhatsApp(
         getApplicationWhatsAppMessage({
           stage: "paid",
@@ -196,8 +215,9 @@ export function ApplicationSubmitFlow({
       if (!res.ok) throw new Error(json.error || "Could not record payment");
 
       const app = json.application ?? submitted;
+      const emailSent = await emailOwnerViaFormSubmit(app, "paid", amount);
       setModalOpen(false);
-      toastPaymentComplete({ emailSent: json.emailSent });
+      toastPaymentComplete({ emailSent });
       redirectToWhatsApp(
         getApplicationWhatsAppMessage({
           stage: "paid",

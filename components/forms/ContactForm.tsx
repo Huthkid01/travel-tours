@@ -36,32 +36,22 @@ export function ContactForm() {
     setStatus("loading");
     try {
       const clientResult = await sendContactViaFormSubmitClient(data);
-      let emailSent = clientResult.ok;
+      if (!clientResult.ok) {
+        throw new Error(
+          clientResult.message ||
+            "FormSubmit could not send. Check darboiconsults@gmail.com for the activation email (first time only)."
+        );
+      }
 
       const apiRes = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      const apiJson = (await apiRes.json()) as {
-        ok?: boolean;
-        emailSent?: boolean;
-        emailError?: string;
-        error?: string;
-      };
+      const apiJson = (await apiRes.json()) as { ok?: boolean; error?: string };
 
       if (!apiRes.ok || !apiJson.ok) {
         throw new Error(apiJson.error || "Could not save your message");
-      }
-
-      if (!emailSent) emailSent = Boolean(apiJson.emailSent);
-
-      if (!emailSent) {
-        throw new Error(
-          apiJson.emailError ||
-            clientResult.message ||
-            "Email could not be sent. Open darboiconsults@gmail.com and click the FormSubmit activation link, or add GMAIL_APP_PASSWORD in Vercel."
-        );
       }
 
       setStatus("success");

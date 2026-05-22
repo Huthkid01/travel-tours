@@ -2,7 +2,7 @@
 
 import { FormStepFlow } from "@/components/forms/FormStepFlow";
 import { formInputClass } from "@/components/forms/form-step-styles";
-import { submitLeadAction } from "@/lib/actions/leads";
+import { sendLeadViaFormSubmitClient } from "@/lib/formsubmit-client";
 import { trackEvent } from "@/lib/analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MessageSquare, User, X } from "lucide-react";
@@ -49,14 +49,19 @@ export function LeadPopup() {
   };
 
   const onSubmit = async (data: LeadForm) => {
-    const result = await submitLeadAction(data);
-    if (result.ok) {
-      trackEvent({ eventType: "lead_capture", element: "lead_popup", metadata: { interest: data.interest } });
-      setSubmitted(true);
-      setTimeout(dismiss, 2000);
-    } else {
-      toast.error(result.error ?? "Could not save. Please try WhatsApp.");
+    const emailResult = await sendLeadViaFormSubmitClient(data);
+    if (!emailResult.ok) {
+      toast.error(emailResult.message ?? "FormSubmit could not send. Try WhatsApp.");
+      return;
     }
+    await fetch("/api/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    trackEvent({ eventType: "lead_capture", element: "lead_popup", metadata: { interest: data.interest } });
+    setSubmitted(true);
+    setTimeout(dismiss, 2000);
   };
 
   const handleContinue = async () => {

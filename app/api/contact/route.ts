@@ -1,27 +1,13 @@
 import { getServerSupabase } from "@/supabase/server";
-import { sendContactForm } from "@/services/formsubmit";
 import type { ContactFormData } from "@/types";
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs";
-
-/** Save contact message to Supabase; optional server-side FormSubmit (client may send email too). */
+/** Save contact message only — email is sent via FormSubmit from the visitor's browser */
 export async function POST(request: Request) {
   try {
     const data = (await request.json()) as ContactFormData;
     if (!data.name?.trim() || !data.email?.trim() || !data.message?.trim()) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    let emailSent = false;
-    let emailError: string | undefined;
-
-    try {
-      await sendContactForm(data);
-      emailSent = true;
-    } catch (err) {
-      emailError = err instanceof Error ? err.message : "Email failed";
-      console.error("[api/contact] FormSubmit:", err);
     }
 
     const supabase = getServerSupabase();
@@ -35,12 +21,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({
-      ok: true,
-      emailSent,
-      emailError,
-      saved: Boolean(supabase),
-    });
+    return NextResponse.json({ ok: true, saved: Boolean(supabase) });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Failed to save message" },

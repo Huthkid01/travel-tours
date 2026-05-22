@@ -17,7 +17,7 @@ export async function submitApplicationViaApi(
       serviceName,
       form,
       applicationId,
-      skipOwnerEmail: options?.skipOwnerEmail,
+      skipOwnerEmail: options?.skipOwnerEmail ?? true,
     })
   );
   files.forEach((file, i) => {
