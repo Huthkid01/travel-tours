@@ -11,6 +11,7 @@ import {
   normalizeProgramCtaLink,
   normalizeSlug,
 } from "@/lib/admin-links";
+import { ACTIVE_USER_WINDOW_MS, countCurrentlyActiveUsers } from "@/lib/visit-active";
 import { isExcludedVisitPath } from "@/lib/visit-tracking";
 import { getAdminSupabase } from "@/supabase/admin";
 import type {
@@ -40,7 +41,7 @@ async function countActivePrograms(): Promise<number> {
 export interface AdminDashboardStats {
   totalVisits: number;
   visitsToday: number;
-  /** Distinct sessions with activity in the last 5 minutes */
+  /** Sessions on site right now (recent ping, no leave signal) */
   activeUsers: number;
   totalServices: number;
   activeServices: number;
@@ -128,9 +129,9 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
       .or("source.is.null,source.not.ilike./admin%"),
     supabase
       .from("visitor_activity")
-      .select("metadata, created_at")
-      .eq("action_type", "active_ping")
-      .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString())
+      .select("action_type, metadata, created_at")
+      .in("action_type", ["active_ping", "session_end"])
+      .gte("created_at", new Date(Date.now() - ACTIVE_USER_WINDOW_MS * 4).toISOString())
       .or("source.is.null,source.not.ilike./admin%")
       .limit(500),
     supabase.from("services").select("*", { count: "exact", head: true }),
@@ -156,16 +157,12 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
   const totalFormsSubmitted = totalApplications + totalLeads + totalContactMessages;
   const formsSubmittedToday = applicationsToday + leadsToday + contactToday;
 
-  const activeSessions = new Set<string>();
-  for (const row of activePingRows.data ?? []) {
-    const meta = row.metadata as { sessionId?: string } | null;
-    if (meta?.sessionId) activeSessions.add(meta.sessionId);
-  }
+  const activeUsers = countCurrentlyActiveUsers(activePingRows.data ?? []);
 
   return {
     totalVisits: siteVisits.count ?? 0,
     visitsToday: siteVisitsToday.count ?? 0,
-    activeUsers: activeSessions.size,
+    activeUsers,
     totalServices: servicesTotal.count ?? localServices.length,
     activeServices: servicesActive.count ?? localServices.length,
     totalFormsSubmitted,
@@ -645,6 +642,7 @@ export async function fetchVisitDashboard(): Promise<{
     action_type: string;
     source: string | null;
     session_id: string | null;
+    country: string | null;
     created_at: string;
   }[];
 }> {
@@ -658,7 +656,7 @@ export async function fetchVisitDashboard(): Promise<{
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayIso = today.toISOString();
-  const activeSince = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const activeSince = new Date(Date.now() - ACTIVE_USER_WINDOW_MS * 4).toISOString();
 
   const [totalRes, todayRes, activeRes, listRes] = await Promise.all([
     supabase
@@ -674,8 +672,8 @@ export async function fetchVisitDashboard(): Promise<{
       .or("source.is.null,source.not.ilike./admin%"),
     supabase
       .from("visitor_activity")
-      .select("metadata")
-      .eq("action_type", "active_ping")
+      .select("action_type, metadata, created_at")
+      .in("action_type", ["active_ping", "session_end"])
       .gte("created_at", activeSince)
       .limit(500),
     supabase
@@ -689,21 +687,18 @@ export async function fetchVisitDashboard(): Promise<{
 
   if (listRes.error) throw new Error(listRes.error.message);
 
-  const activeSessions = new Set<string>();
-  for (const row of activeRes.data ?? []) {
-    const meta = row.metadata as { sessionId?: string } | null;
-    if (meta?.sessionId) activeSessions.add(meta.sessionId);
-  }
+  const activeUsers = countCurrentlyActiveUsers(activeRes.data ?? []);
 
   const visits = (listRes.data ?? [])
     .filter((r) => !isExcludedVisitPath(r.source as string | null))
     .map((r) => {
-      const meta = r.metadata as { sessionId?: string } | null;
+      const meta = r.metadata as { sessionId?: string; country?: string } | null;
       return {
         id: r.id as string,
         action_type: r.action_type as string,
         source: r.source as string | null,
         session_id: meta?.sessionId ?? null,
+        country: meta?.country ?? null,
         created_at: r.created_at as string,
       };
     });
@@ -712,7 +707,7 @@ export async function fetchVisitDashboard(): Promise<{
     summary: {
       totalVisits: totalRes.count ?? 0,
       visitsToday: todayRes.count ?? 0,
-      activeUsers: activeSessions.size,
+      activeUsers,
     },
     visits,
   };

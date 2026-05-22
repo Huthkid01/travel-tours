@@ -15,6 +15,7 @@ export type VisitorActionType =
   | "page_view"
   | "site_visit"
   | "active_ping"
+  | "session_end"
   | "consultation_start";
 
 export interface UploadedFileMeta {

@@ -1,6 +1,7 @@
 "use client";
 
 import { adminH1, adminSubtitle, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
+import { formatCountryLabel } from "@/lib/visitor-geo";
 import { Loader2, Trash2, Users } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ interface VisitRow {
   action_type: string;
   source: string | null;
   session_id: string | null;
+  country: string | null;
   created_at: string;
 }
 
@@ -44,7 +46,7 @@ export default function AdminVisitsPage() {
 
   useEffect(() => {
     void load();
-    const refresh = window.setInterval(() => void load(), 60_000);
+    const refresh = window.setInterval(() => void load(), 30_000);
     return () => window.clearInterval(refresh);
   }, [load]);
 
@@ -70,8 +72,9 @@ export default function AdminVisitsPage() {
         <div>
           <h1 className={adminH1}>Site Visits</h1>
           <p className={adminSubtitle}>
-            One visit per user session when they open the site. Active users are on the site now (last 5
-            minutes).
+            Total visits count each time someone opens your site (one per browser session). Active now is
+            only people on the site at this moment — when they leave or switch tabs, they drop off within
+            about a minute.
           </p>
         </div>
         <button
@@ -88,6 +91,7 @@ export default function AdminVisitsPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total site visits</p>
+          <p className="mt-0.5 text-[11px] text-slate-400">Each time someone opens the site</p>
           <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
             {summary?.totalVisits ?? (loading ? "—" : 0)}
           </p>
@@ -106,17 +110,18 @@ export default function AdminVisitsPage() {
           <p className="mt-2 text-3xl font-bold text-green-700 dark:text-green-400">
             {summary?.activeUsers ?? (loading ? "—" : 0)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Refreshes every minute</p>
+          <p className="mt-1 text-xs text-slate-500">Updates every 30 seconds while they stay</p>
         </div>
       </div>
 
       <p className="text-xs text-slate-500 sm:hidden">Swipe left on the table to see all columns.</p>
       <div className={adminTableWrap}>
-        <table className="w-full min-w-[520px] text-left text-sm">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className={adminTableHead}>
             <tr>
               <th className="whitespace-nowrap px-4 py-3">Time</th>
               <th className="whitespace-nowrap px-4 py-3">Type</th>
+              <th className="min-w-[7rem] px-4 py-3">Country</th>
               <th className="min-w-[8rem] px-4 py-3">Landing page</th>
               <th className="min-w-[6rem] px-4 py-3">Session</th>
             </tr>
@@ -124,14 +129,14 @@ export default function AdminVisitsPage() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
                   <Loader2 className="mx-auto h-6 w-6 animate-spin" />
                 </td>
               </tr>
             )}
             {!loading && visits.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
                   No site visits recorded yet.
                 </td>
               </tr>
@@ -145,6 +150,9 @@ export default function AdminVisitsPage() {
                   <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300">
                     Site visit
                   </span>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">
+                  {formatCountryLabel(row.country)}
                 </td>
                 <td className="max-w-[14rem] px-4 py-3 text-slate-700 break-words dark:text-slate-300 sm:max-w-none">
                   {row.source || "/"}
