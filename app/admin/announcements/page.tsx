@@ -1,16 +1,50 @@
 "use client";
 
+import {
+  AdminAnnouncementModal,
+  emptyAdminAnnouncement,
+  type AdminAnnouncementForm,
+} from "@/components/admin/AdminAnnouncementModal";
 import type { Announcement } from "@/types";
-import { Loader2, Plus, Trash2, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+function rowToForm(row: Announcement): AdminAnnouncementForm {
+  return {
+    id: row.id,
+    message: row.message,
+    type: row.type,
+    link: row.link ?? null,
+    active: row.active,
+    sortOrder: row.sortOrder ?? 0,
+  };
+}
+
+function typeBadge(type: string) {
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+        type === "promo" && "bg-purple-500/20 text-purple-300",
+        type === "service" && "bg-blue-500/20 text-blue-300",
+        type === "notice" && "bg-slate-500/20 text-slate-300"
+      )}
+    >
+      {type}
+    </span>
+  );
+}
+
 export default function AdminAnnouncementsPage() {
   const [rows, setRows] = useState<Announcement[]>([]);
-  const [form, setForm] = useState<Partial<Announcement> | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<AdminAnnouncementForm | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [search, setSearch] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -31,6 +65,31 @@ export default function AdminAnnouncementsPage() {
     void load();
   }, [load]);
 
+  const filtered = rows.filter((r) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      r.message.toLowerCase().includes(q) ||
+      r.type.toLowerCase().includes(q) ||
+      (r.link ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  const openAdd = () => {
+    setEditing(emptyAdminAnnouncement(rows.length));
+    setModalOpen(true);
+  };
+
+  const openEdit = (row: Announcement) => {
+    setEditing(rowToForm(row));
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditing(null);
+  };
+
   const importDefaults = async () => {
     setSeeding(true);
     try {
@@ -46,8 +105,8 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
-  const save = async () => {
-    if (!form?.message?.trim()) {
+  const save = async (form: AdminAnnouncementForm) => {
+    if (!form.message.trim()) {
       toast.error("Message is required");
       return;
     }
@@ -60,8 +119,8 @@ export default function AdminAnnouncementsPage() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Save failed");
-      toast.success("Announcement saved");
-      setForm(null);
+      toast.success(form.id ? "Announcement updated" : "Announcement created");
+      closeModal();
       void load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
@@ -85,9 +144,9 @@ export default function AdminAnnouncementsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Announcements</h1>
+          <h1 className="font-display text-2xl font-bold text-white">Announcement Management</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Top banner and ticker messages on the public site. Edits here update the live site after deploy.
+            Manage top banner messages ({rows.length} total). Click Add or Edit to open the popup.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -102,111 +161,103 @@ export default function AdminAnnouncementsPage() {
           </button>
           <button
             type="button"
-            onClick={() =>
-              setForm({ message: "", type: "notice", active: true, sortOrder: rows.length, link: null })
-            }
+            onClick={openAdd}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
           >
             <Plus className="h-4 w-4" />
-            Add
+            Add Announcement
           </button>
         </div>
       </div>
 
-      {form && (
-        <div className="space-y-3 rounded-xl border border-slate-700 bg-slate-900 p-6">
-          <input
-            placeholder="Message *"
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
-            value={form.message ?? ""}
-            onChange={(e) => setForm({ ...form, message: e.target.value })}
-          />
-          <input
-            placeholder="Link (optional, e.g. /programs/serbia-warehouse-jobs)"
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
-            value={form.link ?? ""}
-            onChange={(e) => setForm({ ...form, link: e.target.value || null })}
-          />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <select
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
-              value={form.type ?? "notice"}
-              onChange={(e) => setForm({ ...form, type: e.target.value as Announcement["type"] })}
-            >
-              <option value="notice">Notice</option>
-              <option value="promo">Promo</option>
-              <option value="service">Service</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Sort order"
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
-              value={form.sortOrder ?? 0}
-              onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) || 0 })}
-            />
-          </div>
-          <label className="flex items-center gap-2 text-sm text-slate-300">
-            <input
-              type="checkbox"
-              checked={form.active ?? true}
-              onChange={(e) => setForm({ ...form, active: e.target.checked })}
-            />
-            Active (visible on site)
-          </label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={save}
-              disabled={saving}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:opacity-60"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-            </button>
-            <button type="button" onClick={() => setForm(null)} className="text-sm text-slate-400">
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+        <input
+          type="search"
+          placeholder="Search by message, type, or link…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white placeholder:text-slate-500"
+        />
+      </div>
 
-      <ul className="space-y-2">
-        {loading && (
-          <li className="py-8 text-center text-slate-500">
-            <Loader2 className="mx-auto h-6 w-6 animate-spin" />
-          </li>
-        )}
-        {!loading && rows.length === 0 && (
-          <li className="rounded-xl border border-dashed border-slate-700 bg-slate-900/50 px-6 py-10 text-center">
-            <p className="text-slate-300">No announcements in the database yet.</p>
-            <p className="mt-2 text-sm text-slate-500">
-              Click <strong className="text-slate-400">Import site announcements</strong> to load the 4 default
-              messages (appointment booking, Serbia jobs, office hours, France/Turkey visas), then edit or add more.
-            </p>
-          </li>
-        )}
-        {rows.map((a) => (
-          <li
-            key={a.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900 px-4 py-3"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="text-white">{a.message}</p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {a.type} · sort {a.sortOrder ?? 0} · {a.active ? "active" : "hidden"}
-                {a.link ? ` · ${a.link}` : ""}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button type="button" className="text-sm text-blue-400 hover:underline" onClick={() => setForm(a)}>
-                Edit
-              </button>
-              <button type="button" onClick={() => remove(a.id)} aria-label="Delete">
-                <Trash2 className="h-4 w-4 text-red-400" />
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
+        <table className="w-full min-w-[800px] text-left text-sm">
+          <thead className="border-b border-slate-800 text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              <th className="px-4 py-3">Message</th>
+              <th className="px-4 py-3">Type</th>
+              <th className="px-4 py-3">Link</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Sort</th>
+              <th className="px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+                </td>
+              </tr>
+            )}
+            {!loading && filtered.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                  No announcements found. Import site announcements or add one.
+                </td>
+              </tr>
+            )}
+            {filtered.map((row) => (
+              <tr key={row.id} className="border-b border-slate-800/80 hover:bg-slate-800/30">
+                <td className="max-w-[320px] px-4 py-3 font-medium text-white">{row.message}</td>
+                <td className="px-4 py-3">{typeBadge(row.type)}</td>
+                <td className="max-w-[180px] truncate px-4 py-3 font-mono text-xs text-slate-500" title={row.link ?? ""}>
+                  {row.link || "—"}
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={cn(
+                      "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
+                      row.active ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-500/20 text-slate-400"
+                    )}
+                  >
+                    {row.active ? "active" : "hidden"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-slate-400">{row.sortOrder ?? 0}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(row)}
+                      className="rounded-lg bg-blue-600/20 p-2 text-blue-400 hover:bg-blue-600/30"
+                      aria-label="Edit announcement"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => remove(row.id)}
+                      className="rounded-lg bg-red-600/20 p-2 text-red-400 hover:bg-red-600/30"
+                      aria-label="Delete announcement"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <AdminAnnouncementModal
+        open={modalOpen}
+        initial={editing}
+        saving={saving}
+        onClose={closeModal}
+        onSave={save}
+      />
     </div>
   );
 }
