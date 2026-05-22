@@ -25,7 +25,7 @@ const CONTENT_LINKS = [
 ];
 
 const ACTIVITY_LINKS = [
-  { href: "/admin/visits", label: "Site visits", desc: "Who visited and which pages", icon: Users },
+  { href: "/admin/visits", label: "Site visits", desc: "Unique visitors and active users", icon: Users },
   { href: "/admin/applications", label: "Applications", desc: "Client form submissions", icon: FileText },
 ];
 
@@ -69,9 +69,9 @@ export default function AdminDashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Total site visits"
+          label="Site visitors"
           value={stats?.totalVisits ?? "—"}
-          hint={`${stats?.visitsToday ?? 0} visits today`}
+          hint={`${stats?.visitsToday ?? 0} today · ${stats?.activeUsers ?? 0} active now`}
           icon={Eye}
           accent="blue"
         />

@@ -13,6 +13,8 @@ export type VisitorActionType =
   | "social_click"
   | "payment_attempt"
   | "page_view"
+  | "site_visit"
+  | "active_ping"
   | "consultation_start";
 
 export interface UploadedFileMeta {

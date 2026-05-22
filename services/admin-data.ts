@@ -40,6 +40,8 @@ async function countActivePrograms(): Promise<number> {
 export interface AdminDashboardStats {
   totalVisits: number;
   visitsToday: number;
+  /** Distinct sessions with activity in the last 5 minutes */
+  activeUsers: number;
   totalServices: number;
   activeServices: number;
   /** All form types: service applications + leads + contact */
@@ -77,6 +79,7 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
     return {
       totalVisits: 0,
       visitsToday: 0,
+      activeUsers: 0,
       totalServices: localServices.length,
       activeServices: localServices.length,
       totalFormsSubmitted: 0,
@@ -96,8 +99,9 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
   const todayIso = today.toISOString();
 
   const [
-    visits,
-    visitsToday,
+    siteVisits,
+    siteVisitsToday,
+    activePingRows,
     servicesTotal,
     servicesActive,
     totalApplications,
@@ -114,14 +118,21 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
     supabase
       .from("visitor_activity")
       .select("*", { count: "exact", head: true })
-      .eq("action_type", "page_view")
+      .eq("action_type", "site_visit")
       .or("source.is.null,source.not.ilike./admin%"),
     supabase
       .from("visitor_activity")
       .select("*", { count: "exact", head: true })
-      .eq("action_type", "page_view")
+      .eq("action_type", "site_visit")
       .gte("created_at", todayIso)
       .or("source.is.null,source.not.ilike./admin%"),
+    supabase
+      .from("visitor_activity")
+      .select("metadata, created_at")
+      .eq("action_type", "active_ping")
+      .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString())
+      .or("source.is.null,source.not.ilike./admin%")
+      .limit(500),
     supabase.from("services").select("*", { count: "exact", head: true }),
     supabase
       .from("services")
@@ -145,9 +156,16 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
   const totalFormsSubmitted = totalApplications + totalLeads + totalContactMessages;
   const formsSubmittedToday = applicationsToday + leadsToday + contactToday;
 
+  const activeSessions = new Set<string>();
+  for (const row of activePingRows.data ?? []) {
+    const meta = row.metadata as { sessionId?: string } | null;
+    if (meta?.sessionId) activeSessions.add(meta.sessionId);
+  }
+
   return {
-    totalVisits: visits.count ?? 0,
-    visitsToday: visitsToday.count ?? 0,
+    totalVisits: siteVisits.count ?? 0,
+    visitsToday: siteVisitsToday.count ?? 0,
+    activeUsers: activeSessions.size,
     totalServices: servicesTotal.count ?? localServices.length,
     activeServices: servicesActive.count ?? localServices.length,
     totalFormsSubmitted,
@@ -602,26 +620,90 @@ export async function seedAdminTestimonialsFromLocal(): Promise<number> {
   return count;
 }
 
-export async function fetchRecentVisits(limit = 30): Promise<
-  { id: string; action_type: string; source: string | null; service: string | null; created_at: string }[]
-> {
-  const supabase = getAdminSupabase();
-  if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("visitor_activity")
-    .select("id, action_type, source, service, created_at")
-    .or("source.is.null,source.not.ilike./admin%")
-    .order("created_at", { ascending: false })
-    .limit(limit * 2);
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as {
+export interface VisitDashboardSummary {
+  totalVisits: number;
+  visitsToday: number;
+  activeUsers: number;
+}
+
+export async function fetchVisitDashboard(): Promise<{
+  summary: VisitDashboardSummary;
+  visits: {
     id: string;
     action_type: string;
     source: string | null;
-    service: string | null;
+    session_id: string | null;
     created_at: string;
   }[];
-  return rows.filter((r) => !isExcludedVisitPath(r.source)).slice(0, limit);
+}> {
+  const supabase = getAdminSupabase();
+  const empty = {
+    summary: { totalVisits: 0, visitsToday: 0, activeUsers: 0 },
+    visits: [],
+  };
+  if (!supabase) return empty;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayIso = today.toISOString();
+  const activeSince = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+  const [totalRes, todayRes, activeRes, listRes] = await Promise.all([
+    supabase
+      .from("visitor_activity")
+      .select("*", { count: "exact", head: true })
+      .eq("action_type", "site_visit")
+      .or("source.is.null,source.not.ilike./admin%"),
+    supabase
+      .from("visitor_activity")
+      .select("*", { count: "exact", head: true })
+      .eq("action_type", "site_visit")
+      .gte("created_at", todayIso)
+      .or("source.is.null,source.not.ilike./admin%"),
+    supabase
+      .from("visitor_activity")
+      .select("metadata")
+      .eq("action_type", "active_ping")
+      .gte("created_at", activeSince)
+      .limit(500),
+    supabase
+      .from("visitor_activity")
+      .select("id, action_type, source, metadata, created_at")
+      .eq("action_type", "site_visit")
+      .or("source.is.null,source.not.ilike./admin%")
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
+
+  if (listRes.error) throw new Error(listRes.error.message);
+
+  const activeSessions = new Set<string>();
+  for (const row of activeRes.data ?? []) {
+    const meta = row.metadata as { sessionId?: string } | null;
+    if (meta?.sessionId) activeSessions.add(meta.sessionId);
+  }
+
+  const visits = (listRes.data ?? [])
+    .filter((r) => !isExcludedVisitPath(r.source as string | null))
+    .map((r) => {
+      const meta = r.metadata as { sessionId?: string } | null;
+      return {
+        id: r.id as string,
+        action_type: r.action_type as string,
+        source: r.source as string | null,
+        session_id: meta?.sessionId ?? null,
+        created_at: r.created_at as string,
+      };
+    });
+
+  return {
+    summary: {
+      totalVisits: totalRes.count ?? 0,
+      visitsToday: todayRes.count ?? 0,
+      activeUsers: activeSessions.size,
+    },
+    visits,
+  };
 }
 
 /** Remove all visit/activity rows (admin dashboard reset) */
