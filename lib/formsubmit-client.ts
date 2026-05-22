@@ -92,9 +92,48 @@ export async function sendLeadViaFormSubmitClient(data: {
   return postFormSubmitClient(formData);
 }
 
+/** Resolve files for FormSubmit — prefer in-memory uploads; else fetch from storage URLs */
+async function resolveApplicationFiles(
+  app: Application,
+  localFiles?: File[]
+): Promise<File[]> {
+  if (localFiles?.length) {
+    return localFiles.filter((f) => f.size > 0);
+  }
+
+  const resolved: File[] = [];
+  for (const meta of app.uploaded_files || []) {
+    if (!meta.url || meta.url.startsWith("demo://")) continue;
+    try {
+      const res = await fetch(meta.url);
+      if (!res.ok) continue;
+      const blob = await res.blob();
+      resolved.push(
+        new File([blob], meta.name, { type: meta.type || blob.type || "application/octet-stream" })
+      );
+    } catch {
+      /* skip unreachable file */
+    }
+  }
+  return resolved;
+}
+
+function appendFilesToFormData(formData: FormData, files: File[]) {
+  files.forEach((file, i) => {
+    const key =
+      file.name.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/^_+/, "") || `document_${i + 1}`;
+    formData.append(key, file, file.name);
+  });
+}
+
 export async function sendApplicationViaFormSubmitClient(
   app: Application,
-  options?: { paymentAmount?: number; stage?: "submitted" | "paid" }
+  options?: {
+    paymentAmount?: number;
+    stage?: "submitted" | "paid";
+    /** Original uploads — attached to email (like native FormSubmit file fields) */
+    files?: File[];
+  }
 ): Promise<FormSubmitClientResult> {
   const stage = options?.stage ?? (app.payment_status === "paid" ? "paid" : "submitted");
   const subject =
@@ -102,9 +141,11 @@ export async function sendApplicationViaFormSubmitClient(
       ? `Payment received: ${app.service_name}`
       : `New application submitted: ${app.service_name}`;
 
-  const fileLinks = (app.uploaded_files || [])
-    .map((f, i) => `${i + 1}. ${f.name}: ${f.url}`)
-    .join("\n");
+  const attachmentFiles = await resolveApplicationFiles(app, options?.files);
+  const fileNames =
+    attachmentFiles.length > 0
+      ? attachmentFiles.map((f) => f.name).join(", ")
+      : (app.uploaded_files || []).map((f) => f.name).join(", ") || "None";
 
   const amountLabel =
     options?.paymentAmount != null ? formatPrice(options.paymentAmount) : "—";
@@ -123,11 +164,18 @@ export async function sendApplicationViaFormSubmitClient(
   formData.append("address", app.address);
   formData.append("purpose", app.purpose);
   formData.append("notes", app.notes || "—");
-  formData.append("uploaded_files", fileLinks || "See admin dashboard");
+  formData.append(
+    "uploaded_files",
+    attachmentFiles.length > 0
+      ? `${fileNames} (attached to this email)`
+      : fileNames || "See admin dashboard"
+  );
   formData.append("status", stage === "paid" ? "Paid" : "Submitted");
   formData.append("payment_status", app.payment_status);
   formData.append("payment_reference", app.payment_reference || "—");
   formData.append("payment_amount", amountLabel);
+
+  appendFilesToFormData(formData, attachmentFiles);
 
   return postFormSubmitClient(formData);
 }

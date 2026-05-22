@@ -47,17 +47,20 @@ export function ApplicationSubmitFlow({
   const [finishing, setFinishing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const pendingRef = useRef<PendingSubmission | null>(null);
+  const submittedFilesRef = useRef<File[]>([]);
   const { settings: liveSettings } = usePaymentSettings();
   const settings = paymentSettingsOverride ?? liveSettings;
 
   const emailOwnerViaFormSubmit = async (
     app: Application,
     stage: "submitted" | "paid",
-    paymentAmount?: number
+    paymentAmount?: number,
+    files?: File[]
   ): Promise<boolean> => {
     const result = await sendApplicationViaFormSubmitClient(app, {
       stage,
       paymentAmount,
+      files,
     });
     if (!result.ok) {
       toast.error(
@@ -81,7 +84,8 @@ export function ApplicationSubmitFlow({
         { skipOwnerEmail: true }
       );
       sessionStorage.setItem("pending_application_id", application.id);
-      const emailSent = await emailOwnerViaFormSubmit(application, "submitted");
+      submittedFilesRef.current = files;
+      const emailSent = await emailOwnerViaFormSubmit(application, "submitted", undefined, files);
       toastApplicationSaved({ emailSent });
       setSubmitted(application);
     } catch (err) {
@@ -215,7 +219,12 @@ export function ApplicationSubmitFlow({
       if (!res.ok) throw new Error(json.error || "Could not record payment");
 
       const app = json.application ?? submitted;
-      const emailSent = await emailOwnerViaFormSubmit(app, "paid", amount);
+      const emailSent = await emailOwnerViaFormSubmit(
+        app,
+        "paid",
+        amount,
+        submittedFilesRef.current.length ? submittedFilesRef.current : undefined
+      );
       setModalOpen(false);
       toastPaymentComplete({ emailSent });
       redirectToWhatsApp(

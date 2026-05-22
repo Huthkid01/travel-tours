@@ -36,6 +36,12 @@ Or: **Admin → Applications → Test owner email** (sends from your browser the
 
 Data is always saved in the admin dashboard even if email fails.
 
+## Application documents in email
+
+Application and consultation forms **attach uploaded files** to the FormSubmit email (same as a normal HTML file upload), not only Supabase links. Gmail shows them under **attachments** — open or preview images/PDFs there.
+
+If an attachment is missing, check FormSubmit size limits (~5MB per file) and confirm files uploaded successfully in Admin → Applications.
+
 ## If email still fails
 
 - Confirm activation link was clicked.
