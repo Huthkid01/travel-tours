@@ -4,7 +4,7 @@ import { CTABanner } from "@/components/home/CTABanner";
 import { Hero } from "@/components/home/Hero";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { StatsSection } from "@/components/home/StatsSection";
-import { TestimonialCarousel } from "@/components/home/TestimonialCarousel";
+import { FeaturedTestimonialsSection } from "@/components/home/FeaturedTestimonialsSection";
 import { FeaturedProgramsSection } from "@/components/programs/FeaturedProgramsSection";
 import { FeaturedServicesGrid } from "@/components/services/FeaturedServicesGrid";
 import { GoogleFormSection } from "@/components/forms/GoogleFormSection";
@@ -116,14 +116,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-padding bg-navy-50 dark:bg-navy-900/30">
-        <div className="container-custom">
-          <SectionHeading label="Testimonials" title="What Our Clients Say" />
-          <div className="mt-12">
-            <TestimonialCarousel />
-          </div>
-        </div>
-      </section>
+      <FeaturedTestimonialsSection />
 
       <section className="section-padding">
         <div className="container-custom max-w-3xl">

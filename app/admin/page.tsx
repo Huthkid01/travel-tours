@@ -10,6 +10,7 @@ import {
   Eye,
   FileText,
   GraduationCap,
+  MessageSquareQuote,
   RefreshCw,
   Users,
 } from "lucide-react";
@@ -20,6 +21,7 @@ const CONTENT_LINKS = [
   { href: "/admin/services", label: "Manage Services", desc: "Edit all services on the site", icon: Briefcase },
   { href: "/admin/programs", label: "Manage Programs", desc: "Travel programs & flyers", icon: GraduationCap },
   { href: "/admin/announcements", label: "Announcements", desc: "Top banner messages", icon: Bell },
+  { href: "/admin/testimonials", label: "Testimonials", desc: "Client reviews on homepage", icon: MessageSquareQuote },
 ];
 
 const ACTIVITY_LINKS = [

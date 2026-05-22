@@ -197,6 +197,8 @@ export interface Testimonial {
   rating: number;
   text: string;
   service: string;
+  active?: boolean;
+  sortOrder?: number;
 }
 
 export interface FAQ {

@@ -5,12 +5,20 @@ import {
 } from "@/data/payment-settings-default";
 import { programs as localPrograms } from "@/data/programs";
 import { services as localServices } from "@/data/services";
+import { testimonials as localTestimonials } from "@/data/testimonials";
 import { normalizeProgramCtaLink } from "@/lib/admin-links";
 import { getProgramFlyerPath, isProgramFlyerImage } from "@/lib/program-flyers";
 import "server-only";
 
 import { getServerSupabase } from "@/supabase/server";
-import type { Announcement, Program, ProgramImageType, ServiceCategory, ServiceItem } from "@/types";
+import type {
+  Announcement,
+  Program,
+  ProgramImageType,
+  ServiceCategory,
+  ServiceItem,
+  Testimonial,
+} from "@/types";
 import { unstable_noStore as noStore } from "next/cache";
 
 function mapService(row: Record<string, unknown>): ServiceItem {
@@ -242,3 +250,37 @@ export async function fetchPaymentSettings(): Promise<PaymentSettings> {
 }
 
 export type { PaymentSettings };
+
+function mapTestimonial(row: Record<string, unknown>): Testimonial {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    role: String(row.role ?? ""),
+    avatar: String(row.avatar),
+    rating: Math.min(5, Math.max(1, Number(row.rating ?? 5))),
+    text: String(row.text),
+    service: String(row.service ?? ""),
+    active: row.active !== false,
+    sortOrder: Number(row.sort_order ?? 0),
+  };
+}
+
+export async function fetchTestimonials(): Promise<Testimonial[]> {
+  noStore();
+  const supabase = getServerSupabase();
+  if (!supabase) {
+    return localTestimonials.filter((t) => t.active !== false);
+  }
+
+  const { data, error } = await supabase
+    .from("testimonials")
+    .select("*")
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (error || !data?.length) {
+    return localTestimonials.filter((t) => t.active !== false);
+  }
+
+  return data.map((row) => mapTestimonial(row as Record<string, unknown>));
+}

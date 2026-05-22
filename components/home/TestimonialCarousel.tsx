@@ -1,13 +1,24 @@
 "use client";
 
-import { testimonials } from "@/data/testimonials";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { RemoteImage } from "@/components/ui/RemoteImage";
-import { useState } from "react";
+import type { Testimonial } from "@/types";
+import { useEffect, useState } from "react";
 
-export function TestimonialCarousel() {
+type TestimonialCarouselProps = {
+  testimonials: Testimonial[];
+};
+
+export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) {
   const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    setCurrent((c) => (testimonials.length ? Math.min(c, testimonials.length - 1) : 0));
+  }, [testimonials.length]);
+
+  if (!testimonials.length) return null;
+
   const testimonial = testimonials[current];
 
   const next = () => setCurrent((p) => (p + 1) % testimonials.length);

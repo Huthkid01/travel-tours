@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquareQuote,
   Users,
   X,
 } from "lucide-react";
@@ -35,6 +36,7 @@ const NAV_SECTIONS = [
       { href: "/admin/services", label: "Services", icon: Briefcase },
       { href: "/admin/programs", label: "Programs", icon: GraduationCap },
       { href: "/admin/announcements", label: "Announcements", icon: Bell },
+      { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
       { href: "/admin/payment", label: "Payment methods", icon: CreditCard },
     ],
   },

@@ -5,6 +5,7 @@ import {
 import { announcements as localAnnouncements } from "@/data/announcements";
 import { programs as localPrograms } from "@/data/programs";
 import { services as localServices } from "@/data/services";
+import { testimonials as localTestimonials } from "@/data/testimonials";
 import {
   normalizeAnnouncementLink,
   normalizeProgramCtaLink,
@@ -12,7 +13,14 @@ import {
 } from "@/lib/admin-links";
 import { isExcludedVisitPath } from "@/lib/visit-tracking";
 import { getAdminSupabase } from "@/supabase/admin";
-import type { Announcement, Application, Program, ProgramStatus, ServiceCategory } from "@/types";
+import type {
+  Announcement,
+  Application,
+  Program,
+  ProgramStatus,
+  ServiceCategory,
+  Testimonial,
+} from "@/types";
 
 const PROGRAM_TABLES = ["programs", "featured_programs"] as const;
 
@@ -494,6 +502,104 @@ export async function deleteAdminAnnouncement(id: string): Promise<void> {
   if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase.from("announcements").delete().eq("id", id);
   if (error) throw new Error(error.message);
+}
+
+function mapAdminTestimonial(row: Record<string, unknown>): Testimonial {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    role: String(row.role ?? ""),
+    avatar: String(row.avatar),
+    rating: Math.min(5, Math.max(1, Number(row.rating ?? 5))),
+    text: String(row.text),
+    service: String(row.service ?? ""),
+    active: Boolean(row.active),
+    sortOrder: Number(row.sort_order ?? 0),
+  };
+}
+
+export async function fetchAdminTestimonials(): Promise<Testimonial[]> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("testimonials")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => mapAdminTestimonial(row as Record<string, unknown>));
+}
+
+export async function upsertAdminTestimonial(
+  row: Partial<Testimonial> & { name: string; text: string; avatar: string },
+  id?: string
+): Promise<void> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const payload = {
+    name: row.name.trim(),
+    role: (row.role ?? "").trim(),
+    avatar: row.avatar.trim(),
+    rating: Math.min(5, Math.max(1, Number(row.rating ?? 5))),
+    text: row.text.trim(),
+    service: (row.service ?? "").trim(),
+    active: row.active ?? true,
+    sort_order: row.sortOrder ?? 0,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (id) {
+    const { error } = await supabase.from("testimonials").update(payload).eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  const { error } = await supabase.from("testimonials").insert(payload);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteAdminTestimonial(id: string): Promise<void> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+  const { error } = await supabase.from("testimonials").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function seedAdminTestimonialsFromLocal(): Promise<number> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  let count = 0;
+  for (const t of localTestimonials) {
+    const { data: existing } = await supabase
+      .from("testimonials")
+      .select("id")
+      .eq("name", t.name)
+      .eq("text", t.text)
+      .maybeSingle();
+
+    const payload = {
+      name: t.name,
+      role: t.role,
+      avatar: t.avatar,
+      rating: t.rating,
+      text: t.text,
+      service: t.service,
+      active: true,
+      sort_order: count,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existing?.id) {
+      const { error } = await supabase.from("testimonials").update(payload).eq("id", existing.id);
+      if (!error) count += 1;
+    } else {
+      const { error } = await supabase.from("testimonials").insert(payload);
+      if (!error) count += 1;
+    }
+  }
+
+  return count;
 }
 
 export async function fetchRecentVisits(limit = 30): Promise<

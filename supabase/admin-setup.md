@@ -8,6 +8,7 @@
 | **visitor_activity** | Public site visits & clicks only (`/admin` is excluded). Clear via Admin → Site visits → **Clear all visit data**, or SQL: `delete from public.visitor_activity;` |
 | **featured_programs** | Travel programs shown on home & `/programs` (editable in admin) |
 | **announcements** | Top banner messages on the site |
+| **testimonials** | Homepage “What Our Clients Say” carousel |
 | **services** | All services on the site (editable in admin) |
 | **payment_settings** | Bank transfer details & Paystack/Flutterwave toggles |
 | **Storage `documents`** | Uploaded passport/files from application forms |
@@ -21,7 +22,8 @@
 3. `schema-v3-services.sql` — services (editable in admin)  
 4. `schema-v4-payment-settings.sql` — payment methods & bank details  
 5. `schema-v5-form-submissions.sql` — contact form records (dashboard counts)  
-6. `schema-v6-program-flyers.sql` — **program flyer uploads** (Storage bucket `program-flyers`; uses `featured_programs` only — safe if you did not run schema-v3)
+6. `schema-v6-program-flyers.sql` — **program flyer uploads** (Storage bucket `program-flyers`; uses `featured_programs` only — safe if you did not run schema-v3)  
+7. `schema-v7-testimonials.sql` — client testimonials on homepage
 
 ## Environment variables (Vercel)
 
@@ -53,7 +55,7 @@ Open: **https://your-site.vercel.app/admin/login**
 - **Services** — all services (like product list): add, edit, delete, featured flag  
 - **Programs** — travel programs on home & `/programs` (use **Import all site programs** if the list is empty)  
 - **Announcements** — banner/ticker messages (use **Import site announcements** if the list is empty)  
-- **Announcements** — top banner messages  
+- **Testimonials** — homepage client reviews (use **Import defaults** if the list is empty)  
 - **Payment methods** — bank account, fee label, Paystack/Flutterwave on/off  
 
 ### Sidebar — Activity
