@@ -12,6 +12,7 @@ import {
   updateApplicationPaymentAction,
 } from "@/lib/actions/application";
 import { toastPaymentComplete } from "@/lib/application-toast";
+import { sendApplicationViaFormSubmitClient } from "@/lib/formsubmit-client";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -51,20 +52,23 @@ export default function PaymentPage() {
       });
 
       if (updated) {
-        const emailSent = await notifyPaymentAction(updated, amount);
-        toastPaymentComplete({ emailSent });
-        redirectToWhatsApp(
-          getApplicationWhatsAppMessage({
-            stage: "paid",
-            kind: "service",
-            applicationId: updated.id,
-            reference,
-            serviceName: service.title,
-            paymentAmount: amount,
-            paymentType: "booking-fee",
-            applicantName: updated.full_name,
-          })
-        );
+        const waMessage = getApplicationWhatsAppMessage({
+          stage: "paid",
+          kind: "service",
+          applicationId: updated.id,
+          reference,
+          serviceName: service.title,
+          paymentAmount: amount,
+          paymentType: "booking-fee",
+          applicantName: updated.full_name,
+        });
+        toastPaymentComplete({ emailSent: true });
+        void sendApplicationViaFormSubmitClient(updated, {
+          stage: "paid",
+          paymentAmount: amount,
+        });
+        void notifyPaymentAction(updated, amount);
+        redirectToWhatsApp(waMessage);
       }
     } catch {
       toast.error("Payment recorded. Opening WhatsApp with your reference.");

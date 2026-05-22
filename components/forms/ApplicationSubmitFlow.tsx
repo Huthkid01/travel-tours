@@ -47,20 +47,17 @@ export function ApplicationSubmitFlow({
   const [finishing, setFinishing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const pendingRef = useRef<PendingSubmission | null>(null);
-  const submittedFilesRef = useRef<File[]>([]);
   const { settings: liveSettings } = usePaymentSettings();
   const settings = paymentSettingsOverride ?? liveSettings;
 
   const emailOwnerViaFormSubmit = async (
     app: Application,
     stage: "submitted" | "paid",
-    paymentAmount?: number,
-    files?: File[]
+    paymentAmount?: number
   ): Promise<boolean> => {
     const result = await sendApplicationViaFormSubmitClient(app, {
       stage,
       paymentAmount,
-      files,
     });
     if (!result.ok) {
       toast.error(
@@ -70,6 +67,14 @@ export function ApplicationSubmitFlow({
       return false;
     }
     return true;
+  };
+
+  const emailOwnerInBackground = (
+    app: Application,
+    stage: "submitted" | "paid",
+    paymentAmount?: number
+  ) => {
+    void emailOwnerViaFormSubmit(app, stage, paymentAmount);
   };
 
   const handleFormSubmit = async (data: ApplicationFormData, files: File[]) => {
@@ -84,9 +89,8 @@ export function ApplicationSubmitFlow({
         { skipOwnerEmail: true }
       );
       sessionStorage.setItem("pending_application_id", application.id);
-      submittedFilesRef.current = files;
-      const emailSent = await emailOwnerViaFormSubmit(application, "submitted", undefined, files);
-      toastApplicationSaved({ emailSent });
+      emailOwnerInBackground(application, "submitted");
+      toastApplicationSaved({ emailSent: true, nextStep: "payment" });
       setSubmitted(application);
     } catch (err) {
       toast.error(
@@ -154,22 +158,24 @@ export function ApplicationSubmitFlow({
       if (!res.ok) throw new Error(json.error || "Could not record payment");
 
       const app = json.application ?? application;
-      const emailSent = await emailOwnerViaFormSubmit(app, "paid", amount);
+      const waMessage = getApplicationWhatsAppMessage({
+        stage: "paid",
+        kind,
+        applicationId: app.id,
+        serviceName,
+        applicantName: app.full_name,
+        reference: paymentReference || app.payment_reference || undefined,
+        paymentAmount: amount,
+        paymentType: "booking-fee",
+      });
+
       pendingRef.current = null;
       setModalOpen(false);
-      toastPaymentComplete({ emailSent });
-      redirectToWhatsApp(
-        getApplicationWhatsAppMessage({
-          stage: "paid",
-          kind,
-          applicationId: app.id,
-          serviceName,
-          applicantName: app.full_name,
-          reference: paymentReference || app.payment_reference || undefined,
-          paymentAmount: amount,
-          paymentType: "booking-fee",
-        })
-      );
+      setFinishing(false);
+      toastPaymentComplete({ emailSent: true });
+      emailOwnerInBackground(app, "paid", amount);
+      redirectToWhatsApp(waMessage);
+      return;
     } catch {
       toast.error("Could not save your application. Opening WhatsApp — please send your payment reference there.");
       setModalOpen(false);
@@ -219,26 +225,23 @@ export function ApplicationSubmitFlow({
       if (!res.ok) throw new Error(json.error || "Could not record payment");
 
       const app = json.application ?? submitted;
-      const emailSent = await emailOwnerViaFormSubmit(
-        app,
-        "paid",
-        amount,
-        submittedFilesRef.current.length ? submittedFilesRef.current : undefined
-      );
+      const waMessage = getApplicationWhatsAppMessage({
+        stage: "paid",
+        kind,
+        applicationId: app.id,
+        serviceName,
+        applicantName: app.full_name,
+        reference: paymentReference || app.payment_reference || undefined,
+        paymentAmount: amount,
+        paymentType: "booking-fee",
+      });
+
       setModalOpen(false);
-      toastPaymentComplete({ emailSent });
-      redirectToWhatsApp(
-        getApplicationWhatsAppMessage({
-          stage: "paid",
-          kind,
-          applicationId: app.id,
-          serviceName,
-          applicantName: app.full_name,
-          reference: paymentReference || app.payment_reference || undefined,
-          paymentAmount: amount,
-          paymentType: "booking-fee",
-        })
-      );
+      setFinishing(false);
+      toastPaymentComplete({ emailSent: true });
+      emailOwnerInBackground(app, "paid", amount);
+      redirectToWhatsApp(waMessage);
+      return;
     } catch {
       toast.error("Could not save payment. Opening WhatsApp anyway.");
       setModalOpen(false);

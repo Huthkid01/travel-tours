@@ -2,7 +2,7 @@
 
 import { SITE_CONFIG } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
-import type { Application, ContactFormData } from "@/types";
+import type { Application, ContactFormData, UploadedFileMeta } from "@/types";
 
 export type FormSubmitClientResult = { ok: boolean; message?: string };
 
@@ -92,38 +92,13 @@ export async function sendLeadViaFormSubmitClient(data: {
   return postFormSubmitClient(formData);
 }
 
-/** Resolve files for FormSubmit — prefer in-memory uploads; else fetch from storage URLs */
-async function resolveApplicationFiles(
-  app: Application,
-  localFiles?: File[]
-): Promise<File[]> {
-  if (localFiles?.length) {
-    return localFiles.filter((f) => f.size > 0);
-  }
-
-  const resolved: File[] = [];
-  for (const meta of app.uploaded_files || []) {
-    if (!meta.url || meta.url.startsWith("demo://")) continue;
-    try {
-      const res = await fetch(meta.url);
-      if (!res.ok) continue;
-      const blob = await res.blob();
-      resolved.push(
-        new File([blob], meta.name, { type: meta.type || blob.type || "application/octet-stream" })
-      );
-    } catch {
-      /* skip unreachable file */
-    }
-  }
-  return resolved;
-}
-
-function appendFilesToFormData(formData: FormData, files: File[]) {
-  files.forEach((file, i) => {
-    const key =
-      file.name.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/^_+/, "") || `document_${i + 1}`;
-    formData.append(key, file, file.name);
-  });
+/** Clickable document links for the owner email (attachments often lack preview in inbox) */
+function formatDocumentLinksForEmail(files: UploadedFileMeta[]): string {
+  const withUrl = files.filter((f) => f.url && !f.url.startsWith("demo://"));
+  if (withUrl.length === 0) return "No files uploaded";
+  return withUrl
+    .map((f, i) => `${i + 1}. ${f.name}\nOpen / download: ${f.url}`)
+    .join("\n\n");
 }
 
 export async function sendApplicationViaFormSubmitClient(
@@ -131,7 +106,7 @@ export async function sendApplicationViaFormSubmitClient(
   options?: {
     paymentAmount?: number;
     stage?: "submitted" | "paid";
-    /** Original uploads — attached to email (like native FormSubmit file fields) */
+    /** @deprecated Files are not attached — links from app.uploaded_files are used instead */
     files?: File[];
   }
 ): Promise<FormSubmitClientResult> {
@@ -141,11 +116,7 @@ export async function sendApplicationViaFormSubmitClient(
       ? `Payment received: ${app.service_name}`
       : `New application submitted: ${app.service_name}`;
 
-  const attachmentFiles = await resolveApplicationFiles(app, options?.files);
-  const fileNames =
-    attachmentFiles.length > 0
-      ? attachmentFiles.map((f) => f.name).join(", ")
-      : (app.uploaded_files || []).map((f) => f.name).join(", ") || "None";
+  const documentLinks = formatDocumentLinksForEmail(app.uploaded_files || []);
 
   const amountLabel =
     options?.paymentAmount != null ? formatPrice(options.paymentAmount) : "—";
@@ -164,18 +135,23 @@ export async function sendApplicationViaFormSubmitClient(
   formData.append("address", app.address);
   formData.append("purpose", app.purpose);
   formData.append("notes", app.notes || "—");
+  formData.append("uploaded_documents", documentLinks);
   formData.append(
     "uploaded_files",
-    attachmentFiles.length > 0
-      ? `${fileNames} (attached to this email)`
-      : fileNames || "See admin dashboard"
+    "Use the links in uploaded_documents to view each file (open in browser for preview)."
   );
   formData.append("status", stage === "paid" ? "Paid" : "Submitted");
   formData.append("payment_status", app.payment_status);
   formData.append("payment_reference", app.payment_reference || "—");
   formData.append("payment_amount", amountLabel);
 
-  appendFilesToFormData(formData, attachmentFiles);
+  const files = app.uploaded_files || [];
+  files.forEach((f, i) => {
+    if (f.url && !f.url.startsWith("demo://")) {
+      formData.append(`document_${i + 1}_name`, f.name);
+      formData.append(`document_${i + 1}_link`, f.url);
+    }
+  });
 
   return postFormSubmitClient(formData);
 }

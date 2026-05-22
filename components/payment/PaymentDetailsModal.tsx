@@ -14,6 +14,7 @@ interface PaymentDetailsModalProps {
   onDone: (paymentReference: string) => void;
   settings?: PaymentSettings;
   loadingDone?: boolean;
+  loadingLabel?: string;
   doneLabel?: string;
 }
 
