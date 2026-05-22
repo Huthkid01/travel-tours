@@ -1,4 +1,5 @@
 import { isAdminResponse, requireAdminSession } from "@/lib/admin-api";
+import { revalidatePublicSite } from "@/lib/revalidate-public-site";
 import { fetchAdminPaymentSettings, upsertAdminPaymentSettings } from "@/services/admin-data";
 import type { PaymentSettings } from "@/data/payment-settings-default";
 import { NextResponse } from "next/server";
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as PaymentSettings;
     await upsertAdminPaymentSettings(body);
+    revalidatePublicSite();
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json(

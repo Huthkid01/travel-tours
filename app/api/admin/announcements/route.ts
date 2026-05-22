@@ -1,4 +1,5 @@
 import { isAdminResponse, requireAdminSession } from "@/lib/admin-api";
+import { revalidatePublicSite } from "@/lib/revalidate-public-site";
 import {
   deleteAdminAnnouncement,
   fetchAdminAnnouncements,
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     await upsertAdminAnnouncement(body, body.id);
+    revalidatePublicSite();
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json(
@@ -41,6 +43,7 @@ export async function DELETE(request: Request) {
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
   try {
     await deleteAdminAnnouncement(id);
+    revalidatePublicSite();
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json(

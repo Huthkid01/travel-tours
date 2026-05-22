@@ -17,8 +17,9 @@ import { PASSPORT_MATCH_NOTE } from "@/data/darboi-application-form";
 import type { ServiceItem } from "@/types";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { toastApplicationSaved } from "@/lib/application-toast";
 import { toast } from "sonner";
+
+const WHATSAPP_REDIRECT_MS = 1500;
 
 async function submitAndOpenWhatsApp(
   storageSlug: string,
@@ -28,16 +29,20 @@ async function submitAndOpenWhatsApp(
   files: File[]
 ) {
   const { application, emailSent } = await submitApplicationViaApi(storageSlug, label, data, files);
-  toastApplicationSaved({ emailSent, nextStep: "whatsapp" });
-  redirectToWhatsApp(
-    getApplicationWhatsAppMessage({
-      stage: "submitted",
-      kind,
-      applicationId: application.id,
-      serviceName: label,
-      applicantName: application.full_name,
-    })
-  );
+  toast.success("Submitted successfully!");
+  if (!emailSent) {
+    toast.info(
+      "Your application is saved. Email to Darboi is pending — activate FormSubmit in your inbox if you have not already."
+    );
+  }
+  const message = getApplicationWhatsAppMessage({
+    stage: "submitted",
+    kind,
+    applicationId: application.id,
+    serviceName: label,
+    applicantName: application.full_name,
+  });
+  window.setTimeout(() => redirectToWhatsApp(message), WHATSAPP_REDIRECT_MS);
 }
 
 export function ConsultationPageContent({ services }: { services: ServiceItem[] }) {
@@ -78,7 +83,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
             {programSlug ? (
               <DarboiApplicationForm
                 contextLabel={label}
-                submitLabel="Submit & Contact via WhatsApp"
+                submitLabel="Submit"
                 showPaymentInfo={false}
                 onSubmit={async (data, files) => {
                   try {
@@ -111,7 +116,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
             ) : (
               <DarboiApplicationForm
                 contextLabel={label}
-                submitLabel="Submit & Contact via WhatsApp"
+                submitLabel="Submit"
                 showPaymentInfo={false}
                 onSubmit={async (data, files) => {
                   try {

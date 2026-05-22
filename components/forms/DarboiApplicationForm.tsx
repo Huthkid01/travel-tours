@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CreditCard, FileUp, MapPin, Plane, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export interface DarboiApplicationFiles {
   passportPhoto: File[];
@@ -73,6 +74,7 @@ export function DarboiApplicationForm({
     formState: { errors },
   } = useForm<DarboiApplicationFormValues>({
     resolver: zodResolver(darboiApplicationSchema),
+    mode: "onTouched",
   });
 
   const submit = async (data: DarboiApplicationFormValues) => {
@@ -101,6 +103,8 @@ export function DarboiApplicationForm({
 
     try {
       await onSubmit(data, { passportPhoto, passportBioPage });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Submit failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -129,6 +133,23 @@ export function DarboiApplicationForm({
     }
 
     if (step === lastStepIndex) {
+      if (!validateDocuments()) return;
+      const fieldsOk = await trigger();
+      if (!fieldsOk) {
+        toast.error("Please complete all required fields before submitting.");
+        for (let i = 0; i < STEP_FIELDS.length; i++) {
+          const fields = STEP_FIELDS[i];
+          if (!fields.length) continue;
+          const stepOk = await trigger(fields);
+          if (!stepOk) {
+            const targetId = STEPS[i]?.id;
+            const targetIndex = steps.findIndex((s) => s.id === targetId);
+            if (targetIndex >= 0) setStep(targetIndex);
+            break;
+          }
+        }
+        return;
+      }
       void handleSubmit(submit)();
       return;
     }

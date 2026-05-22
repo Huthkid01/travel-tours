@@ -1,0 +1,62 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+
+/** How often open tabs poll for CMS updates (ms). */
+export const CMS_LIVE_POLL_MS = 12_000;
+
+type UseLiveCmsOptions<T> = {
+  /** SSR / first paint data before first client fetch */
+  initial?: T;
+  enabled?: boolean;
+};
+
+export function useLiveCms<T>(url: string, options?: UseLiveCmsOptions<T>) {
+  const { initial, enabled = true } = options ?? {};
+  const [data, setData] = useState<T | undefined>(initial);
+  const [loading, setLoading] = useState(!initial);
+  const mounted = useRef(true);
+
+  const refresh = useCallback(async () => {
+    if (!enabled) return;
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      const json = await res.json();
+      if (!res.ok || json?.error) return;
+      if (mounted.current) {
+        setData(json as T);
+        setLoading(false);
+      }
+    } catch {
+      if (mounted.current) setLoading(false);
+    }
+  }, [url, enabled]);
+
+  useEffect(() => {
+    mounted.current = true;
+    void refresh();
+
+    if (!enabled) return () => {
+      mounted.current = false;
+    };
+
+    const interval = setInterval(() => void refresh(), CMS_LIVE_POLL_MS);
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const onFocus = () => void refresh();
+
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      mounted.current = false;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refresh, enabled]);
+
+  return { data, loading, refresh };
+}

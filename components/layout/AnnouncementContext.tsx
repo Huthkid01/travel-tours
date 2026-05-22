@@ -1,5 +1,6 @@
 "use client";
 
+import { useLiveCms } from "@/hooks/use-live-cms";
 import type { Announcement } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, X } from "lucide-react";
@@ -27,22 +28,20 @@ export function useAnnouncementVisible() {
 export function AnnouncementProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
-  const [items, setItems] = useState<Announcement[]>([]);
   const [index, setIndex] = useState(0);
   /** In-memory only — dismiss hides until page refresh, then banner returns */
   const [dismissed, setDismissed] = useState(false);
 
+  const { data: liveItems } = useLiveCms<Announcement[]>("/api/announcements", {
+    enabled: !isAdminRoute,
+  });
+  const items = liveItems ?? [];
+
   useEffect(() => {
     if (isAdminRoute) return;
-    fetch("/api/announcements")
-      .then((r) => r.json())
-      .then((list: Announcement[]) => {
-        const items = Array.isArray(list) ? list : [];
-        setItems(items);
-        if (items.length === 0) setDismissed(true);
-      })
-      .catch(() => setDismissed(true));
-  }, [isAdminRoute]);
+    if (items.length === 0) setDismissed(true);
+    else if (index >= items.length) setIndex(0);
+  }, [isAdminRoute, items.length, index]);
 
   useEffect(() => {
     if (items.length <= 1 || dismissed) return;

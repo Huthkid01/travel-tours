@@ -142,7 +142,7 @@ export function FormStepFlow({
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                {continueLabel ?? (isLastStep ? "Submit application" : "Continue")}
+                {continueLabel ?? (isLastStep ? "Submit" : "Continue")}
                 {!isLastStep && <ChevronRight className="h-4 w-4" />}
               </>
             )}

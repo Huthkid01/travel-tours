@@ -1,13 +1,13 @@
 import { jsonNoCache } from "@/lib/api-no-cache";
-import { fetchAnnouncements } from "@/services/cms";
+import { fetchServices } from "@/services/cms";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET() {
   try {
-    const items = await fetchAnnouncements();
-    return jsonNoCache(items);
+    const services = await fetchServices();
+    return jsonNoCache(services);
   } catch {
     return jsonNoCache([], { status: 500 });
   }

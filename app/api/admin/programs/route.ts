@@ -1,4 +1,5 @@
 import { isAdminResponse, requireAdminSession } from "@/lib/admin-api";
+import { revalidatePublicSite } from "@/lib/revalidate-public-site";
 import { deleteAdminProgram, fetchAdminPrograms, upsertAdminProgram } from "@/services/admin-data";
 import { NextResponse } from "next/server";
 
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const data = await upsertAdminProgram(body, body.id);
+    revalidatePublicSite();
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(
@@ -37,6 +39,7 @@ export async function DELETE(request: Request) {
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
   try {
     await deleteAdminProgram(id);
+    revalidatePublicSite();
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json(

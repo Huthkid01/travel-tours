@@ -11,6 +11,7 @@ import "server-only";
 
 import { getServerSupabase } from "@/supabase/server";
 import type { Announcement, Program, ProgramImageType, ServiceCategory, ServiceItem } from "@/types";
+import { unstable_noStore as noStore } from "next/cache";
 
 function mapService(row: Record<string, unknown>): ServiceItem {
   const requirements = row.requirements;
@@ -39,6 +40,7 @@ function mapService(row: Record<string, unknown>): ServiceItem {
 }
 
 export async function fetchServices(): Promise<ServiceItem[]> {
+  noStore();
   const supabase = getServerSupabase();
   if (!supabase) {
     return [...localServices];
@@ -57,6 +59,7 @@ export async function fetchServices(): Promise<ServiceItem[]> {
 }
 
 export async function fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
+  noStore();
   const supabase = getServerSupabase();
   if (supabase) {
     const { data, error } = await supabase
@@ -151,6 +154,7 @@ function mergeProgramsWithLocal(dbPrograms: Program[]): Program[] {
 }
 
 export async function fetchPrograms(): Promise<Program[]> {
+  noStore();
   const fromPrograms = await fetchFromTable("programs");
   if (fromPrograms.length) return mergeProgramsWithLocal(fromPrograms);
 
@@ -187,6 +191,7 @@ function mergeAnnouncementsWithLocal(dbRows: Announcement[]): Announcement[] {
 }
 
 export async function fetchAnnouncements(): Promise<Announcement[]> {
+  noStore();
   const supabase = getServerSupabase();
   if (!supabase) {
     return getLocalActiveAnnouncements();
@@ -222,6 +227,7 @@ function mapPaymentSettings(row: Record<string, unknown>): PaymentSettings {
 }
 
 export async function fetchPaymentSettings(): Promise<PaymentSettings> {
+  noStore();
   const supabase = getServerSupabase();
   if (!supabase) return DEFAULT_PAYMENT_SETTINGS;
 

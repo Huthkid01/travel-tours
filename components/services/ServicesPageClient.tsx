@@ -2,10 +2,16 @@
 
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { ServiceFilters, filterServices } from "@/components/services/ServiceFilters";
+import { useLiveCms } from "@/hooks/use-live-cms";
 import type { ServiceItem } from "@/types";
 import { useMemo, useState } from "react";
 
-export function ServicesPageClient({ services }: { services: ServiceItem[] }) {
+export function ServicesPageClient({ services: initialServices }: { services: ServiceItem[] }) {
+  const { data: liveServices } = useLiveCms<ServiceItem[]>("/api/services", {
+    initial: initialServices,
+  });
+  const services = liveServices ?? initialServices;
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
 

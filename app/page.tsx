@@ -6,7 +6,7 @@ import { ProcessSection } from "@/components/home/ProcessSection";
 import { StatsSection } from "@/components/home/StatsSection";
 import { TestimonialCarousel } from "@/components/home/TestimonialCarousel";
 import { FeaturedProgramsSection } from "@/components/programs/FeaturedProgramsSection";
-import { ServiceCard } from "@/components/services/ServiceCard";
+import { FeaturedServicesGrid } from "@/components/services/FeaturedServicesGrid";
 import { GoogleFormSection } from "@/components/forms/GoogleFormSection";
 import { VisaProofsGallery } from "@/components/proofs/VisaProofsGallery";
 import { HashScrollOnLoad } from "@/components/layout/HashScrollOnLoad";
@@ -19,7 +19,6 @@ import { ArrowRight } from "lucide-react";
 
 export default async function HomePage() {
   const services = await fetchServices();
-  const featured = services.filter((s) => s.featured).slice(0, 6);
 
   return (
     <>
@@ -73,11 +72,7 @@ export default async function HomePage() {
             title="16+ Professional Services"
             description="Documentation, travel, legal, and certification support under one roof."
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((service, i) => (
-              <ServiceCard key={service.slug} service={service} index={i} />
-            ))}
-          </div>
+          <FeaturedServicesGrid initialServices={services} />
           <div className="mt-10 text-center">
             <Button href="/services" variant="secondary">
               View All Services <ArrowRight className="h-4 w-4" />

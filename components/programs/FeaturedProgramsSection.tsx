@@ -1,4 +1,4 @@
-import { ProgramCard } from "@/components/programs/ProgramCard";
+import { LiveProgramsGrid } from "@/components/programs/LiveProgramsGrid";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
 import { fetchPrograms } from "@/services/cms";
@@ -21,9 +21,7 @@ export async function FeaturedProgramsSection() {
         />
 
         <div className="mt-10 grid grid-cols-2 gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-3">
-          {programs.map((program, i) => (
-            <ProgramCard key={program.id} program={program} index={i} variant="compact" />
-          ))}
+          <LiveProgramsGrid initialPrograms={programs} variant="compact" />
         </div>
 
         <div className="mt-10 text-center">

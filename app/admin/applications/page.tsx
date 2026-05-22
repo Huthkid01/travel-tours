@@ -18,9 +18,6 @@ export default function AdminApplicationsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold text-white">Applications</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Client form submissions saved in Supabase. Emails also sent via FormSubmit.
-        </p>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">

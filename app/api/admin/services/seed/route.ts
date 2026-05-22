@@ -1,4 +1,5 @@
 import { isAdminResponse, requireAdminSession } from "@/lib/admin-api";
+import { revalidatePublicSite } from "@/lib/revalidate-public-site";
 import { seedAdminServicesFromLocal } from "@/services/admin-data";
 import { NextResponse } from "next/server";
 
@@ -7,6 +8,7 @@ export async function POST() {
   if (isAdminResponse(session)) return session;
   try {
     const count = await seedAdminServicesFromLocal();
+    revalidatePublicSite();
     return NextResponse.json({ ok: true, count });
   } catch (err) {
     return NextResponse.json(

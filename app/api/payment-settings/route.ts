@@ -1,13 +1,16 @@
+import { jsonNoCache } from "@/lib/api-no-cache";
 import { fetchPaymentSettings } from "@/services/cms";
-import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 /** Public read — bank details & enabled payment methods for forms */
 export async function GET() {
   try {
     const settings = await fetchPaymentSettings();
-    return NextResponse.json(settings);
+    return jsonNoCache(settings);
   } catch {
-    return NextResponse.json(
+    return jsonNoCache(
       { error: "Failed to load payment settings" },
       { status: 500 }
     );

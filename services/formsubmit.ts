@@ -128,3 +128,31 @@ export async function sendApplicationForm(
 
   await postFormSubmit(formData);
 }
+
+export interface LeadFormData {
+  name: string;
+  phone: string;
+  email: string;
+  interest: string;
+}
+
+/** Lead popup / quick inquiry → owner inbox via FormSubmit */
+export async function sendLeadForm(data: LeadFormData): Promise<void> {
+  if (!isFormSubmitServerConfigured()) {
+    console.log("[FormSubmit Demo] Lead:", data);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("_subject", `New lead inquiry: ${data.interest}`);
+  formData.append("_captcha", "false");
+  formData.append("_template", "table");
+  formData.append("_replyto", data.email);
+  formData.append("name", data.name);
+  formData.append("email", data.email);
+  formData.append("phone", data.phone);
+  formData.append("interest", data.interest);
+  formData.append("source", "Website lead popup");
+
+  await postFormSubmit(formData);
+}

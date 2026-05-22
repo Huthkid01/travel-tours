@@ -1,8 +1,8 @@
-import { ProgramCard } from "@/components/programs/ProgramCard";
-import { AnnouncementSidebar } from "@/components/announcements/AnnouncementSidebar";
+import { LiveAnnouncementSidebar } from "@/components/announcements/LiveAnnouncementSidebar";
+import { LiveProgramsGrid } from "@/components/programs/LiveProgramsGrid";
 import { PageHero } from "@/components/layout/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { fetchPrograms } from "@/services/cms";
+import { fetchAnnouncements, fetchPrograms } from "@/services/cms";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
@@ -12,7 +12,10 @@ export const metadata = buildPageMetadata({
 });
 
 export default async function ProgramsPage() {
-  const programs = await fetchPrograms();
+  const [programs, announcements] = await Promise.all([
+    fetchPrograms(),
+    fetchAnnouncements(),
+  ]);
 
   return (
     <>
@@ -31,13 +34,11 @@ export default async function ProgramsPage() {
                 description="Browse our featured programs. Pricing available on request after consultation."
               />
               <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6">
-                {programs.map((p, i) => (
-                  <ProgramCard key={p.id} program={p} index={i} variant="compact" />
-                ))}
+                <LiveProgramsGrid initialPrograms={programs} variant="compact" />
               </div>
             </div>
             <div className="lg:col-span-1">
-              <AnnouncementSidebar />
+              <LiveAnnouncementSidebar initialItems={announcements} />
             </div>
           </div>
         </div>
