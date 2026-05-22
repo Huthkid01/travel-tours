@@ -106,17 +106,6 @@ export default function AdminVisitsPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-400">
-        <p>
-          To start monitoring again from zero, click <strong className="text-slate-200">Clear all visit data</strong>,
-          then browse the public site (home, services, programs) in a normal browser window — not while logged into
-          admin.
-        </p>
-        <p className="mt-2 text-xs text-slate-500">
-          Or in Supabase SQL Editor: <code className="text-blue-400">delete from public.visitor_activity;</code>
-        </p>
-      </div>
-
       <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-800 bg-slate-950/80 text-xs uppercase text-slate-500">
@@ -138,7 +127,7 @@ export default function AdminVisitsPage() {
             {!loading && rows.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
-                  No public visits yet. Open the live homepage in a private window to test.
+                  No public visits recorded yet. Visits appear when someone opens the live site (not /admin).
                 </td>
               </tr>
             )}
