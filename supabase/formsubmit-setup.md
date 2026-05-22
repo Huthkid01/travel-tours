@@ -2,6 +2,17 @@
 
 Applications and contact forms save to **Supabase** and email **darboiconsults@gmail.com**.
 
+## FormSubmit URL (two formats — same service)
+
+| Use case | URL |
+|----------|-----|
+| Plain HTML form in a static page | `https://formsubmit.co/darboiconsults@gmail.com` |
+| Next.js / React / AJAX (this site) | `https://formsubmit.co/ajax/darboiconsults@gmail.com` |
+
+The contact form sends from the **visitor’s browser** to the **ajax** URL (like FormSubmit’s docs for SPAs). Application forms use the **server** ajax URL after payment.
+
+**Your email** is `darboiconsults@gmail.com` — set in `FORMSUBMIT_EMAIL` in Vercel, not `your@email.com`.
+
 ## Vercel / `.env.local`
 
 ```env

@@ -3,7 +3,7 @@
 import { FormStepFlow } from "@/components/forms/FormStepFlow";
 import { formInputClass } from "@/components/forms/form-step-styles";
 import { contactSchema, type ContactFormValues } from "@/lib/validations";
-import { submitContactAction } from "@/lib/actions/contact";
+import { sendContactViaFormSubmitClient } from "@/lib/formsubmit-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { CheckCircle, Mail, MessageSquare, User } from "lucide-react";
@@ -35,15 +35,43 @@ export function ContactForm() {
   const onSubmit = async (data: ContactFormValues) => {
     setStatus("loading");
     try {
-      const result = await submitContactAction(data);
-      if (!result.ok) throw new Error(result.error);
+      const clientResult = await sendContactViaFormSubmitClient(data);
+      let emailSent = clientResult.ok;
+
+      const apiRes = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const apiJson = (await apiRes.json()) as {
+        ok?: boolean;
+        emailSent?: boolean;
+        emailError?: string;
+        error?: string;
+      };
+
+      if (!apiRes.ok || !apiJson.ok) {
+        throw new Error(apiJson.error || "Could not save your message");
+      }
+
+      if (!emailSent) emailSent = Boolean(apiJson.emailSent);
+
+      if (!emailSent) {
+        throw new Error(
+          apiJson.emailError ||
+            clientResult.message ||
+            "Email could not be sent. Open darboiconsults@gmail.com and click the FormSubmit activation link, or add GMAIL_APP_PASSWORD in Vercel."
+        );
+      }
+
       setStatus("success");
       toast.success("Message sent successfully!");
+      toast.info("A copy was sent to Darboi Consults by email.");
       reset();
       setStep(0);
-    } catch {
+    } catch (err) {
       setStatus("idle");
-      toast.error("Failed to send message. Please try WhatsApp.");
+      toast.error(err instanceof Error ? err.message : "Failed to send message. Please try WhatsApp.");
     }
   };
 
