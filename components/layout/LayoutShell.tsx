@@ -1,6 +1,7 @@
 "use client";
 
 import { useAnnouncementVisible } from "@/components/layout/AnnouncementContext";
+import { announcementMainPadClass } from "@/lib/announcement-bar-layout";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { RoutePrefetcher } from "@/components/layout/RoutePrefetcher";
 import { SiteChrome } from "@/components/layout/SiteChrome";
@@ -28,7 +29,7 @@ export function LayoutShell({ children }: { children: ReactNode }) {
       <main
         className={cn(
           "min-h-screen transition-[padding] duration-300",
-          announcementVisible ? "pt-28 sm:pt-[7.25rem]" : "pt-20"
+          announcementVisible ? announcementMainPadClass : "pt-20"
         )}
       >
         {children}

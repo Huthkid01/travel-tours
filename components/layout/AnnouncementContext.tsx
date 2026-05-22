@@ -1,6 +1,10 @@
 "use client";
 
 import { useLiveCms } from "@/hooks/use-live-cms";
+import {
+  announcementBarHeightClass,
+  announcementMessageClass,
+} from "@/lib/announcement-bar-layout";
 import type { Announcement } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, X } from "lucide-react";
@@ -29,13 +33,17 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
   const [index, setIndex] = useState(0);
-  /** In-memory only — dismiss hides until page refresh, then banner returns */
+  /** Session-only dismiss — never saved to storage; resets on refresh or route change */
   const [dismissed, setDismissed] = useState(false);
 
   const { data: liveItems } = useLiveCms<Announcement[]>("/api/announcements", {
     enabled: !isAdminRoute,
   });
   const items = liveItems ?? [];
+
+  useEffect(() => {
+    if (!isAdminRoute) setDismissed(false);
+  }, [pathname, isAdminRoute]);
 
   useEffect(() => {
     if (isAdminRoute) return;
@@ -56,11 +64,13 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
   const visible = !isAdminRoute && items.length > 0 && !dismissed;
   const current = items[index];
 
+  const messageClass = announcementMessageClass;
+
   return (
     <AnnouncementContext.Provider value={{ visible }}>
       {visible && (
         <div
-          className="fixed top-0 right-0 left-0 z-[210] flex h-8 items-center bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950 sm:h-9"
+          className={`fixed top-0 right-0 left-0 z-[210] flex ${announcementBarHeightClass} items-center bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-navy-950`}
           role="region"
           aria-label="Site announcements"
         >
@@ -70,15 +80,15 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
-              className="flex w-full min-w-0 items-center gap-1.5 px-2 sm:container-custom sm:gap-3 sm:px-4"
+              className="flex w-full min-w-0 items-center gap-2 px-3 sm:container-custom sm:gap-3 sm:px-4"
             >
               <button
                 type="button"
                 onClick={dismiss}
-                className="shrink-0 rounded p-0.5 hover:bg-navy-950/10 sm:p-1"
-                aria-label="Dismiss announcement"
+                className="shrink-0 rounded p-1 hover:bg-navy-950/10 sm:p-1.5"
+                aria-label="Dismiss announcement for this page"
               >
-                <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
 
               <div className="min-w-0 flex-1 overflow-hidden">
@@ -86,25 +96,22 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
                   <Link
                     href={current.link}
                     prefetch
-                    className="block truncate text-[10px] leading-tight font-medium hover:underline sm:text-xs"
+                    className={`block hover:underline ${messageClass}`}
                   >
-                    <span className="sm:hidden">{current.message}</span>
-                    <span className="hidden items-center gap-0.5 sm:inline-flex sm:text-xs">
-                      {current.message}
-                      <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                    <span className="inline-flex max-w-full items-center gap-0.5 sm:gap-1">
+                      <span className="truncate">{current.message}</span>
+                      <ChevronRight className="hidden h-4 w-4 shrink-0 sm:block lg:h-5 lg:w-5" />
                     </span>
                   </Link>
                 ) : (
-                  <p className="truncate text-center text-[10px] leading-tight font-medium sm:text-xs">
-                    {current?.message}
-                  </p>
+                  <p className={`text-center ${messageClass}`}>{current?.message}</p>
                 )}
               </div>
 
               <Link
                 href="/announcements"
                 prefetch
-                className="hidden shrink-0 text-[10px] font-semibold underline-offset-2 hover:underline sm:inline sm:text-xs"
+                className="hidden shrink-0 text-xs font-semibold underline-offset-2 hover:underline sm:inline sm:text-sm lg:text-base"
               >
                 All updates
               </Link>
