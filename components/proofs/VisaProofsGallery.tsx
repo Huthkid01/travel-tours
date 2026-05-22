@@ -34,13 +34,13 @@ export function VisaProofsGallery() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 [&>*]:min-w-0">
         {visaProofs.map((proof, i) => (
           <ScrollReveal
             as="article"
             key={proof.id}
             index={i}
-            className="interactive-card group flex h-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900"
+            className="interactive-card group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900"
           >
             <button
               type="button"

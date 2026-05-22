@@ -30,13 +30,15 @@ export function ApplicationSubmitFlow({
   storageSlug,
   serviceName,
   kind = "service",
+  paymentSettings: paymentSettingsOverride,
   children,
 }: ApplicationSubmitFlowProps) {
   const [submitted, setSubmitted] = useState<Application | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const { settings } = usePaymentSettings();
+  const { settings: liveSettings } = usePaymentSettings();
+  const settings = paymentSettingsOverride ?? liveSettings;
 
   const handleFormSubmit = async (data: ApplicationFormData, files: File[]) => {
     setSubmitting(true);

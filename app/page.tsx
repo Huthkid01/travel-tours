@@ -107,7 +107,7 @@ export default async function HomePage() {
           <SectionHeading
             label="Apply"
             title="Consultation Form"
-            description="Complete our official Google Form to start your consultation."
+            description="Submit your application below. Pay by bank transfer after submitting to confirm your consultation."
             align="center"
           />
           <div className="mt-8">

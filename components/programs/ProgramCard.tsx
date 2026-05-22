@@ -53,7 +53,7 @@ export function ProgramCard({
         as="article"
         index={index}
         className={cn(
-          "interactive-card group flex h-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900",
+          "interactive-card group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900",
           layout === "carousel" && "min-w-[280px] sm:min-w-[320px]"
         )}
       >

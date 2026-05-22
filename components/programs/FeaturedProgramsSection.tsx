@@ -20,7 +20,7 @@ export async function FeaturedProgramsSection() {
           className="[&_h2]:text-white [&_p]:text-navy-300 [&_span]:text-gold-400"
         />
 
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-3 [&>*]:min-w-0">
           <LiveProgramsGrid initialPrograms={programs} variant="compact" />
         </div>
 

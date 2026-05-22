@@ -33,7 +33,7 @@ export default async function ProgramsPage() {
                 title="Current Offers & Campaigns"
                 description="Browse our featured programs. Pricing available on request after consultation."
               />
-              <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6">
+              <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 [&>*]:min-w-0">
                 <LiveProgramsGrid initialPrograms={programs} variant="compact" />
               </div>
             </div>

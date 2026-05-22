@@ -35,7 +35,7 @@ export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
   { href: "/programs", label: "Programs" },
-  { href: "/#consultation-form", label: "Google Form" },
+  { href: "/#consultation-form", label: "Apply" },
   { href: "/consultation", label: "Consultation" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },

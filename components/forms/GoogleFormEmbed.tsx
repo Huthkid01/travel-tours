@@ -1,45 +1,34 @@
-import { getGoogleFormEmbedUrl } from "@/lib/google-form";
-import { FileText } from "lucide-react";
+import { GOOGLE_FORM_SHARE_URL } from "@/lib/google-form";
+import { ConsultationFormSection } from "@/components/forms/ConsultationFormSection";
+import { ExternalLink } from "lucide-react";
 
 export interface GoogleFormEmbedProps {
-  formUrl?: string;
   title?: string;
   description?: string;
 }
 
+/**
+ * Native consultation form (no Google iframe — avoids TrustedScript / font console errors).
+ * Optional external link to the legacy Google Form opens in a new tab.
+ */
 export function GoogleFormEmbed({
-  formUrl = getGoogleFormEmbedUrl(),
   title = "Consultation Form",
-  description = "Complete our consultation form to get started with your application.",
+  description = "Submit your details below. After you submit, pay by bank transfer to confirm your consultation.",
 }: GoogleFormEmbedProps) {
-  if (formUrl) {
-    return (
-      <section className="rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:p-6 dark:border-navy-800 dark:bg-navy-900">
-        <h2 className="font-display text-xl font-bold text-navy-900 sm:text-2xl dark:text-white">{title}</h2>
-        {description && <p className="mt-2 text-sm text-navy-600 sm:text-base dark:text-navy-300">{description}</p>}
-        <div className="mt-4 overflow-hidden rounded-xl border border-navy-200 sm:mt-6 dark:border-navy-700">
-          <iframe
-            src={formUrl}
-            title={title}
-            className="h-[min(70vh,520px)] w-full sm:h-[600px]"
-            loading="lazy"
-          />
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="rounded-2xl border border-dashed border-gold-500/40 bg-gold-500/5 p-8 text-center sm:p-12">
-      <FileText className="mx-auto h-12 w-12 text-gold-500" />
-      <h2 className="mt-4 font-display text-xl font-bold text-navy-900 sm:text-2xl dark:text-white">{title}</h2>
-      <p className="mt-3 text-sm text-navy-600 sm:text-base dark:text-navy-300">{description}</p>
-      <p className="mt-6 inline-block rounded-full bg-navy-900 px-6 py-3 text-sm font-semibold text-gold-400 dark:bg-navy-800">
-        Consultation form coming soon
+    <div>
+      <ConsultationFormSection title={title} description={description} />
+      <p className="mt-4 text-center text-xs text-navy-500 dark:text-navy-400">
+        <a
+          href={GOOGLE_FORM_SHARE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-gold-600 hover:underline dark:text-gold-400"
+        >
+          Open legacy Google Form
+          <ExternalLink className="h-3 w-3" aria-hidden />
+        </a>
       </p>
-      <p className="mt-4 text-sm text-navy-500">
-        Use our online consultation page or contact us on WhatsApp in the meantime.
-      </p>
-    </section>
+    </div>
   );
 }

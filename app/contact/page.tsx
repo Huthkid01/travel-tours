@@ -77,8 +77,10 @@ export default function ContactPage() {
             </div>
             <ContactForm />
           </div>
-          <div className="mt-16">
-            <GoogleFormSection />
+          <div className="mt-16 max-w-3xl">
+            <GoogleFormSection
+              description="Submit a full consultation application with documents. Bank transfer payment applies after submit."
+            />
           </div>
         </div>
       </section>
