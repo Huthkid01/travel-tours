@@ -1,7 +1,9 @@
 import { SITE_CONFIG } from "@/lib/constants";
+import { getSiteUrl } from "@/lib/env.server";
 import type { Metadata } from "next";
 
-const defaultOgImage = `${SITE_CONFIG.url}/branding/logo.png`;
+const siteUrl = getSiteUrl();
+const defaultOgImage = `${siteUrl}/branding/logo.png`;
 
 interface PageSeoOptions {
   title: string;
@@ -20,7 +22,7 @@ export function buildPageMetadata({
   keywords = [],
   noIndex = false,
 }: PageSeoOptions): Metadata {
-  const url = `${SITE_CONFIG.url}${path}`;
+  const url = `${siteUrl}${path}`;
   const fullTitle = title.includes(SITE_CONFIG.name) ? title : `${title} | ${SITE_CONFIG.name}`;
 
   return {

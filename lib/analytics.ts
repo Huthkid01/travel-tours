@@ -27,7 +27,7 @@ declare global {
   }
 }
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GA_ID = process.env.GA_MEASUREMENT_ID;
 
 export function isGaConfigured(): boolean {
   return Boolean(GA_ID && !GA_ID.includes("G-XXXXXXXX"));

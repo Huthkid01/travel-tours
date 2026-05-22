@@ -1,5 +1,10 @@
+import {
+  DEFAULT_PAYMENT_SETTINGS,
+  type PaymentSettings,
+} from "@/data/payment-settings-default";
+import { services as localServices } from "@/data/services";
 import { getAdminSupabase } from "@/supabase/admin";
-import type { Announcement, Application, Program, ProgramStatus } from "@/types";
+import type { Announcement, Application, Program, ProgramStatus, ServiceCategory } from "@/types";
 
 const PROGRAM_TABLES = ["programs", "featured_programs"] as const;
 
@@ -19,11 +24,35 @@ async function countActivePrograms(): Promise<number> {
 export interface AdminDashboardStats {
   totalVisits: number;
   visitsToday: number;
+  totalServices: number;
+  activeServices: number;
+  /** All form types: service applications + leads + contact */
+  totalFormsSubmitted: number;
+  formsSubmittedToday: number;
   totalApplications: number;
+  totalLeads: number;
+  totalContactMessages: number;
   pendingPayments: number;
   paidApplications: number;
   activePrograms: number;
   activeAnnouncements: number;
+}
+
+async function countTable(
+  supabase: NonNullable<ReturnType<typeof getAdminSupabase>>,
+  table: string,
+  options?: { gteCreatedAt?: string; eq?: Record<string, string> }
+): Promise<number> {
+  let query = supabase.from(table).select("*", { count: "exact", head: true });
+  if (options?.gteCreatedAt) query = query.gte("created_at", options.gteCreatedAt);
+  if (options?.eq) {
+    for (const [key, value] of Object.entries(options.eq)) {
+      query = query.eq(key, value);
+    }
+  }
+  const { count, error } = await query;
+  if (error) return 0;
+  return count ?? 0;
 }
 
 export async function fetchAdminStats(): Promise<AdminDashboardStats> {
@@ -32,7 +61,13 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
     return {
       totalVisits: 0,
       visitsToday: 0,
+      totalServices: localServices.length,
+      activeServices: localServices.length,
+      totalFormsSubmitted: 0,
+      formsSubmittedToday: 0,
       totalApplications: 0,
+      totalLeads: 0,
+      totalContactMessages: 0,
       pendingPayments: 0,
       paidApplications: 0,
       activePrograms: 0,
@@ -44,7 +79,22 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
   today.setHours(0, 0, 0, 0);
   const todayIso = today.toISOString();
 
-  const [visits, visitsToday, apps, programs, announcements] = await Promise.all([
+  const [
+    visits,
+    visitsToday,
+    servicesTotal,
+    servicesActive,
+    totalApplications,
+    applicationsToday,
+    pendingPayments,
+    paidApplications,
+    totalLeads,
+    leadsToday,
+    totalContactMessages,
+    contactToday,
+    programs,
+    announcements,
+  ] = await Promise.all([
     supabase
       .from("visitor_activity")
       .select("*", { count: "exact", head: true })
@@ -54,7 +104,19 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
       .select("*", { count: "exact", head: true })
       .eq("action_type", "page_view")
       .gte("created_at", todayIso),
-    supabase.from("applications").select("payment_status"),
+    supabase.from("services").select("*", { count: "exact", head: true }),
+    supabase
+      .from("services")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "active"),
+    countTable(supabase, "applications"),
+    countTable(supabase, "applications", { gteCreatedAt: todayIso }),
+    countTable(supabase, "applications", { eq: { payment_status: "pending" } }),
+    countTable(supabase, "applications", { eq: { payment_status: "paid" } }),
+    countTable(supabase, "leads"),
+    countTable(supabase, "leads", { gteCreatedAt: todayIso }),
+    countTable(supabase, "contact_submissions"),
+    countTable(supabase, "contact_submissions", { gteCreatedAt: todayIso }),
     countActivePrograms(),
     supabase
       .from("announcements")
@@ -62,19 +124,165 @@ export async function fetchAdminStats(): Promise<AdminDashboardStats> {
       .eq("active", true),
   ]);
 
-  const applications = apps.data ?? [];
-  const pending = applications.filter((a) => a.payment_status === "pending").length;
-  const paid = applications.filter((a) => a.payment_status === "paid").length;
+  const totalFormsSubmitted = totalApplications + totalLeads + totalContactMessages;
+  const formsSubmittedToday = applicationsToday + leadsToday + contactToday;
 
   return {
     totalVisits: visits.count ?? 0,
     visitsToday: visitsToday.count ?? 0,
-    totalApplications: applications.length,
-    pendingPayments: pending,
-    paidApplications: paid,
+    totalServices: servicesTotal.count ?? localServices.length,
+    activeServices: servicesActive.count ?? localServices.length,
+    totalFormsSubmitted,
+    formsSubmittedToday,
+    totalApplications,
+    totalLeads,
+    totalContactMessages,
+    pendingPayments,
+    paidApplications,
     activePrograms: typeof programs === "number" ? programs : 0,
     activeAnnouncements: announcements.count ?? 0,
   };
+}
+
+export async function fetchAdminServices(): Promise<Record<string, unknown>[]> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("services")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function upsertAdminService(
+  row: Record<string, unknown>,
+  id?: string
+): Promise<Record<string, unknown>> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const requirementsRaw = row.requirements;
+  const requirements = Array.isArray(requirementsRaw)
+    ? requirementsRaw
+    : typeof requirementsRaw === "string"
+      ? requirementsRaw.split("\n").map((s) => s.trim()).filter(Boolean)
+      : [];
+
+  const payload = {
+    slug: String(row.slug),
+    title: String(row.title),
+    short_description: String(row.short_description),
+    description: String(row.description),
+    requirements,
+    pricing_deposit: Number(row.pricing_deposit ?? 0),
+    pricing_full: Number(row.pricing_full ?? 0),
+    pricing_booking_fee: Number(row.pricing_booking_fee ?? 0),
+    category: (row.category as ServiceCategory) || "documentation",
+    icon: String(row.icon || "FileText"),
+    processing_time: String(row.processing_time || "5–10 business days"),
+    featured: Boolean(row.featured),
+    status: String(row.status || "active"),
+    sort_order: Number(row.sort_order ?? 0),
+    updated_at: new Date().toISOString(),
+  };
+
+  if (id) {
+    const { data, error } = await supabase.from("services").update(payload).eq("id", id).select().single();
+    if (error) throw new Error(error.message);
+    return data as Record<string, unknown>;
+  }
+
+  const { data, error } = await supabase.from("services").insert(payload).select().single();
+  if (error) throw new Error(error.message);
+  return data as Record<string, unknown>;
+}
+
+export async function deleteAdminService(id: string): Promise<void> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+  const { error } = await supabase.from("services").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchAdminPaymentSettings(): Promise<PaymentSettings> {
+  const supabase = getAdminSupabase();
+  if (!supabase) return DEFAULT_PAYMENT_SETTINGS;
+
+  const { data, error } = await supabase
+    .from("payment_settings")
+    .select("*")
+    .eq("id", "default")
+    .maybeSingle();
+
+  if (error || !data) return DEFAULT_PAYMENT_SETTINGS;
+
+  return {
+    title: String(data.title),
+    feeAmount: Number(data.fee_amount),
+    feeAmountLabel: String(data.fee_amount_label),
+    bankName: String(data.bank_name),
+    accountNumber: String(data.account_number),
+    accountName: String(data.account_name),
+    afterPaymentNote: String(data.after_payment_note),
+    paystackEnabled: Boolean(data.paystack_enabled),
+    flutterwaveEnabled: Boolean(data.flutterwave_enabled),
+    showBankTransfer: Boolean(data.show_bank_transfer),
+  };
+}
+
+export async function upsertAdminPaymentSettings(settings: PaymentSettings): Promise<void> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { error } = await supabase.from("payment_settings").upsert({
+    id: "default",
+    title: settings.title,
+    fee_amount: settings.feeAmount,
+    fee_amount_label: settings.feeAmountLabel,
+    bank_name: settings.bankName,
+    account_number: settings.accountNumber,
+    account_name: settings.accountName,
+    after_payment_note: settings.afterPaymentNote,
+    paystack_enabled: settings.paystackEnabled,
+    flutterwave_enabled: settings.flutterwaveEnabled,
+    show_bank_transfer: settings.showBankTransfer,
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) throw new Error(error.message);
+}
+
+export async function seedAdminServicesFromLocal(): Promise<number> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  let count = 0;
+  for (let i = 0; i < localServices.length; i++) {
+    const s = localServices[i];
+    const { error } = await supabase.from("services").upsert(
+      {
+        slug: s.slug,
+        title: s.title,
+        short_description: s.shortDescription,
+        description: s.description,
+        requirements: s.requirements,
+        pricing_deposit: s.pricing.deposit,
+        pricing_full: s.pricing.full,
+        pricing_booking_fee: s.pricing.bookingFee,
+        category: s.category,
+        icon: s.icon,
+        processing_time: s.processingTime,
+        featured: s.featured ?? false,
+        status: "active",
+        sort_order: i,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "slug" }
+    );
+    if (!error) count += 1;
+  }
+  return count;
 }
 
 export async function fetchAdminApplications(limit = 50): Promise<Application[]> {

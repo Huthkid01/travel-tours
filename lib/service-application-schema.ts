@@ -30,7 +30,7 @@ export function buildServiceApplicationSchema(config: ServiceApplicationFormConf
     shape.passportNumber = z.string().min(3, "Passport number is required");
   }
   if (fields.travelDestination) {
-    shape.travelDestination = z.string().min(2, "Destination is required");
+    shape.travelDestination = z.string().min(1, "Please select a destination country");
   }
   if (fields.travelDates) {
     shape.travelDates = z.string().min(2, "Travel dates are required");

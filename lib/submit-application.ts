@@ -1,9 +1,7 @@
-import { createApplication } from "@/services/applications";
-import { uploadApplicationFiles } from "@/services/storage";
-import { notifyOwnerOnApplicationSubmit } from "@/lib/notify-owner";
+import { submitApplicationAction } from "@/lib/actions/application";
 import type { Application, ApplicationFormData } from "@/types";
 
-/** Save application, upload files, email owner immediately */
+/** Save application, upload files, email owner immediately (server-side) */
 export async function submitApplicationWithNotify(
   storageSlug: string,
   serviceName: string,
@@ -11,8 +9,7 @@ export async function submitApplicationWithNotify(
   files: File[],
   applicationId: string = crypto.randomUUID()
 ): Promise<{ application: Application; emailSent: boolean }> {
-  const uploaded = await uploadApplicationFiles(storageSlug, applicationId, files);
-  const application = await createApplication(serviceName, form, uploaded, applicationId);
-  const emailSent = await notifyOwnerOnApplicationSubmit(application, files);
-  return { application, emailSent };
+  const result = await submitApplicationAction(storageSlug, serviceName, form, files, applicationId);
+  if (result.error) throw new Error(result.error);
+  return { application: result.application, emailSent: result.emailSent };
 }

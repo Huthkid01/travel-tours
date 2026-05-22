@@ -1,7 +1,2 @@
-/** Set NEXT_PUBLIC_SHOW_PRICING=true to display prices publicly */
-export const SHOW_PRICING =
-  process.env.NEXT_PUBLIC_SHOW_PRICING === "true" ||
-  process.env.NEXT_PUBLIC_SHOW_PRICES === "true";
-
-/** @deprecated Use SHOW_PRICING */
-export const SHOW_PUBLIC_PRICES = SHOW_PRICING;
+/** Set SHOW_PRICING=true in Vercel env to display prices publicly */
+export const SHOW_PRICING = process.env.SHOW_PRICING === "true";

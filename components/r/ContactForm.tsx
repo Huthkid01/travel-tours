@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { contactSchema, type ContactFormValues } from "@/lib/validations";
-import { sendContactEmail } from "@/services/email";
+import { submitContactAction } from "@/lib/actions/contact";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { CheckCircle, Send } from "lucide-react";
@@ -25,7 +25,8 @@ export function ContactForm() {
   const onSubmit = async (data: ContactFormValues) => {
     setStatus("loading");
     try {
-      await sendContactEmail(data);
+      const result = await submitContactAction(data);
+      if (!result.ok) throw new Error(result.error);
       setStatus("success");
       toast.success("Message sent successfully!");
       reset();

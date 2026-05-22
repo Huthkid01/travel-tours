@@ -3,17 +3,24 @@
 import { ApplicationForm } from "@/components/forms/ApplicationForm";
 import { PageHero } from "@/components/layout/PageHero";
 import { submitApplicationWithNotify } from "@/lib/submit-application";
-import { getServiceBySlug } from "@/data/services";
 import type { ApplicationFormData } from "@/types";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
+import type { ServiceItem } from "@/types";
 
 export default function ApplyPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
-  const service = useMemo(() => getServiceBySlug(slug), [slug]);
+  const [service, setService] = useState<ServiceItem | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/services/${slug}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setService)
+      .catch(() => setService(null));
+  }, [slug]);
 
   if (!service) {
     return (
@@ -48,15 +55,13 @@ export default function ApplyPage() {
   return (
     <>
       <PageHero title="Application Form" subtitle={`Apply for ${service.title}`} />
-      <section className="section-padding">
-        <div className="container-custom max-w-3xl">
-          <div className="rounded-2xl border border-navy-100 bg-white p-8 shadow-xl dark:border-navy-800 dark:bg-navy-900">
-            <ApplicationForm
-              serviceSlug={slug}
-              serviceTitle={service.title}
-              onSubmit={handleSubmit}
-            />
-          </div>
+      <section className="section-padding bg-navy-50/50 dark:bg-navy-950/30">
+        <div className="container-custom max-w-2xl">
+          <ApplicationForm
+            serviceSlug={slug}
+            serviceTitle={service.title}
+            onSubmit={handleSubmit}
+          />
         </div>
       </section>
     </>

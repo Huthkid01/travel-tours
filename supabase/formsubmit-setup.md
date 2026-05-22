@@ -5,7 +5,7 @@ Contact and application emails go to **darboiconsults@gmail.com** via [FormSubmi
 ## Vercel / `.env.local`
 
 ```env
-NEXT_PUBLIC_FORMSUBMIT_EMAIL=darboiconsults@gmail.com
+FORMSUBMIT_EMAIL=darboiconsults@gmail.com
 ```
 
 ## First-time activation
@@ -24,4 +24,4 @@ Uploaded files are linked in the email body (from Supabase storage), not attache
 
 ## Google Form
 
-Set `NEXT_PUBLIC_GOOGLE_FORM_URL` to your `forms.gle` link. Users tap **Allow cookies & show form** on Home or Contact before the iframe loads.
+Set `GOOGLE_FORM_URL` to your `forms.gle` link. Users tap **Allow cookies & show form** on Home or Contact before the iframe loads.

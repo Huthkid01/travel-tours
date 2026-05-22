@@ -4,6 +4,7 @@ import { StatCard } from "@/components/admin/StatCard";
 import type { AdminDashboardStats } from "@/services/admin-data";
 import {
   Bell,
+  Briefcase,
   CreditCard,
   Eye,
   FileText,
@@ -14,11 +15,15 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-const QUICK_ACTIONS = [
-  { href: "/admin/programs", label: "Manage Programs", desc: "Edit travel programs on the site", icon: GraduationCap },
-  { href: "/admin/announcements", label: "Announcements", desc: "Top bar messages & promos", icon: Bell },
-  { href: "/admin/applications", label: "Applications", desc: "Form submissions from clients", icon: FileText },
-  { href: "/admin/visits", label: "Site Visits", desc: "Page views and activity log", icon: Users },
+const CONTENT_LINKS = [
+  { href: "/admin/services", label: "Manage Services", desc: "Edit all services on the site", icon: Briefcase },
+  { href: "/admin/programs", label: "Manage Programs", desc: "Travel programs & flyers", icon: GraduationCap },
+  { href: "/admin/announcements", label: "Announcements", desc: "Top banner messages", icon: Bell },
+];
+
+const ACTIVITY_LINKS = [
+  { href: "/admin/visits", label: "Site visits", desc: "Who visited and which pages", icon: Users },
+  { href: "/admin/applications", label: "Applications", desc: "Client form submissions", icon: FileText },
 ];
 
 export default function AdminDashboardPage() {
@@ -43,9 +48,9 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">Content Management Dashboard</h1>
+          <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">Dashboard overview</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Manage programs, announcements, applications, and track site visits.
+            Site visits, form submissions, services, and quick links to edit your website.
           </p>
         </div>
         <button
@@ -61,28 +66,28 @@ export default function AdminDashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Total Site Visits"
+          label="Total site visits"
           value={stats?.totalVisits ?? "—"}
-          hint="All page views recorded"
+          hint={`${stats?.visitsToday ?? 0} visits today`}
           icon={Eye}
           accent="blue"
         />
         <StatCard
-          label="Visits Today"
-          value={stats?.visitsToday ?? "—"}
-          hint="Page views since midnight"
-          icon={Users}
+          label="Total services"
+          value={stats?.totalServices ?? "—"}
+          hint={`${stats?.activeServices ?? 0} active on site`}
+          icon={Briefcase}
           accent="green"
         />
         <StatCard
-          label="Applications"
-          value={stats?.totalApplications ?? "—"}
-          hint={`${stats?.pendingPayments ?? 0} pending payment`}
+          label="Total forms submitted"
+          value={stats?.totalFormsSubmitted ?? "—"}
+          hint={`${stats?.formsSubmittedToday ?? 0} today · ${stats?.totalApplications ?? 0} applications`}
           icon={FileText}
           accent="orange"
         />
         <StatCard
-          label="Paid Applications"
+          label="Paid applications"
           value={stats?.paidApplications ?? "—"}
           hint="Completed payments"
           icon={CreditCard}
@@ -92,9 +97,10 @@ export default function AdminDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="font-semibold text-white">Quick Actions</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {QUICK_ACTIONS.map(({ href, label, desc, icon: Icon }) => (
+          <h2 className="font-semibold text-white">Website content</h2>
+          <p className="mt-1 text-xs text-slate-500">Edit what visitors see on the public site</p>
+          <div className="mt-4 grid gap-3">
+            {CONTENT_LINKS.map(({ href, label, desc, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
@@ -111,22 +117,47 @@ export default function AdminDashboardPage() {
         </section>
 
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="font-semibold text-white">Today&apos;s Summary</h2>
-          <p className="mt-1 text-xs text-slate-500">
-            {new Date().toLocaleDateString("en-NG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-          </p>
-          <ul className="mt-4 space-y-3 text-sm">
-            <li className="flex justify-between border-b border-slate-800 pb-2">
+          <h2 className="font-semibold text-white">Activity</h2>
+          <p className="mt-1 text-xs text-slate-500">Visits and client submissions</p>
+          <div className="mt-4 grid gap-3">
+            {ACTIVITY_LINKS.map(({ href, label, desc, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950/50 p-4 transition hover:border-blue-500/40 hover:bg-slate-800"
+              >
+                <Icon className="h-8 w-8 shrink-0 text-blue-400" />
+                <div>
+                  <p className="font-medium text-slate-200">{label}</p>
+                  <p className="text-xs text-slate-500">{desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <ul className="mt-6 space-y-2 border-t border-slate-800 pt-4 text-sm">
+            <li className="flex justify-between">
+              <span className="text-slate-400">Service applications</span>
+              <span className="font-semibold text-white">{stats?.totalApplications ?? 0}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-slate-400">Lead popup submissions</span>
+              <span className="font-semibold text-white">{stats?.totalLeads ?? 0}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-slate-400">Contact page messages</span>
+              <span className="font-semibold text-white">{stats?.totalContactMessages ?? 0}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-slate-400">Pending payment</span>
+              <span className="font-semibold text-amber-400">{stats?.pendingPayments ?? 0}</span>
+            </li>
+            <li className="flex justify-between">
               <span className="text-slate-400">Active programs</span>
               <span className="font-semibold text-white">{stats?.activePrograms ?? 0}</span>
             </li>
-            <li className="flex justify-between border-b border-slate-800 pb-2">
+            <li className="flex justify-between">
               <span className="text-slate-400">Active announcements</span>
               <span className="font-semibold text-white">{stats?.activeAnnouncements ?? 0}</span>
-            </li>
-            <li className="flex justify-between">
-              <span className="text-slate-400">Services list</span>
-              <span className="text-xs text-slate-500">Edit in code (data/services.ts)</span>
             </li>
           </ul>
         </section>

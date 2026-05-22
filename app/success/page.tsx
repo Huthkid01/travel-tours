@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
-import { getApplication } from "@/services/applications";
+import { getApplicationAction } from "@/lib/actions/application";
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -17,7 +17,7 @@ export default function SuccessPage() {
 
   useEffect(() => {
     if (!applicationId) return;
-    getApplication(applicationId).then((app) => {
+    getApplicationAction(applicationId).then((app) => {
       if (app) {
         setApplicantName(app.full_name);
         setServiceName(app.service_name);

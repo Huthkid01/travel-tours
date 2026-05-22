@@ -1,8 +1,84 @@
 import { announcements as localAnnouncements } from "@/data/announcements";
+import {
+  DEFAULT_PAYMENT_SETTINGS,
+  type PaymentSettings,
+} from "@/data/payment-settings-default";
 import { programs as localPrograms } from "@/data/programs";
+import { services as localServices } from "@/data/services";
 import { getProgramFlyerPath, isProgramFlyerImage } from "@/lib/program-flyers";
-import { getSupabaseClient } from "@/supabase/client";
-import type { Announcement, Program, ProgramImageType } from "@/types";
+import "server-only";
+
+import { getServerSupabase } from "@/supabase/server";
+import type { Announcement, Program, ProgramImageType, ServiceCategory, ServiceItem } from "@/types";
+
+function mapService(row: Record<string, unknown>): ServiceItem {
+  const requirements = row.requirements;
+  const reqList = Array.isArray(requirements)
+    ? (requirements as string[])
+    : typeof requirements === "string"
+      ? (JSON.parse(requirements) as string[])
+      : [];
+
+  return {
+    slug: String(row.slug),
+    title: String(row.title),
+    shortDescription: String(row.short_description),
+    description: String(row.description),
+    requirements: reqList,
+    pricing: {
+      deposit: Number(row.pricing_deposit ?? 0),
+      full: Number(row.pricing_full ?? 0),
+      bookingFee: Number(row.pricing_booking_fee ?? 0),
+    },
+    category: String(row.category) as ServiceCategory,
+    icon: String(row.icon ?? "FileText"),
+    processingTime: String(row.processing_time ?? "5–10 business days"),
+    featured: Boolean(row.featured),
+  };
+}
+
+export async function fetchServices(): Promise<ServiceItem[]> {
+  const supabase = getServerSupabase();
+  if (!supabase) {
+    return [...localServices];
+  }
+
+  const { data, error } = await supabase
+    .from("services")
+    .select("*")
+    .eq("status", "active")
+    .order("sort_order", { ascending: true });
+
+  if (error || !data?.length) {
+    return [...localServices];
+  }
+  return data.map((row) => mapService(row as Record<string, unknown>));
+}
+
+export async function fetchServiceBySlug(slug: string): Promise<ServiceItem | null> {
+  const supabase = getServerSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("services")
+      .select("*")
+      .eq("slug", slug)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (!error && data) {
+      return mapService(data as Record<string, unknown>);
+    }
+  }
+
+  return localServices.find((s) => s.slug === slug) ?? null;
+}
+
+export async function fetchRelatedServices(slug: string, limit = 3): Promise<ServiceItem[]> {
+  const all = await fetchServices();
+  const current = all.find((s) => s.slug === slug);
+  if (!current) return all.slice(0, limit);
+  return all.filter((s) => s.slug !== slug && s.category === current.category).slice(0, limit);
+}
 
 function mapProgram(row: Record<string, unknown>): Program {
   const image = String(row.image);
@@ -39,7 +115,7 @@ function mapAnnouncement(row: Record<string, unknown>): Announcement {
 }
 
 async function fetchFromTable(table: "programs" | "featured_programs"): Promise<Program[]> {
-  const supabase = getSupabaseClient();
+  const supabase = getServerSupabase();
   if (!supabase) return [];
 
   const { data, error } = await supabase
@@ -73,7 +149,7 @@ export async function fetchProgramBySlug(slug: string): Promise<Program | null> 
 export const fetchProgramBySlugLegacy = fetchProgramBySlug;
 
 export async function fetchAnnouncements(): Promise<Announcement[]> {
-  const supabase = getSupabaseClient();
+  const supabase = getServerSupabase();
   if (!supabase) {
     return localAnnouncements.filter((a) => a.active).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }
@@ -89,3 +165,34 @@ export async function fetchAnnouncements(): Promise<Announcement[]> {
   }
   return data.map(mapAnnouncement);
 }
+
+function mapPaymentSettings(row: Record<string, unknown>): PaymentSettings {
+  return {
+    title: String(row.title ?? DEFAULT_PAYMENT_SETTINGS.title),
+    feeAmount: Number(row.fee_amount ?? DEFAULT_PAYMENT_SETTINGS.feeAmount),
+    feeAmountLabel: String(row.fee_amount_label ?? DEFAULT_PAYMENT_SETTINGS.feeAmountLabel),
+    bankName: String(row.bank_name ?? DEFAULT_PAYMENT_SETTINGS.bankName),
+    accountNumber: String(row.account_number ?? DEFAULT_PAYMENT_SETTINGS.accountNumber),
+    accountName: String(row.account_name ?? DEFAULT_PAYMENT_SETTINGS.accountName),
+    afterPaymentNote: String(row.after_payment_note ?? DEFAULT_PAYMENT_SETTINGS.afterPaymentNote),
+    paystackEnabled: row.paystack_enabled !== false,
+    flutterwaveEnabled: row.flutterwave_enabled !== false,
+    showBankTransfer: row.show_bank_transfer !== false,
+  };
+}
+
+export async function fetchPaymentSettings(): Promise<PaymentSettings> {
+  const supabase = getServerSupabase();
+  if (!supabase) return DEFAULT_PAYMENT_SETTINGS;
+
+  const { data, error } = await supabase
+    .from("payment_settings")
+    .select("*")
+    .eq("id", "default")
+    .maybeSingle();
+
+  if (error || !data) return DEFAULT_PAYMENT_SETTINGS;
+  return mapPaymentSettings(data as Record<string, unknown>);
+}
+
+export type { PaymentSettings };

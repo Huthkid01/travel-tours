@@ -1,19 +1,21 @@
-import { getSupabaseClient } from "@/supabase/client";
+import "server-only";
+
+import { getServerSupabase } from "@/supabase/server";
 import type { UploadedFileMeta } from "@/types";
 
 const BUCKET = "documents";
 
-export async function uploadApplicationFiles(
+export async function uploadApplicationFilesServer(
   serviceSlug: string,
   applicationId: string,
   files: File[]
 ): Promise<UploadedFileMeta[]> {
-  const supabase = getSupabaseClient();
+  const supabase = getServerSupabase();
 
   if (!supabase) {
     return files.map((file) => ({
       name: file.name,
-      url: URL.createObjectURL(file),
+      url: `demo://${serviceSlug}/${applicationId}/${file.name}`,
       type: file.type,
       size: file.size,
       path: `demo/${serviceSlug}/${applicationId}/${file.name}`,

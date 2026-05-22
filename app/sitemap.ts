@@ -1,10 +1,10 @@
 import { programs } from "@/data/programs";
 import { services } from "@/data/services";
-import { SITE_CONFIG } from "@/lib/constants";
+import { getSiteUrl } from "@/lib/env.server";
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = SITE_CONFIG.url;
+  const base = getSiteUrl();
 
   const staticPages = ["", "/services", "/programs", "/consultation", "/announcements", "/about", "/contact", "/success"].map((path) => ({
     url: `${base}${path}`,

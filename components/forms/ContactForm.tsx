@@ -1,21 +1,31 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { FormStepFlow } from "@/components/forms/FormStepFlow";
+import { formInputClass } from "@/components/forms/form-step-styles";
 import { contactSchema, type ContactFormValues } from "@/lib/validations";
-import { sendContactEmail } from "@/services/email";
+import { submitContactAction } from "@/lib/actions/contact";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { CheckCircle, Send } from "lucide-react";
+import { CheckCircle, Mail, MessageSquare, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+const STEPS = [
+  { id: "details", title: "Your details", description: "Name and contact information", icon: User },
+  { id: "message", title: "Your message", description: "What would you like to discuss?", icon: MessageSquare },
+  { id: "review", title: "Send", description: "Review and submit your message", icon: Mail },
+];
+
 export function ContactForm() {
+  const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
   const {
     register,
     handleSubmit,
+    trigger,
+    getValues,
     formState: { errors },
     reset,
   } = useForm<ContactFormValues>({
@@ -25,10 +35,12 @@ export function ContactForm() {
   const onSubmit = async (data: ContactFormValues) => {
     setStatus("loading");
     try {
-      await sendContactEmail(data);
+      const result = await submitContactAction(data);
+      if (!result.ok) throw new Error(result.error);
       setStatus("success");
       toast.success("Message sent successfully!");
       reset();
+      setStep(0);
     } catch {
       setStatus("idle");
       toast.error("Failed to send message. Please try WhatsApp.");
@@ -54,42 +66,83 @@ export function ContactForm() {
     );
   }
 
-  const inputClass =
-    "w-full rounded-xl border border-navy-200 bg-white px-4 py-3 text-navy-900 transition-colors focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/20 dark:border-navy-700 dark:bg-navy-800 dark:text-white";
+  const handleContinue = async () => {
+    if (step === 0) {
+      const ok = await trigger(["name", "phone", "email"]);
+      if (!ok) return;
+      setStep(1);
+      return;
+    }
+    if (step === 1) {
+      const ok = await trigger(["subject", "message"]);
+      if (!ok) return;
+      setStep(2);
+      return;
+    }
+    void handleSubmit(onSubmit)();
+  };
+
+  const values = getValues();
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-2xl bg-white p-8 shadow-xl dark:bg-navy-900">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-medium">Name *</label>
-          <input {...register("name")} className={inputClass} placeholder="Your name" />
-          {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-medium">Phone *</label>
-          <input {...register("phone")} className={inputClass} placeholder="+234..." />
-          {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>}
-        </div>
-      </div>
-      <div>
-        <label className="mb-2 block text-sm font-medium">Email *</label>
-        <input {...register("email")} type="email" className={inputClass} placeholder="your@email.com" />
-        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
-      </div>
-      <div>
-        <label className="mb-2 block text-sm font-medium">Subject *</label>
-        <input {...register("subject")} className={inputClass} placeholder="How can we help?" />
-        {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>}
-      </div>
-      <div>
-        <label className="mb-2 block text-sm font-medium">Message *</label>
-        <textarea {...register("message")} rows={5} className={inputClass} placeholder="Your message..." />
-        {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>}
-      </div>
-      <Button type="submit" loading={status === "loading"} className="w-full">
-        <Send className="h-4 w-4" />
-        Send Message
-      </Button>
+    <form onSubmit={handleSubmit(onSubmit)} className="min-w-0">
+      <FormStepFlow
+        flowTitle="Contact"
+        flowSubtitle="Get in touch with Darboi Consults"
+        steps={STEPS}
+        currentStep={step}
+        onBack={() => setStep((s) => Math.max(0, s - 1))}
+        onContinue={handleContinue}
+        continueLabel={step === 2 ? "Send message" : undefined}
+        isLastStep={step === 2}
+        isSubmitting={status === "loading"}
+        showBack={step > 0}
+      >
+        {step === 0 && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium">Name *</label>
+              <input {...register("name")} className={formInputClass} placeholder="Your name" />
+              {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Phone *</label>
+              <input {...register("phone")} className={formInputClass} placeholder="+234..." />
+              {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>}
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-2 block text-sm font-medium">Email *</label>
+              <input {...register("email")} type="email" className={formInputClass} placeholder="your@email.com" />
+              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="space-y-4">
+            <div>
+              <label className="mb-2 block text-sm font-medium">Subject *</label>
+              <input {...register("subject")} className={formInputClass} placeholder="How can we help?" />
+              {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>}
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Message *</label>
+              <textarea {...register("message")} rows={5} className={formInputClass} placeholder="Your message..." />
+              {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-3 rounded-xl border border-navy-100 bg-navy-50/50 p-4 text-sm dark:border-navy-700 dark:bg-navy-950/50">
+            <p><span className="font-semibold text-navy-700 dark:text-navy-200">Name:</span> {values.name || "—"}</p>
+            <p><span className="font-semibold text-navy-700 dark:text-navy-200">Phone:</span> {values.phone || "—"}</p>
+            <p><span className="font-semibold text-navy-700 dark:text-navy-200">Email:</span> {values.email || "—"}</p>
+            <p><span className="font-semibold text-navy-700 dark:text-navy-200">Subject:</span> {values.subject || "—"}</p>
+            <p className="whitespace-pre-wrap"><span className="font-semibold text-navy-700 dark:text-navy-200">Message:</span> {values.message || "—"}</p>
+          </div>
+        )}
+      </FormStepFlow>
     </form>
   );
 }

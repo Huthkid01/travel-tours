@@ -13,11 +13,12 @@ import { HashScrollOnLoad } from "@/components/layout/HashScrollOnLoad";
 import { FeaturedVideoSection } from "@/components/social/FeaturedVideoSection";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { services } from "@/data/services";
+import { fetchServices } from "@/services/cms";
 import { SITE_CONFIG } from "@/lib/constants";
 import { ArrowRight } from "lucide-react";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const services = await fetchServices();
   const featured = services.filter((s) => s.featured).slice(0, 6);
 
   return (

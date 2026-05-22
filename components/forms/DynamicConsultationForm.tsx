@@ -1,18 +1,19 @@
 "use client";
 
+import { CountrySelect } from "@/components/forms/CountrySelect";
+import { FormStepFlow, type FormStepConfig } from "@/components/forms/FormStepFlow";
+import { formInputClass } from "@/components/forms/form-step-styles";
 import { DocumentUpload } from "@/components/upload/DocumentUpload";
-import { Button } from "@/components/ui/Button";
 import { WhatsAppCTA } from "@/components/layout/WhatsAppCTA";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
 import { getConsultationWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
 import type { ConsultationFormSchema, FormFieldConfig } from "@/types";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { FileUp, MessageSquare, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 function buildZodSchema(fields: FormFieldConfig[]) {
@@ -45,13 +46,14 @@ export function DynamicConsultationForm({
 }: DynamicConsultationFormProps) {
   const router = useRouter();
   const track = useLeadTrackerContext();
+  const [step, setStep] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
   const zodSchema = useMemo(() => buildZodSchema(schema.fields), [schema.fields]);
   type FormValues = z.infer<typeof zodSchema>;
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, trigger, control, getValues, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(zodSchema),
     defaultValues: {},
   });
@@ -59,13 +61,42 @@ export function DynamicConsultationForm({
   const watched = useWatch({ control }) as Record<string, string>;
   const visibleFields = schema.fields.filter((f) => isFieldVisible(f, watched ?? {}));
 
-  const inputClass = cn(
-    "w-full rounded-xl border border-navy-200 bg-white px-4 py-3 text-navy-900 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 dark:border-navy-700 dark:bg-navy-900 dark:text-white"
-  );
+  const inputFields = visibleFields.filter((f) => f.type !== "textarea" && f.type !== "file");
+  const textareaFields = visibleFields.filter((f) => f.type === "textarea");
+  const hasUpload = schema.enableFileUpload;
+
+  const steps = useMemo(() => {
+    const list: FormStepConfig[] = [
+      { id: "info", title: "Your information", description: "Basic details for your consultation", icon: User },
+    ];
+    if (textareaFields.length > 0) {
+      list.push({
+        id: "details",
+        title: "Additional details",
+        description: "Tell us more about your request",
+        icon: MessageSquare,
+      });
+    }
+    if (hasUpload) {
+      list.push({ id: "documents", title: "Documents", description: "Upload supporting files", icon: FileUp });
+    }
+    list.push({
+      id: "submit",
+      title: "Submit",
+      description: schema.enablePayment ? "Continue to payment" : "Send and open WhatsApp",
+      icon: MessageSquare,
+    });
+    return list;
+  }, [textareaFields.length, hasUpload, schema.enablePayment]);
+
+  const lastStepIndex = steps.length - 1;
+  const stepId = steps[step]?.id;
 
   const submit = async (data: FormValues) => {
     if (schema.enableFileUpload && files.length === 0) {
       toast.error("Please upload at least one document");
+      const docIdx = steps.findIndex((s) => s.id === "documents");
+      if (docIdx >= 0) setStep(docIdx);
       return;
     }
 
@@ -106,7 +137,7 @@ export function DynamicConsultationForm({
       return (
         <div key={field.name}>
           <label className="mb-1 block text-sm font-medium">{field.label}{field.required && " *"}</label>
-          <textarea {...register(field.name)} rows={4} className={inputClass} placeholder={field.placeholder} />
+          <textarea {...register(field.name)} rows={4} className={formInputClass} placeholder={field.placeholder} />
           {err && <p className="mt-1 text-sm text-red-500">{String(err.message)}</p>}
         </div>
       );
@@ -116,7 +147,7 @@ export function DynamicConsultationForm({
       return (
         <div key={field.name}>
           <label className="mb-1 block text-sm font-medium">{field.label}{field.required && " *"}</label>
-          <select {...register(field.name)} className={inputClass}>
+          <select {...register(field.name)} className={formInputClass}>
             <option value="">Select...</option>
             {field.options?.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -127,13 +158,30 @@ export function DynamicConsultationForm({
       );
     }
 
+    if (field.type === "country") {
+      return (
+        <div key={field.name}>
+          <label className="mb-1 block text-sm font-medium" htmlFor={field.name}>
+            {field.label}{field.required && " *"}
+          </label>
+          <CountrySelect
+            id={field.name}
+            registration={register(field.name)}
+            className={formInputClass}
+            placeholder={field.placeholder ?? "Select country"}
+            error={err ? String(err.message) : undefined}
+          />
+        </div>
+      );
+    }
+
     return (
       <div key={field.name}>
         <label className="mb-1 block text-sm font-medium">{field.label}{field.required && " *"}</label>
         <input
           {...register(field.name)}
           type={field.type === "email" ? "email" : field.type === "phone" ? "tel" : "text"}
-          className={inputClass}
+          className={formInputClass}
           placeholder={field.placeholder}
         />
         {err && <p className="mt-1 text-sm text-red-500">{String(err.message)}</p>}
@@ -141,39 +189,108 @@ export function DynamicConsultationForm({
     );
   };
 
+  const handleContinue = async () => {
+    if (stepId === "info") {
+      const names = inputFields.map((f) => f.name);
+      if (names.length > 0) {
+        const ok = await trigger(names as (keyof FormValues)[]);
+        if (!ok) return;
+      }
+      setStep((s) => s + 1);
+      return;
+    }
+
+    if (stepId === "details") {
+      const names = textareaFields.map((f) => f.name);
+      if (names.length > 0) {
+        const ok = await trigger(names as (keyof FormValues)[]);
+        if (!ok) return;
+      }
+      setStep((s) => s + 1);
+      return;
+    }
+
+    if (stepId === "documents") {
+      if (files.length === 0) {
+        toast.error("Please upload at least one document");
+        return;
+      }
+      setStep((s) => s + 1);
+      return;
+    }
+
+    void handleSubmit(submit)();
+  };
+
+  const values = getValues();
+
   return (
-    <form onSubmit={handleSubmit(submit)} className="space-y-6">
+    <form onSubmit={handleSubmit(submit)} className="min-w-0 space-y-4">
       {schema.description && (
-        <p className="text-navy-600 dark:text-navy-300">{schema.description}</p>
+        <p className="text-sm text-navy-600 dark:text-navy-300">{schema.description}</p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {visibleFields
-          .filter((f) => f.type !== "textarea" && f.type !== "file")
-          .map(renderField)}
-      </div>
+      <FormStepFlow
+        flowTitle="Consultation"
+        flowSubtitle={contextLabel}
+        steps={steps}
+        currentStep={step}
+        onBack={() => setStep((s) => Math.max(0, s - 1))}
+        onContinue={handleContinue}
+        continueLabel={
+          step === lastStepIndex
+            ? schema.enablePayment
+              ? "Continue to Payment"
+              : "Submit & Contact via WhatsApp"
+            : undefined
+        }
+        isLastStep={step === lastStepIndex}
+        isSubmitting={loading}
+        showBack={step > 0}
+        footer={
+          step === lastStepIndex ? (
+            <div className="flex justify-center pt-2">
+              <WhatsAppCTA
+                message={getConsultationWhatsAppMessage(contextLabel)}
+                variant="link"
+                label="Prefer WhatsApp?"
+                service={contextLabel}
+              />
+            </div>
+          ) : undefined
+        }
+      >
+        {stepId === "info" && (
+          <div className="grid gap-4 sm:grid-cols-2">{inputFields.map(renderField)}</div>
+        )}
 
-      {visibleFields.filter((f) => f.type === "textarea").map(renderField)}
+        {stepId === "details" && (
+          <div className="space-y-4">{textareaFields.map(renderField)}</div>
+        )}
 
-      {schema.enableFileUpload && (
-        <div>
-          <label className="mb-2 block text-sm font-medium">Upload Documents</label>
-          <DocumentUpload files={files} onChange={setFiles} />
-        </div>
-      )}
+        {stepId === "documents" && hasUpload && (
+          <div>
+            <label className="mb-2 block text-sm font-medium">Upload documents *</label>
+            <DocumentUpload files={files} onChange={setFiles} />
+          </div>
+        )}
 
-      <div className="flex flex-wrap gap-4">
-        <Button type="submit" size="lg" disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {schema.enablePayment ? "Continue to Payment" : "Submit & Contact via WhatsApp"}
-        </Button>
-        <WhatsAppCTA
-          message={getConsultationWhatsAppMessage(contextLabel)}
-          variant="link"
-          label="Prefer WhatsApp?"
-          service={contextLabel}
-        />
-      </div>
+        {stepId === "submit" && (
+          <div className="space-y-3 rounded-xl border border-navy-100 bg-navy-50/50 p-4 text-sm dark:border-navy-700 dark:bg-navy-950/50">
+            {Object.entries(values).map(([key, val]) => (
+              <p key={key}>
+                <span className="font-semibold capitalize text-navy-700 dark:text-navy-200">{key.replace(/_/g, " ")}:</span>{" "}
+                {String(val || "—")}
+              </p>
+            ))}
+            {hasUpload && (
+              <p>
+                <span className="font-semibold text-navy-700 dark:text-navy-200">Files:</span> {files.length} uploaded
+              </p>
+            )}
+          </div>
+        )}
+      </FormStepFlow>
     </form>
   );
 }

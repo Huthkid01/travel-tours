@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchAnnouncements } from "@/services/cms";
 import type { Announcement } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, X } from "lucide-react";
@@ -31,10 +30,14 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    fetchAnnouncements().then((list) => {
-      setItems(list);
-      if (list.length === 0) setDismissed(true);
-    });
+    fetch("/api/announcements")
+      .then((r) => r.json())
+      .then((list: Announcement[]) => {
+        const items = Array.isArray(list) ? list : [];
+        setItems(items);
+        if (items.length === 0) setDismissed(true);
+      })
+      .catch(() => setDismissed(true));
   }, []);
 
   useEffect(() => {

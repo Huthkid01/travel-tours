@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchAnnouncements } from "@/services/cms";
 import type { Announcement } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Megaphone } from "lucide-react";
@@ -12,7 +11,10 @@ export function AnnouncementTicker() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    fetchAnnouncements().then(setItems);
+    fetch("/api/announcements")
+      .then((r) => r.json())
+      .then((list) => setItems(Array.isArray(list) ? list : []))
+      .catch(() => setItems([]));
   }, []);
 
   useEffect(() => {

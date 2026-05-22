@@ -1,3 +1,5 @@
+import { getGoogleFormShareUrl } from "@/lib/env.server";
+
 /** Resolved embed URL for https://forms.gle/CgsEKQ8JudSTRaVY9 */
 export const GOOGLE_FORM_EMBED_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSfG3s8g_bMYl-p0vV4rP_S8ElTgTLNhHznL2EmuTL_0NFtlNw/viewform?embedded=true";
@@ -8,10 +10,10 @@ const GLE_REDIRECTS: Record<string, string> = {
   [GOOGLE_FORM_SHARE_URL]: GOOGLE_FORM_EMBED_URL,
 };
 
-const raw = process.env.NEXT_PUBLIC_GOOGLE_FORM_URL?.trim() || GOOGLE_FORM_EMBED_URL;
-
-/** URL suitable for iframe embed */
+/** URL suitable for iframe embed — server components only */
 export function getGoogleFormEmbedUrl(): string {
+  const raw = getGoogleFormShareUrl() || GOOGLE_FORM_EMBED_URL;
+
   if (GLE_REDIRECTS[raw]) return GLE_REDIRECTS[raw];
 
   try {

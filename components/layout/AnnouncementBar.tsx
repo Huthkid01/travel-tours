@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchAnnouncements } from "@/services/cms";
 import type { Announcement } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, X } from "lucide-react";
@@ -13,7 +12,10 @@ export function AnnouncementBar() {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    fetchAnnouncements().then(setItems);
+    fetch("/api/announcements")
+      .then((r) => r.json())
+      .then((list) => setItems(Array.isArray(list) ? list : []))
+      .catch(() => setItems([]));
   }, []);
 
   useEffect(() => {

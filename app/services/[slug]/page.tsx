@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { PriceLabel, PricingBlock } from "@/components/ui/PriceLabel";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { SHOW_PRICING } from "@/lib/features";
-import { getRelatedServices, getServiceBySlug, services } from "@/data/services";
+import { fetchRelatedServices, fetchServiceBySlug, fetchServices } from "@/services/cms";
 import { buildPageMetadata } from "@/lib/seo";
 import { CheckCircle, Clock } from "lucide-react";
 import type { Metadata } from "next";
@@ -16,12 +16,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
+  const services = await fetchServices();
   return services.map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await fetchServiceBySlug(slug);
   if (!service) return { title: "Service Not Found" };
   return buildPageMetadata({
     title: service.title,
@@ -32,10 +33,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await fetchServiceBySlug(slug);
   if (!service) notFound();
 
-  const related = getRelatedServices(slug);
+  const related = await fetchRelatedServices(slug);
 
   return (
     <>

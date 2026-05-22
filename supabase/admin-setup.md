@@ -8,6 +8,8 @@
 | **visitor_activity** | Site visits & clicks (page views, WhatsApp clicks, etc.) |
 | **featured_programs** | Travel programs shown on home & `/programs` (editable in admin) |
 | **announcements** | Top banner messages on the site |
+| **services** | All services on the site (editable in admin) |
+| **payment_settings** | Bank transfer details & Paystack/Flutterwave toggles |
 | **Storage `documents`** | Uploaded passport/files from application forms |
 
 **FormSubmit email** is separate — it sends copies to your inbox immediately. Supabase stores the data permanently.
@@ -16,17 +18,26 @@
 
 1. `schema.sql` — applications + file storage  
 2. `schema-v2.sql` — programs, announcements, visitor tracking  
+3. `schema-v3-services.sql` — services (editable in admin)  
+4. `schema-v4-payment-settings.sql` — payment methods & bank details  
+5. `schema-v5-form-submissions.sql` — contact form records (dashboard counts)
 
-## Environment variables
+## Environment variables (Vercel)
+
+See **`VERCEL.md`** in the project root for the full checklist.
+
+Minimum for admin:
 
 ```env
-ADMIN_EMAIL=darboiconsults@gmail.com
-ADMIN_PASSWORD=your-secure-password
-ADMIN_SESSION_SECRET=any-long-random-string
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+ADMIN_SESSION_SECRET=
 ```
 
-Get **service_role** from Supabase → Project Settings → API (keep secret; server-only).
+Get **service_role** from Supabase → Project Settings → API (server-only, never `NEXT_PUBLIC_`).
 
 ## Login
 
@@ -34,10 +45,20 @@ Open: **https://your-site.vercel.app/admin/login**
 
 ## What you can manage
 
-- **Dashboard** — total visits, visits today, applications  
-- **Programs** — add/edit/delete (updates website)  
-- **Announcements** — top bar messages  
-- **Applications** — all form submissions  
-- **Site Visits** — activity log  
+### Sidebar — Overview
+- **Dashboard** — total site visits, **total forms submitted**, services, applications
 
-**Services list** (Marriage Certificate, NDLEA, etc.) is still in `data/services.ts` — contact developer to add new services or we can move them to Supabase in a future update.
+### Sidebar — Website content
+- **Services** — all services (like product list): add, edit, delete, featured flag  
+- **Programs** — travel programs on home & `/programs`  
+- **Announcements** — top banner messages  
+- **Payment methods** — bank account, fee label, Paystack/Flutterwave on/off  
+
+### Sidebar — Activity
+- **Site visits** — who visited which pages  
+- **Applications** — client form submissions  
+
+### First-time services setup
+1. Open **Admin → Services**  
+2. Click **Import site defaults** (loads all services from the site into Supabase)  
+3. Edit any service — changes go live on the public website  

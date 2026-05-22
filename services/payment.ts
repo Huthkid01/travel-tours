@@ -1,4 +1,4 @@
-import { PAYMENT_KEYS, SITE_CONFIG, CURRENCY } from "@/lib/constants";
+import { CURRENCY, SITE_CONFIG } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
 import type { PaymentProvider, PaymentType, ServiceItem } from "@/types";
 
@@ -10,6 +10,11 @@ export interface PaymentConfig {
   type: PaymentType;
   provider: PaymentProvider;
   onSuccess?: () => void;
+}
+
+export interface PaymentGatewayKeys {
+  paystack: string;
+  flutterwave: string;
 }
 
 export function getServicePaymentAmount(
@@ -38,10 +43,10 @@ export function getPaymentLabel(type: PaymentType): string {
   return PAYMENT_LABELS[type];
 }
 
-export function initiateFlutterwavePayment(config: PaymentConfig): void {
+export function initiateFlutterwavePayment(config: PaymentConfig, keys: PaymentGatewayKeys): void {
   const { amount, email, name, reference, onSuccess } = config;
 
-  if (PAYMENT_KEYS.flutterwave.includes("demo")) {
+  if (keys.flutterwave.includes("demo")) {
     console.log("[Flutterwave Demo]", { amount, email, name, reference });
     const confirmed = window.confirm(
       `Flutterwave Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nClick OK when done to continue to WhatsApp.`
@@ -54,7 +59,7 @@ export function initiateFlutterwavePayment(config: PaymentConfig): void {
   script.src = "https://checkout.flutterwave.com/v3.js";
   script.onload = () => {
     window.FlutterwaveCheckout?.({
-      public_key: PAYMENT_KEYS.flutterwave,
+      public_key: keys.flutterwave,
       tx_ref: reference,
       amount,
       currency: CURRENCY.code,
@@ -70,10 +75,10 @@ export function initiateFlutterwavePayment(config: PaymentConfig): void {
   document.body.appendChild(script);
 }
 
-export function initiatePaystackPayment(config: PaymentConfig): void {
+export function initiatePaystackPayment(config: PaymentConfig, keys: PaymentGatewayKeys): void {
   const { amount, email, name, reference, onSuccess } = config;
 
-  if (PAYMENT_KEYS.paystack.includes("demo")) {
+  if (keys.paystack.includes("demo")) {
     console.log("[Paystack Demo]", { amount, email, name, reference });
     const confirmed = window.confirm(
       `Paystack Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nClick OK when done to continue to WhatsApp.`
@@ -86,7 +91,7 @@ export function initiatePaystackPayment(config: PaymentConfig): void {
   script.src = "https://js.paystack.co/v1/inline.js";
   script.onload = () => {
     const handler = window.PaystackPop?.setup({
-      key: PAYMENT_KEYS.paystack,
+      key: keys.paystack,
       email,
       amount: amount * 100,
       currency: CURRENCY.code,

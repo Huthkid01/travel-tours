@@ -3,16 +3,6 @@ export const CURRENCY = {
   locale: "en-NG",
 } as const;
 
-function getSiteUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
-}
-
 export const BRAND = {
   name: "Darboi Consults Limited",
   short: "Darboi Consults",
@@ -20,20 +10,25 @@ export const BRAND = {
   logoAccent: "Consults Limited",
 } as const;
 
+/** Public contact details (shown on site — not secret) */
 export const SITE_CONFIG = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || BRAND.name,
-  url: getSiteUrl(),
-  email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || "darboiconsults@gmail.com",
-  phone: process.env.NEXT_PUBLIC_ADMIN_PHONE || "08038178843",
-  /** E.164 for tel: links (same line as phone / WhatsApp) */
+  name: BRAND.name,
+  email: "darboiconsults@gmail.com",
+  phone: "08038178843",
   phoneTel: "+2348038178843",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348038178843",
+  whatsapp: "2348038178843",
   address: "Head Office, 24 Olowu Road, Ikeja, Lagos, Nigeria",
   addressLines: ["Head Office", "24 Olowu Road, Ikeja, Lagos, Nigeria"] as const,
   description:
     "Premium documentation, certification, and travel consultation services. Professional support from application to delivery.",
   mapEmbedUrl:
     "https://maps.google.com/maps?q=24+Olowu+Road,+Ikeja,+Lagos,+Nigeria&hl=en&z=16&output=embed",
+  url:
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.SITE_URL || process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000",
 };
 
 export const NAV_LINKS = [
@@ -47,29 +42,14 @@ export const NAV_LINKS = [
 ];
 
 export const SOCIAL_LINKS = {
-  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com",
-  tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "https://www.tiktok.com/@darboiconsults",
-  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://facebook.com",
-  instagramHandle: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || "@darboiconsults",
-  tiktokHandle: process.env.NEXT_PUBLIC_TIKTOK_HANDLE || "@darboiconsults",
+  tiktok: "https://www.tiktok.com/@darboiconsults",
+  tiktokHandle: "@darboiconsults",
+  instagram: "https://instagram.com",
+  facebook: "https://facebook.com",
+  instagramHandle: "@darboiconsults",
 } as const;
 
 export type SocialPlatform = "tiktok";
-
-export const SUPABASE_CONFIG = {
-  url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-};
-
-export const FORMSUBMIT_EMAIL =
-  process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL ||
-  process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-  SITE_CONFIG.email;
-
-export const PAYMENT_KEYS = {
-  flutterwave: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || "FLWPUBK_TEST-demo",
-  paystack: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_demo",
-};
 
 export const WHATSAPP_BASE = "https://wa.me";
 
@@ -94,14 +74,3 @@ export const ACCEPTED_FILE_TYPES = [
 export const ACCEPTED_FILE_EXTENSIONS = ".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx";
 
 export const MAX_FILE_SIZE_MB = 10;
-
-export function isSupabaseConfigured(): boolean {
-  return Boolean(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
-}
-
-export function isFormSubmitConfigured(): boolean {
-  return Boolean(FORMSUBMIT_EMAIL && FORMSUBMIT_EMAIL.includes("@"));
-}
-
-/** @deprecated Use isFormSubmitConfigured */
-export const isEmailJsConfigured = isFormSubmitConfigured;

@@ -1,52 +1,55 @@
-# Deploy to Vercel (Client Demo — No Env Variables)
+# Vercel — environment variables
 
-You can deploy **without adding any environment variables**. The site uses built-in demo defaults.
+Add these in **Vercel → Project → Settings → Environment Variables**.  
+Use **no `NEXT_PUBLIC_` prefix** — secrets stay on the server.
 
-## Steps
+After changing variables, **Redeploy**.
 
-1. Go to [vercel.com](https://vercel.com) and sign in with GitHub
-2. Click **Add New Project**
-3. Import: `Huthkid01/travel-tours`
-4. Leave all settings as default (Vercel detects Next.js automatically)
-5. **Environment Variables:** skip — leave empty
-6. Click **Deploy**
+## Required
 
-Wait ~2 minutes. Your live URL will look like: `https://travel-tours-xxx.vercel.app`
+| Variable | Where to get it |
+|----------|-----------------|
+| `SUPABASE_URL` | Supabase → Settings → API → Project URL |
+| `SUPABASE_ANON_KEY` | Supabase → `anon` public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → `service_role` secret |
+| `FORMSUBMIT_EMAIL` | `darboiconsults@gmail.com` |
+| `GOOGLE_FORM_URL` | Your `forms.gle` link |
+| `ADMIN_EMAIL` | Admin login email |
+| `ADMIN_PASSWORD` | Admin login password |
+| `ADMIN_SESSION_SECRET` | Long random string (32+ chars) |
 
-## What works in demo mode (no env)
+## Recommended
 
-| Feature | Demo behavior |
-|---------|----------------|
-| All pages | Full navigation works |
-| Tour packages | All 6 tours + detail pages |
-| Prices | Nigerian Naira (₦) |
-| Reservation form | Shows success, then opens WhatsApp |
-| Contact form | Shows success message |
-| Payments | Demo popup (no real charge) |
-| Dark mode | Works |
-| Images | Load from Unsplash |
+| Variable | Example |
+|----------|---------|
+| `SITE_URL` | `https://travel-tours-eight.vercel.app` |
+| `PAYSTACK_PUBLIC_KEY` | Paystack public key |
+| `FLUTTERWAVE_PUBLIC_KEY` | Flutterwave public key |
 
-## Vercel settings (confirm these)
+## Optional
 
-| Setting | Value |
-|---------|--------|
-| Framework Preset | **Next.js** |
-| Root Directory | `.` (leave blank) |
-| Build Command | `npm run build` |
-| Output Directory | *(leave default)* |
-| Install Command | `npm install` |
-| Node.js Version | 20.x (default) |
+| Variable | Purpose |
+|----------|---------|
+| `SHOW_PRICING` | `true` to show prices on the site |
+| `GA_MEASUREMENT_ID` | Google Analytics (server-only reference) |
 
-## Optional — add later for production
+## Remove from Vercel (old / unused)
 
-Only add these when the client goes live:
+Delete any of these if still present:
 
-- `NEXT_PUBLIC_WHATSAPP_NUMBER` — real WhatsApp
-- `NEXT_PUBLIC_FORMSPREE_RESERVATION_ID` — real emails
-- `NEXT_PUBLIC_FORMSPREE_CONTACT_ID`
-- `NEXT_PUBLIC_SITE_URL` — your custom domain
-- Payment keys for Flutterwave / Paystack
+- `NEXT_PUBLIC_SUPABASE_URL` → use `SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` → use `SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_FORMSUBMIT_EMAIL` → use `FORMSUBMIT_EMAIL`
+- `NEXT_PUBLIC_ADMIN_EMAIL`
+- `NEXT_PUBLIC_GOOGLE_FORM_URL` → use `GOOGLE_FORM_URL`
+- `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` → use `PAYSTACK_PUBLIC_KEY`
+- `NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY` → use `FLUTTERWAVE_PUBLIC_KEY`
+- `NEXT_PUBLIC_EMAILJS_*`, `NEXT_PUBLIC_FORMSPREE_*`
 
-## Redeploy after GitHub push
+## After deploy
 
-Every push to `main` auto-deploys on Vercel if connected.
+1. Run Supabase SQL: `schema.sql` → `v2` → `v3` → `v4`
+2. Submit Contact form once → activate FormSubmit email
+3. Login at `/admin/login`
+4. Admin → Services → Import defaults (first time)
+5. Admin → Payment methods → save bank details

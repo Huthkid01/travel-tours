@@ -1,20 +1,13 @@
-import { SITE_CONFIG } from "@/lib/constants";
+import "server-only";
+
+import { getFormSubmitEmail, isFormSubmitServerConfigured } from "@/lib/env.server";
 import { formatPrice } from "@/lib/utils";
 import type { Application, ContactFormData } from "@/types";
 
 const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax";
 
 function getRecipientEmail(): string {
-  return (
-    process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL ||
-    process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-    SITE_CONFIG.email
-  );
-}
-
-function isFormSubmitConfigured(): boolean {
-  const email = getRecipientEmail();
-  return Boolean(email && email.includes("@"));
+  return getFormSubmitEmail();
 }
 
 async function postFormSubmit(formData: FormData): Promise<void> {
@@ -32,9 +25,9 @@ async function postFormSubmit(formData: FormData): Promise<void> {
   }
 }
 
-/** Contact form → client inbox via FormSubmit (no EmailJS) */
+/** Contact form → client inbox via FormSubmit */
 export async function sendContactForm(data: ContactFormData): Promise<void> {
-  if (!isFormSubmitConfigured()) {
+  if (!isFormSubmitServerConfigured()) {
     console.log("[FormSubmit Demo] Contact:", data);
     return;
   }
@@ -64,7 +57,7 @@ export async function sendApplicationForm(
     stage?: ApplicationEmailStage;
   }
 ): Promise<void> {
-  if (!isFormSubmitConfigured()) {
+  if (!isFormSubmitServerConfigured()) {
     console.log("[FormSubmit Demo] Application:", app, options?.stage ?? "submitted");
     return;
   }
@@ -111,5 +104,3 @@ export async function sendApplicationForm(
 
   await postFormSubmit(formData);
 }
-
-export { isFormSubmitConfigured };

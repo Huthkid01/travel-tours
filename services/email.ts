@@ -1,10 +1,10 @@
-/** Notifications via FormSubmit — EmailJS removed per client preference */
 import { notifyOwnerOnApplicationSubmit, notifyOwnerOnPayment } from "@/lib/notify-owner";
-import { sendContactForm } from "@/services/formsubmit";
+import { submitContactAction } from "@/lib/actions/contact";
 import type { Application, ContactFormData } from "@/types";
 
 export async function sendContactEmail(data: ContactFormData): Promise<void> {
-  return sendContactForm(data);
+  const result = await submitContactAction(data);
+  if (!result.ok) throw new Error(result.error || "Failed to send message");
 }
 
 export async function sendApplicationEmail(app: Application, paymentAmount?: number): Promise<void> {

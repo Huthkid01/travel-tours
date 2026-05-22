@@ -9,7 +9,7 @@ export const darboiApplicationSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   phone: z.string().min(10, "Please enter a valid phone number"),
   passportNumber: z.string().min(3, "Passport number is required"),
-  countryOfChoice: z.string().min(2, "Country of choice is required"),
+  countryOfChoice: z.string().min(1, "Please select a country"),
   preferredProgramme: z.string().min(2, "Preferred programme of study is required"),
   paymentReference: z.string().optional(),
 });

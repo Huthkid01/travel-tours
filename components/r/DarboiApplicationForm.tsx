@@ -3,6 +3,7 @@
 import { DarboiFormHeader } from "@/components/forms/DarboiFormHeader";
 import { PaymentInfoBlock } from "@/components/forms/PaymentInfoBlock";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
+import { CountrySelect } from "@/components/forms/CountrySelect";
 import { DocumentUpload } from "@/components/upload/DocumentUpload";
 import { Button } from "@/components/ui/Button";
 import { MARITAL_STATUS_OPTIONS, SEX_OPTIONS } from "@/data/darboi-application-form";
@@ -47,7 +48,7 @@ export function DarboiApplicationForm({
   });
 
   const inputClass = cn(
-    "w-full rounded-xl border border-navy-200 bg-white px-4 py-3 text-navy-900 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 dark:border-navy-700 dark:bg-navy-900 dark:text-white"
+    "box-border w-full max-w-full min-w-0 rounded-xl border border-navy-200 bg-white px-4 py-3 text-navy-900 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 dark:border-navy-700 dark:bg-navy-900 dark:text-white"
   );
 
   const labelClass = "mb-1 block text-sm font-semibold uppercase tracking-wide text-navy-800 dark:text-navy-200";
@@ -81,17 +82,17 @@ export function DarboiApplicationForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(submit)} className="space-y-6">
+    <form onSubmit={handleSubmit(submit)} className="min-w-0 max-w-full space-y-6 overflow-x-hidden">
       <DarboiFormHeader contextLabel={contextLabel} />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
         <div className="sm:col-span-2">
           <label className={labelClass}>Full legal name *</label>
           <input {...register("fullLegalName")} className={inputClass} placeholder="As on passport" />
           {errors.fullLegalName && <p className="mt-1 text-sm text-red-500">{errors.fullLegalName.message}</p>}
         </div>
 
-        <div>
+        <div className="min-w-0 overflow-hidden">
           <label className={labelClass}>Date of birth *</label>
           <input {...register("dateOfBirth")} type="date" className={inputClass} />
           {errors.dateOfBirth && <p className="mt-1 text-sm text-red-500">{errors.dateOfBirth.message}</p>}
@@ -171,9 +172,16 @@ export function DarboiApplicationForm({
         </div>
 
         <div>
-          <label className={labelClass}>Country of choice *</label>
-          <input {...register("countryOfChoice")} className={inputClass} placeholder="e.g. Canada, UK" />
-          {errors.countryOfChoice && <p className="mt-1 text-sm text-red-500">{errors.countryOfChoice.message}</p>}
+          <label className={labelClass} htmlFor="countryOfChoice">
+            Country of choice *
+          </label>
+          <CountrySelect
+            id="countryOfChoice"
+            registration={register("countryOfChoice")}
+            className={inputClass}
+            placeholder="Select destination country"
+            error={errors.countryOfChoice?.message}
+          />
         </div>
 
         <div>

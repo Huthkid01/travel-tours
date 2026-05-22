@@ -4,6 +4,8 @@ import { BRAND } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
   Bell,
+  Briefcase,
+  CreditCard,
   FileText,
   GraduationCap,
   LayoutDashboard,
@@ -16,13 +18,28 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
-const NAV = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/visits", label: "Site Visits", icon: Users },
-  { href: "/admin/applications", label: "Applications", icon: FileText },
-  { href: "/admin/programs", label: "Programs", icon: GraduationCap },
-  { href: "/admin/announcements", label: "Announcements", icon: Bell },
-];
+const NAV_SECTIONS = [
+  {
+    title: "Overview",
+    items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    title: "Website content",
+    items: [
+      { href: "/admin/services", label: "Services", icon: Briefcase },
+      { href: "/admin/programs", label: "Programs", icon: GraduationCap },
+      { href: "/admin/announcements", label: "Announcements", icon: Bell },
+      { href: "/admin/payment", label: "Payment methods", icon: CreditCard },
+    ],
+  },
+  {
+    title: "Activity",
+    items: [
+      { href: "/admin/visits", label: "Site visits", icon: Users },
+      { href: "/admin/applications", label: "Applications", icon: FileText },
+    ],
+  },
+] as const;
 
 export function AdminShell({ children, email }: { children: ReactNode; email: string }) {
   const pathname = usePathname();
@@ -34,6 +51,9 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
     router.push("/admin/login");
     router.refresh();
   };
+
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/admin" && pathname.startsWith(href));
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
@@ -51,24 +71,32 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
           <p className="text-xs text-slate-500">Logged in as</p>
           <p className="truncate text-sm font-medium text-slate-200">{email}</p>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
-          {NAV.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                  active ? "bg-blue-600/20 text-blue-300" : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {label}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto p-3">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.title} className="mb-4">
+              <p className="mb-2 px-3 text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                {section.title}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                      isActive(href)
+                        ? "bg-blue-600/20 text-blue-300"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </nav>
         <div className="border-t border-slate-800 p-3">
           <Link

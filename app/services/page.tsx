@@ -1,19 +1,9 @@
-"use client";
-
-import { ServiceCard } from "@/components/services/ServiceCard";
-import { ServiceFilters, filterServices } from "@/components/services/ServiceFilters";
+import { ServicesPageClient } from "@/components/services/ServicesPageClient";
 import { PageHero } from "@/components/layout/PageHero";
-import { services } from "@/data/services";
-import { useMemo, useState } from "react";
+import { fetchServices } from "@/services/cms";
 
-export default function ServicesPage() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-
-  const filtered = useMemo(
-    () => filterServices(services, search, category),
-    [search, category]
-  );
+export default async function ServicesPage() {
+  const services = await fetchServices();
 
   return (
     <>
@@ -24,24 +14,7 @@ export default function ServicesPage() {
       />
       <section className="section-padding">
         <div className="container-custom">
-          <ServiceFilters
-            search={search}
-            category={category}
-            onSearchChange={setSearch}
-            onCategoryChange={setCategory}
-          />
-          <p className="mt-4 text-sm text-navy-500">
-            Showing {filtered.length} of {services.length} services
-          </p>
-          {filtered.length === 0 ? (
-            <p className="mt-12 text-center text-navy-600">No services match your search.</p>
-          ) : (
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((service, i) => (
-                <ServiceCard key={service.slug} service={service} index={i} />
-              ))}
-            </div>
-          )}
+          <ServicesPageClient services={services} />
         </div>
       </section>
     </>

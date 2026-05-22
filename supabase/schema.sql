@@ -63,3 +63,4 @@ create policy "Allow public read documents"
   using (bucket_id = 'documents');
 
 -- v2 tables: also run schema-v2.sql for featured_programs, announcements, visitor_activity
+-- v3 services: also run schema-v3-services.sql for editable services in admin
