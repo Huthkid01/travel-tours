@@ -359,16 +359,49 @@ export async function fetchAdminApplications(limit = 50): Promise<Application[]>
   return (data ?? []) as Application[];
 }
 
+function isMissingSupabaseTableError(error: { code?: string; message?: string }): boolean {
+  return (
+    error.code === "PGRST205" ||
+    Boolean(error.message?.includes("Could not find the table"))
+  );
+}
+
 /** Remove all portal form rows: applications, lead popup, contact page */
-export async function clearAllFormSubmissions(): Promise<void> {
+export async function clearAllFormSubmissions(): Promise<{
+  cleared: string[];
+  skipped: string[];
+}> {
   const supabase = getAdminSupabase();
   if (!supabase) throw new Error("Supabase not configured");
 
   const tables = ["applications", "leads", "contact_submissions"] as const;
+  const cleared: string[] = [];
+  const skipped: string[] = [];
+  const failures: string[] = [];
+
   for (const table of tables) {
     const { error } = await supabase.from(table).delete().gte("created_at", "1970-01-01T00:00:00Z");
-    if (error) throw new Error(`Could not clear ${table}: ${error.message}`);
+    if (error) {
+      if (isMissingSupabaseTableError(error)) {
+        skipped.push(table);
+        continue;
+      }
+      failures.push(`${table}: ${error.message}`);
+      continue;
+    }
+    cleared.push(table);
   }
+
+  if (failures.length > 0) {
+    throw new Error(failures.join("; "));
+  }
+  if (cleared.length === 0 && skipped.length === tables.length) {
+    throw new Error(
+      "No form tables found. Run supabase/schema.sql, schema-v3.sql (leads), and schema-v5-form-submissions.sql in the Supabase SQL Editor."
+    );
+  }
+
+  return { cleared, skipped };
 }
 
 export async function fetchAdminPrograms(): Promise<Record<string, unknown>[]> {

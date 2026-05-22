@@ -41,7 +41,7 @@ export default function AdminApplicationsPage() {
       const res = await fetch("/api/admin/applications", { method: "DELETE" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Clear failed");
-      toast.success("All form submissions cleared");
+      toast.success(typeof json.message === "string" ? json.message : "Form data cleared");
       setViewing(null);
       void load();
     } catch (e) {

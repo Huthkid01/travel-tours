@@ -20,11 +20,12 @@ export async function DELETE() {
   const session = await requireAdminSession();
   if (isAdminResponse(session)) return session;
   try {
-    await clearAllFormSubmissions();
-    return NextResponse.json({
-      ok: true,
-      message: "All form submissions cleared (applications, leads, contact messages).",
-    });
+    const { cleared, skipped } = await clearAllFormSubmissions();
+    const message =
+      skipped.length > 0
+        ? `Cleared: ${cleared.join(", ")}. Skipped (table not in Supabase): ${skipped.join(", ")}.`
+        : "All form submissions cleared (applications, leads, contact messages).";
+    return NextResponse.json({ ok: true, cleared, skipped, message });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Failed to clear form data" },

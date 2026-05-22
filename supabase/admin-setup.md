@@ -5,6 +5,8 @@
 | Table | Purpose |
 |-------|---------|
 | **applications** | Service/consultation forms — names, contact, documents, payment status |
+| **leads** | Lead popup sign-ups (optional — run `schema-v3.sql`) |
+| **contact_submissions** | Contact page messages (run `schema-v5-form-submissions.sql`) |
 | **visitor_activity** | Public site visits & clicks only (`/admin` is excluded). Clear via Admin → Site visits → **Clear all visit data**, or SQL: `delete from public.visitor_activity;` |
 | **featured_programs** | Travel programs shown on home & `/programs` (editable in admin) |
 | **announcements** | Top banner messages on the site |
@@ -19,11 +21,12 @@
 
 1. `schema.sql` — applications + file storage  
 2. `schema-v2.sql` — programs, announcements, visitor tracking  
-3. `schema-v3-services.sql` — services (editable in admin)  
-4. `schema-v4-payment-settings.sql` — payment methods & bank details  
-5. `schema-v5-form-submissions.sql` — contact form records (dashboard counts)  
-6. `schema-v6-program-flyers.sql` — **program flyer uploads** (Storage bucket `program-flyers`; uses `featured_programs` only — safe if you did not run schema-v3)  
-7. `schema-v7-testimonials.sql` — client testimonials on homepage
+3. `schema-v3.sql` — **leads** table (popup) + programs/announcements if not already created  
+4. `schema-v3-services.sql` — services (editable in admin)  
+5. `schema-v4-payment-settings.sql` — payment methods & bank details  
+6. `schema-v5-form-submissions.sql` — **contact_submissions** (contact page + dashboard counts)  
+7. `schema-v6-program-flyers.sql` — **program flyer uploads** (Storage bucket `program-flyers`; uses `featured_programs` only — safe if you did not run schema-v3)  
+8. `schema-v7-testimonials.sql` — client testimonials on homepage
 
 ## Environment variables (Vercel)
 
