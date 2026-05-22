@@ -23,8 +23,17 @@ export async function submitApplicationAction(
   files: File[],
   applicationId: string = crypto.randomUUID()
 ): Promise<{ application: Application; emailSent: boolean; error?: string }> {
+  let uploaded: Awaited<ReturnType<typeof uploadApplicationFilesServer>> = [];
+
+  if (files.length > 0) {
+    try {
+      uploaded = await uploadApplicationFilesServer(storageSlug, applicationId, files);
+    } catch (err) {
+      console.error("[submitApplicationAction] file upload failed:", err);
+    }
+  }
+
   try {
-    const uploaded = await uploadApplicationFilesServer(storageSlug, applicationId, files);
     const application = await createApplicationServer(serviceName, form, uploaded, applicationId);
     const emailSent = await notifyOwnerOnApplicationSubmit(application, files);
     return { application, emailSent };
@@ -40,13 +49,16 @@ export async function submitApplicationAction(
         address: form.address,
         purpose: form.purpose,
         notes: form.notes || null,
-        uploaded_files: [],
+        uploaded_files: uploaded,
         payment_status: "pending",
         payment_reference: null,
         created_at: new Date().toISOString(),
       },
       emailSent: false,
-      error: err instanceof Error ? err.message : "Submission failed",
+      error:
+        err instanceof Error
+          ? err.message
+          : "Could not save your application. Please try again or contact us on WhatsApp.",
     };
   }
 }

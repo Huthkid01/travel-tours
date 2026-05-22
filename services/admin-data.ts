@@ -2,6 +2,7 @@ import {
   DEFAULT_PAYMENT_SETTINGS,
   type PaymentSettings,
 } from "@/data/payment-settings-default";
+import { programs as localPrograms } from "@/data/programs";
 import { services as localServices } from "@/data/services";
 import { getAdminSupabase } from "@/supabase/admin";
 import type { Announcement, Application, Program, ProgramStatus, ServiceCategory } from "@/types";
@@ -253,6 +254,35 @@ export async function upsertAdminPaymentSettings(settings: PaymentSettings): Pro
   if (error) throw new Error(error.message);
 }
 
+export async function seedAdminProgramsFromLocal(): Promise<number> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  let count = 0;
+  const active = localPrograms.filter((p) => p.status === "active");
+
+  for (const p of active) {
+    const { error } = await supabase.from("featured_programs").upsert(
+      {
+        slug: p.slug,
+        title: p.title,
+        description: p.description,
+        image: p.image,
+        optional_price: p.optionalPrice ?? null,
+        status: "active",
+        cta_link: p.ctaLink ?? `/consultation?program=${p.slug}`,
+        badge: p.badge ?? null,
+        sort_order: p.sortOrder ?? 0,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "slug" }
+    );
+    if (!error) count += 1;
+  }
+
+  return count;
+}
+
 export async function seedAdminServicesFromLocal(): Promise<number> {
   const supabase = getAdminSupabase();
   if (!supabase) throw new Error("Supabase not configured");
@@ -320,11 +350,20 @@ export async function upsertAdminProgram(
   const supabase = getAdminSupabase();
   if (!supabase) throw new Error("Supabase not configured");
 
-  const payload = {
+  const image = String(row.image || "").trim();
+  const imageType =
+    row.image_type === "flyer" || row.image_type === "photo"
+      ? row.image_type
+      : image.includes("/programs/flyers") || image.includes("program-flyers")
+        ? "flyer"
+        : "photo";
+
+  const payload: Record<string, unknown> = {
     slug: String(row.slug),
     title: String(row.title),
     description: String(row.description),
-    image: String(row.image),
+    image,
+    image_type: imageType,
     optional_price: row.optional_price != null ? Number(row.optional_price) : null,
     status: (row.status as ProgramStatus) || "active",
     cta_link: String(row.cta_link || "/consultation"),
@@ -335,15 +374,20 @@ export async function upsertAdminProgram(
 
   const table = "featured_programs";
 
-  if (id) {
-    const { data, error } = await supabase.from(table).update(payload).eq("id", id).select().single();
-    if (error) throw new Error(error.message);
-    return data;
-  }
+  const save = async () => {
+    if (id) {
+      return supabase.from(table).update(payload).eq("id", id).select().single();
+    }
+    return supabase.from(table).insert(payload).select().single();
+  };
 
-  const { data, error } = await supabase.from(table).insert(payload).select().single();
+  let { data, error } = await save();
+  if (error?.message?.includes("image_type")) {
+    delete payload.image_type;
+    ({ data, error } = await save());
+  }
   if (error) throw new Error(error.message);
-  return data;
+  return data as Record<string, unknown>;
 }
 
 export async function deleteAdminProgram(id: string): Promise<void> {

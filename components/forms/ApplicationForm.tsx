@@ -18,10 +18,20 @@ import type { ApplicationFormData } from "@/types";
 interface ApplicationFormProps {
   serviceSlug: string;
   serviceTitle: string;
+  submitLabel?: string;
+  deferPaymentToModal?: boolean;
+  disabled?: boolean;
   onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
 }
 
-export function ApplicationForm({ serviceSlug, serviceTitle, onSubmit }: ApplicationFormProps) {
+export function ApplicationForm({
+  serviceSlug,
+  serviceTitle,
+  submitLabel = "Submit Application",
+  deferPaymentToModal = false,
+  disabled = false,
+  onSubmit,
+}: ApplicationFormProps) {
   const contextLabel = `Applying for: ${serviceTitle}`;
 
   if (serviceUsesVisaForm(serviceSlug)) {
@@ -35,8 +45,10 @@ export function ApplicationForm({ serviceSlug, serviceTitle, onSubmit }: Applica
     return (
       <DarboiApplicationForm
         contextLabel={contextLabel}
-        submitLabel="Continue to Payment"
-        showPaymentInfo
+        submitLabel={submitLabel}
+        showPaymentInfo={!deferPaymentToModal}
+        deferPaymentToModal={deferPaymentToModal}
+        disabled={disabled}
         onSubmit={handleVisaSubmit}
       />
     );
@@ -52,7 +64,9 @@ export function ApplicationForm({ serviceSlug, serviceTitle, onSubmit }: Applica
     <ServiceApplicationForm
       config={config}
       contextLabel={contextLabel}
-      submitLabel="Continue to Payment"
+      submitLabel={submitLabel}
+      deferPaymentToModal={deferPaymentToModal}
+      disabled={disabled}
       onSubmit={handleServiceSubmit}
     />
   );

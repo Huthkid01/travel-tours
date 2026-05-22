@@ -1,4 +1,3 @@
-import { GoogleFormVideoPrompt } from "@/components/forms/GoogleFormVideoPrompt";
 import { FeaturedVideoPlayer } from "@/components/media/FeaturedVideoPlayer";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
@@ -14,7 +13,6 @@ export function FeaturedVideoSection() {
         />
         <div className="mt-10">
           <FeaturedVideoPlayer />
-          <GoogleFormVideoPrompt />
         </div>
       </div>
     </section>

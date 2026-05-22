@@ -4,6 +4,7 @@ import type { Announcement } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -24,12 +25,15 @@ export function useAnnouncementVisible() {
 }
 
 export function AnnouncementProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/admin");
   const [items, setItems] = useState<Announcement[]>([]);
   const [index, setIndex] = useState(0);
   /** In-memory only — dismiss hides until page refresh, then banner returns */
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
+    if (isAdminRoute) return;
     fetch("/api/announcements")
       .then((r) => r.json())
       .then((list: Announcement[]) => {
@@ -38,7 +42,7 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
         if (items.length === 0) setDismissed(true);
       })
       .catch(() => setDismissed(true));
-  }, []);
+  }, [isAdminRoute]);
 
   useEffect(() => {
     if (items.length <= 1 || dismissed) return;
@@ -50,7 +54,7 @@ export function AnnouncementProvider({ children }: { children: ReactNode }) {
     setDismissed(true);
   }, []);
 
-  const visible = items.length > 0 && !dismissed;
+  const visible = !isAdminRoute && items.length > 0 && !dismissed;
   const current = items[index];
 
   return (

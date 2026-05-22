@@ -53,9 +53,6 @@ export type SocialPlatform = "tiktok";
 
 export const WHATSAPP_BASE = "https://wa.me";
 
-export const APPLICATION_WHATSAPP_MESSAGE =
-  "Hello, I just submitted my application through your website. I would like assistance with the next steps.";
-
 export function getWhatsAppUrl(message?: string) {
   const number = SITE_CONFIG.whatsapp.replace(/\D/g, "");
   const text = message ? `?text=${encodeURIComponent(message)}` : "";

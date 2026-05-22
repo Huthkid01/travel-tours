@@ -112,7 +112,7 @@ export default async function HomePage() {
           <SectionHeading
             label="Apply"
             title="Consultation Form"
-            description="Complete our official Google Form after allowing cookies in the site popup."
+            description="Complete our official Google Form to start your consultation."
             align="center"
           />
           <div className="mt-8">

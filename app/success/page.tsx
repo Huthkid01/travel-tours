@@ -14,6 +14,8 @@ export default function SuccessPage() {
   const ref = searchParams.get("ref");
   const [applicantName, setApplicantName] = useState<string | undefined>();
   const [serviceName, setServiceName] = useState<string | undefined>();
+  const [paymentAmount, setPaymentAmount] = useState<number | undefined>();
+  const [paymentType, setPaymentType] = useState<string | undefined>();
 
   useEffect(() => {
     if (!applicationId) return;
@@ -21,6 +23,8 @@ export default function SuccessPage() {
       if (app) {
         setApplicantName(app.full_name);
         setServiceName(app.service_name);
+        if (app.payment_amount != null) setPaymentAmount(app.payment_amount);
+        if (app.payment_type) setPaymentType(app.payment_type);
       }
     });
   }, [applicationId]);
@@ -28,12 +32,15 @@ export default function SuccessPage() {
   const whatsappMessage = useMemo(
     () =>
       getApplicationWhatsAppMessage({
+        stage: "paid",
         applicationId,
         reference: ref,
         serviceName,
         applicantName,
+        paymentAmount,
+        paymentType,
       }),
-    [applicationId, ref, serviceName, applicantName]
+    [applicationId, ref, serviceName, applicantName, paymentAmount, paymentType]
   );
 
   const handleDone = () => {

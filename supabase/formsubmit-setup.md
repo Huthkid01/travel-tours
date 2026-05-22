@@ -24,4 +24,4 @@ Uploaded files are linked in the email body (from Supabase storage), not attache
 
 ## Google Form
 
-Set `GOOGLE_FORM_URL` to your `forms.gle` link. Users tap **Allow cookies & show form** on Home or Contact before the iframe loads.
+Set `GOOGLE_FORM_URL` to your `forms.gle` link. The form embeds on Home and Contact automatically.

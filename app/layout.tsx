@@ -1,6 +1,4 @@
 import { AnnouncementProvider } from "@/components/layout/AnnouncementContext";
-import { GoogleFormConsentPopup } from "@/components/forms/GoogleFormConsentPopup";
-import { GoogleFormConsentProvider } from "@/components/forms/GoogleFormConsentProvider";
 import { LayoutShell } from "@/components/layout/LayoutShell";
 import { LeadTrackerProvider } from "@/components/providers/LeadTrackerProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -35,15 +33,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider>
-          <GoogleFormConsentProvider>
-            <LeadTrackerProvider>
-              <AnnouncementProvider>
-                <LayoutShell>{children}</LayoutShell>
-                <GoogleFormConsentPopup />
-                <Toaster position="top-right" richColors closeButton />
-              </AnnouncementProvider>
-            </LeadTrackerProvider>
-          </GoogleFormConsentProvider>
+          <LeadTrackerProvider>
+            <AnnouncementProvider>
+              <LayoutShell>{children}</LayoutShell>
+              <Toaster position="top-right" richColors closeButton />
+            </AnnouncementProvider>
+          </LeadTrackerProvider>
         </ThemeProvider>
       </body>
     </html>

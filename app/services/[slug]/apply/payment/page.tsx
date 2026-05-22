@@ -56,12 +56,14 @@ export default function PaymentPage() {
 
       if (updated) {
         await notifyPaymentAction(updated, amount);
-        toast.success("Payment complete! Opening WhatsApp…");
+        toast.success("Payment recorded successfully! Opening WhatsApp…");
         const message = getApplicationWhatsAppMessage({
+          stage: "paid",
           applicationId: updated.id,
           reference,
           serviceName: service.title,
           paymentAmount: amount,
+          paymentType: type,
           applicantName: updated.full_name,
         });
         redirectToWhatsApp(message);
@@ -70,10 +72,12 @@ export default function PaymentPage() {
       toast.error("Payment recorded. Opening WhatsApp with your reference.");
       redirectToWhatsApp(
         getApplicationWhatsAppMessage({
+          stage: "paid",
           applicationId: application.id,
           reference,
           serviceName: service.title,
           paymentAmount: amount,
+          paymentType: type,
           applicantName: application.full_name,
         })
       );

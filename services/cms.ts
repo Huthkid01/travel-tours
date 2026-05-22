@@ -90,7 +90,10 @@ function mapProgram(row: Record<string, unknown>): Program {
     slug: String(row.slug),
     title: String(row.title),
     description: String(row.description),
-    image: image.startsWith("/") ? image : image || getProgramFlyerPath(String(row.slug)),
+    image:
+      image.startsWith("/") || isProgramFlyerImage(image)
+        ? image
+        : getProgramFlyerPath(String(row.slug)),
     imageType,
     optionalPrice: row.optional_price != null ? Number(row.optional_price) : null,
     status: row.status as Program["status"],
@@ -128,16 +131,32 @@ async function fetchFromTable(table: "programs" | "featured_programs"): Promise<
   return data.map(mapProgram);
 }
 
-export async function fetchPrograms(): Promise<Program[]> {
-  const fromPrograms = await fetchFromTable("programs");
-  if (fromPrograms.length) return fromPrograms;
-
-  const legacy = await fetchFromTable("featured_programs");
-  if (legacy.length) return legacy;
-
+function getLocalActivePrograms(): Program[] {
   return localPrograms
     .filter((p) => p.status === "active")
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
+/** DB programs override same slug; local fills Serbia, France, etc. when DB only has sample rows */
+function mergeProgramsWithLocal(dbPrograms: Program[]): Program[] {
+  const local = getLocalActivePrograms();
+  if (!dbPrograms.length) return local;
+
+  const bySlug = new Map(local.map((p) => [p.slug, p]));
+  for (const p of dbPrograms) {
+    bySlug.set(p.slug, p);
+  }
+  return Array.from(bySlug.values()).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
+export async function fetchPrograms(): Promise<Program[]> {
+  const fromPrograms = await fetchFromTable("programs");
+  if (fromPrograms.length) return mergeProgramsWithLocal(fromPrograms);
+
+  const legacy = await fetchFromTable("featured_programs");
+  if (legacy.length) return mergeProgramsWithLocal(legacy);
+
+  return getLocalActivePrograms();
 }
 
 export async function fetchProgramBySlug(slug: string): Promise<Program | null> {

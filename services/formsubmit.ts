@@ -1,6 +1,10 @@
 import "server-only";
 
 import { getFormSubmitEmail, isFormSubmitServerConfigured } from "@/lib/env.server";
+
+function getFormSubmitAccessKey(): string | undefined {
+  return process.env.FORMSUBMIT_ACCESS_KEY?.trim() || undefined;
+}
 import { formatPrice } from "@/lib/utils";
 import type { Application, ContactFormData } from "@/types";
 
@@ -12,16 +16,36 @@ function getRecipientEmail(): string {
 
 async function postFormSubmit(formData: FormData): Promise<void> {
   const email = encodeURIComponent(getRecipientEmail());
-  const res = await fetch(`${FORMSUBMIT_ENDPOINT}/${email}`, {
+  const accessKey = getFormSubmitAccessKey();
+  const endpoint = accessKey
+    ? `${FORMSUBMIT_ENDPOINT}/${email}/${encodeURIComponent(accessKey)}`
+    : `${FORMSUBMIT_ENDPOINT}/${email}`;
+
+  const res = await fetch(endpoint, {
     method: "POST",
     body: formData,
     headers: { Accept: "application/json" },
   });
 
-  const json = (await res.json().catch(() => ({}))) as { success?: string; message?: string };
+  const json = (await res.json().catch(() => ({}))) as {
+    success?: string | boolean;
+    message?: string;
+  };
 
-  if (!res.ok || json.success !== "true") {
-    throw new Error(json.message || "FormSubmit request failed");
+  const ok =
+    res.ok &&
+    (json.success === "true" ||
+      json.success === true ||
+      (res.status === 200 && !json.message?.toLowerCase().includes("fail")));
+
+  if (!ok) {
+    const msg = json.message || "FormSubmit request failed";
+    if (/activat/i.test(msg)) {
+      throw new Error(
+        "FormSubmit email is not activated yet. Open the activation link FormSubmit sent to your inbox."
+      );
+    }
+    throw new Error(msg);
   }
 }
 

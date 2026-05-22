@@ -20,7 +20,8 @@
 2. `schema-v2.sql` — programs, announcements, visitor tracking  
 3. `schema-v3-services.sql` — services (editable in admin)  
 4. `schema-v4-payment-settings.sql` — payment methods & bank details  
-5. `schema-v5-form-submissions.sql` — contact form records (dashboard counts)
+5. `schema-v5-form-submissions.sql` — contact form records (dashboard counts)  
+6. `schema-v6-program-flyers.sql` — **program flyer uploads** (Storage bucket `program-flyers`; uses `featured_programs` only — safe if you did not run schema-v3)
 
 ## Environment variables (Vercel)
 

@@ -4,7 +4,6 @@ import { CountrySelect } from "@/components/forms/CountrySelect";
 import { DarboiFormHeader } from "@/components/forms/DarboiFormHeader";
 import { FormStepFlow, type FormStepConfig } from "@/components/forms/FormStepFlow";
 import { formInputClass, formLabelClass } from "@/components/forms/form-step-styles";
-import { PaymentInfoBlock } from "@/components/forms/PaymentInfoBlock";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
 import { DocumentUpload } from "@/components/upload/DocumentUpload";
 import type { ServiceApplicationFormConfig } from "@/data/service-application-forms";
@@ -30,6 +29,8 @@ interface ServiceApplicationFormProps {
   config: ServiceApplicationFormConfig;
   contextLabel: string;
   submitLabel?: string;
+  deferPaymentToModal?: boolean;
+  disabled?: boolean;
   onSubmit: (data: ServiceApplicationFormValues, files: File[]) => Promise<void>;
 }
 
@@ -39,6 +40,8 @@ export function ServiceApplicationForm({
   config,
   contextLabel,
   submitLabel = "Continue to Payment",
+  deferPaymentToModal = false,
+  disabled = false,
   onSubmit,
 }: ServiceApplicationFormProps) {
   const schema = useMemo(() => buildServiceApplicationSchema(config), [config]);
@@ -105,7 +108,7 @@ export function ServiceApplicationForm({
       });
     }
 
-    if (config.showPaymentInfo !== false) {
+    if (config.showPaymentInfo !== false && !deferPaymentToModal) {
       list.push({
         id: "payment",
         title: "Payment",
@@ -117,7 +120,7 @@ export function ServiceApplicationForm({
     }
 
     return list;
-  }, [config, f]);
+  }, [config, f, deferPaymentToModal]);
 
   const [step, setStep] = useState(0);
   const [uploads, setUploads] = useState<Record<string, File[]>>(() =>
@@ -214,7 +217,7 @@ export function ServiceApplicationForm({
           onContinue={handleContinue}
           continueLabel={step === lastStepIndex ? submitLabel : undefined}
           isLastStep={step === lastStepIndex}
-          isSubmitting={loading}
+          isSubmitting={loading || disabled}
           showBack={step > 0}
         >
           {stepDef.kind === "personal" && (
@@ -377,15 +380,6 @@ export function ServiceApplicationForm({
             </div>
           )}
 
-          {stepDef.kind === "payment" && (
-            <div className="space-y-4">
-              <PaymentInfoBlock />
-              <div>
-                <label className={formLabelClass}>Payment reference / depositor name</label>
-                <input {...register("paymentReference")} className={formInputClass} placeholder="Transfer reference or name used" />
-              </div>
-            </div>
-          )}
         </FormStepFlow>
       </div>
     </form>

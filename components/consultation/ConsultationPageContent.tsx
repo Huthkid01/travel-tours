@@ -1,6 +1,7 @@
 "use client";
 
 import { ApplicationForm } from "@/components/forms/ApplicationForm";
+import { ApplicationSubmitFlow } from "@/components/forms/ApplicationSubmitFlow";
 import { DarboiApplicationForm } from "@/components/forms/DarboiApplicationForm";
 import { WhatsAppCTA } from "@/components/layout/WhatsAppCTA";
 import { serviceUsesVisaForm } from "@/data/service-application-forms";
@@ -10,36 +11,50 @@ import {
   redirectToWhatsApp,
 } from "@/lib/whatsapp";
 import { mapDarboiToApplicationData } from "@/lib/application-mapper";
-import { submitApplicationWithNotify } from "@/lib/submit-application";
+import { submitApplicationViaApi } from "@/lib/submit-application-client";
 import { getProgramBySlug } from "@/data/programs";
 import { PASSPORT_MATCH_NOTE } from "@/data/darboi-application-form";
 import type { ServiceItem } from "@/types";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { toastApplicationSaved } from "@/lib/application-toast";
 import { toast } from "sonner";
+
+async function submitAndOpenWhatsApp(
+  storageSlug: string,
+  label: string,
+  data: ReturnType<typeof mapDarboiToApplicationData>,
+  files: File[],
+  paymentRef?: string
+) {
+  const { application, emailSent } = await submitApplicationViaApi(storageSlug, label, data, files);
+  toastApplicationSaved({ emailSent, nextStep: "whatsapp" });
+  redirectToWhatsApp(
+    getApplicationWhatsAppMessage({
+      stage: paymentRef ? "paid" : "submitted",
+      applicationId: application.id,
+      serviceName: label,
+      applicantName: application.full_name,
+      reference: paymentRef,
+    })
+  );
+}
 
 export function ConsultationPageContent({ services }: { services: ServiceItem[] }) {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const programSlug = searchParams.get("program");
   const serviceSlug = searchParams.get("service");
 
-  const { label, paymentHref } = useMemo(() => {
+  const { label } = useMemo(() => {
     if (programSlug) {
       const program = getProgramBySlug(programSlug);
-      return {
-        label: program?.title ?? programSlug,
-        paymentHref: undefined as string | undefined,
-      };
+      return { label: program?.title ?? programSlug };
     }
     if (serviceSlug) {
       const service = services.find((s) => s.slug === serviceSlug);
-      return {
-        label: service?.title ?? serviceSlug,
-        paymentHref: `/services/${serviceSlug}/apply`,
-      };
+      return { label: service?.title ?? serviceSlug };
     }
-    return { label: "General Consultation", paymentHref: undefined as string | undefined };
+    return { label: "General Consultation" };
   }, [programSlug, serviceSlug, services]);
 
   return (
@@ -64,106 +79,45 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
               <DarboiApplicationForm
                 contextLabel={label}
                 submitLabel="Submit & Contact via WhatsApp"
-                showPaymentInfo
+                showPaymentInfo={false}
                 onSubmit={async (data, files) => {
                   try {
                     const slug = programSlug || "consultation";
                     const form = mapDarboiToApplicationData(data);
                     const allFiles = [...files.passportPhoto, ...files.passportBioPage];
-                    const { application, emailSent } = await submitApplicationWithNotify(
-                      slug,
-                      label,
-                      form,
-                      allFiles
-                    );
-                    if (!emailSent) {
-                      toast.warning("Application saved; email notification could not be sent.");
-                    } else {
-                      toast.success("Application sent to Darboi Consults!");
-                    }
-                    redirectToWhatsApp(
-                      getApplicationWhatsAppMessage({
-                        applicationId: application.id,
-                        serviceName: label,
-                        applicantName: application.full_name,
-                      })
-                    );
+                    await submitAndOpenWhatsApp(slug, label, form, allFiles);
                   } catch (err) {
-                    toast.error(err instanceof Error ? err.message : "Failed to submit");
+                    toast.error(
+                      err instanceof Error
+                        ? err.message
+                        : "Could not save your application. Please try again or contact us on WhatsApp."
+                    );
                   }
                 }}
               />
             ) : serviceSlug ? (
-              <ApplicationForm
-                serviceSlug={serviceSlug}
-                serviceTitle={label}
-                onSubmit={async (data, files) => {
-                  if (paymentHref) {
-                    try {
-                      const { application, emailSent } = await submitApplicationWithNotify(
-                        serviceSlug,
-                        label,
-                        data,
-                        files
-                      );
-                      sessionStorage.setItem("pending_application_id", application.id);
-                      if (emailSent) {
-                        toast.success("Application sent! Continue to payment.");
-                      } else {
-                        toast.success("Application saved. Continue to payment.");
-                      }
-                      router.push(`${paymentHref}/payment?applicationId=${application.id}`);
-                    } catch (err) {
-                      toast.error(err instanceof Error ? err.message : "Failed to save application");
-                    }
-                    return;
-                  }
-
-                  try {
-                    const { application, emailSent } = await submitApplicationWithNotify(
-                      serviceSlug,
-                      label,
-                      data,
-                      files
-                    );
-                    if (!emailSent) toast.warning("Application saved; email could not be sent.");
-                    else toast.success("Application sent!");
-                    redirectToWhatsApp(
-                      getApplicationWhatsAppMessage({
-                        applicationId: application.id,
-                        serviceName: label,
-                        applicantName: application.full_name,
-                      })
-                    );
-                  } catch (err) {
-                    toast.error(err instanceof Error ? err.message : "Failed to submit");
-                  }
-                }}
-              />
+              <ApplicationSubmitFlow storageSlug={serviceSlug} serviceName={label}>
+                {({ onSubmit, submitLabel, deferPaymentToModal, disabled }) => (
+                  <ApplicationForm
+                    serviceSlug={serviceSlug}
+                    serviceTitle={label}
+                    onSubmit={onSubmit}
+                    submitLabel={submitLabel}
+                    deferPaymentToModal={deferPaymentToModal}
+                    disabled={disabled}
+                  />
+                )}
+              </ApplicationSubmitFlow>
             ) : (
               <DarboiApplicationForm
                 contextLabel={label}
                 submitLabel="Submit & Contact via WhatsApp"
-                showPaymentInfo
+                showPaymentInfo={false}
                 onSubmit={async (data, files) => {
                   try {
                     const form = mapDarboiToApplicationData(data);
                     const allFiles = [...files.passportPhoto, ...files.passportBioPage];
-                    const { application, emailSent } = await submitApplicationWithNotify(
-                      "consultation",
-                      label,
-                      form,
-                      allFiles
-                    );
-                    if (!emailSent) toast.warning("Application saved; email could not be sent.");
-                    else toast.success("Application sent!");
-                    redirectToWhatsApp(
-                      getApplicationWhatsAppMessage({
-                        applicationId: application.id,
-                        serviceName: label,
-                        applicantName: application.full_name,
-                      })
-                    );
+                    await submitAndOpenWhatsApp("consultation", label, form, allFiles);
                   } catch (err) {
                     toast.error(err instanceof Error ? err.message : "Failed to submit");
                   }

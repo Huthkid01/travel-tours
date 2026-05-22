@@ -3,7 +3,6 @@
 import { DarboiFormHeader } from "@/components/forms/DarboiFormHeader";
 import { FormStepFlow, type FormStepConfig } from "@/components/forms/FormStepFlow";
 import { formInputClass, formLabelClass } from "@/components/forms/form-step-styles";
-import { PaymentInfoBlock } from "@/components/forms/PaymentInfoBlock";
 import { CountrySelect } from "@/components/forms/CountrySelect";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
 import { DocumentUpload } from "@/components/upload/DocumentUpload";
@@ -23,6 +22,9 @@ export interface DarboiApplicationFormProps {
   contextLabel?: string;
   submitLabel?: string;
   showPaymentInfo?: boolean;
+  /** When true, payment step is omitted; parent shows bank details in a modal after submit */
+  deferPaymentToModal?: boolean;
+  disabled?: boolean;
   onSubmit: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => Promise<void>;
 }
 
@@ -46,6 +48,8 @@ export function DarboiApplicationForm({
   contextLabel,
   submitLabel = "Submit Application",
   showPaymentInfo = true,
+  deferPaymentToModal = false,
+  disabled = false,
   onSubmit,
 }: DarboiApplicationFormProps) {
   const [step, setStep] = useState(0);
@@ -56,7 +60,10 @@ export function DarboiApplicationForm({
   const [loading, setLoading] = useState(false);
   const track = useLeadTrackerContext();
 
-  const steps = showPaymentInfo ? STEPS : STEPS.filter((s) => s.id !== "payment");
+  const steps =
+    showPaymentInfo && !deferPaymentToModal
+      ? STEPS
+      : STEPS.filter((s) => s.id !== "payment");
   const lastStepIndex = steps.length - 1;
 
   const {
@@ -151,7 +158,7 @@ export function DarboiApplicationForm({
           onContinue={handleContinue}
           continueLabel={step === lastStepIndex ? submitLabel : undefined}
           isLastStep={step === lastStepIndex}
-          isSubmitting={loading}
+          isSubmitting={loading || disabled}
           showBack={step > 0}
         >
           {stepId === "personal" && (
@@ -251,15 +258,6 @@ export function DarboiApplicationForm({
             </div>
           )}
 
-          {stepId === "payment" && showPaymentInfo && (
-            <div className="space-y-4">
-              <PaymentInfoBlock />
-              <div>
-                <label className={formLabelClass}>Payment reference / depositor name</label>
-                <input {...register("paymentReference")} className={formInputClass} placeholder="Transfer reference or name used" />
-              </div>
-            </div>
-          )}
         </FormStepFlow>
       </div>
     </form>
