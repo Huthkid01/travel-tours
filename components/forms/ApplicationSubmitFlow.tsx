@@ -1,11 +1,11 @@
 "use client";
 
+import { usePaymentSettings } from "@/components/forms/usePaymentSettings";
 import { PaymentDetailsModal } from "@/components/payment/PaymentDetailsModal";
-import { toastApplicationSaved } from "@/lib/application-toast";
+import { toastApplicationSaved, toastPaymentComplete } from "@/lib/application-toast";
 import { submitApplicationViaApi } from "@/lib/submit-application-client";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
 import type { Application, ApplicationFormData } from "@/types";
-import { APPOINTMENT_FEE_INFO } from "@/data/darboi-application-form";
 import { CheckCircle, CreditCard } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -13,6 +13,8 @@ import { toast } from "sonner";
 interface ApplicationSubmitFlowProps {
   storageSlug: string;
   serviceName: string;
+  /** program | service — affects WhatsApp wording */
+  kind?: "program" | "service" | "consultation";
   children: (props: {
     onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
     submitLabel: string;
@@ -24,12 +26,14 @@ interface ApplicationSubmitFlowProps {
 export function ApplicationSubmitFlow({
   storageSlug,
   serviceName,
+  kind = "service",
   children,
 }: ApplicationSubmitFlowProps) {
   const [submitted, setSubmitted] = useState<Application | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { settings } = usePaymentSettings();
 
   const handleFormSubmit = async (data: ApplicationFormData, files: File[]) => {
     setSubmitting(true);
@@ -57,35 +61,53 @@ export function ApplicationSubmitFlow({
   const handlePaymentDone = async (paymentReference: string) => {
     if (!submitted) return;
     setFinishing(true);
+    const amount = settings.feeAmount;
     try {
-      if (paymentReference) {
-        await fetch(`/api/applications/${submitted.id}/payment-reference`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentReference }),
-        });
-      }
+      const res = await fetch(`/api/applications/${submitted.id}/complete-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentReference: paymentReference || undefined,
+          amount,
+          paymentType: "booking-fee",
+        }),
+      });
+      const json = (await res.json()) as {
+        emailSent?: boolean;
+        error?: string;
+        application?: Application;
+      };
+
+      if (!res.ok) throw new Error(json.error || "Could not record payment");
+
+      const app = json.application ?? submitted;
       setModalOpen(false);
+      toastPaymentComplete({ emailSent: json.emailSent });
       redirectToWhatsApp(
         getApplicationWhatsAppMessage({
           stage: "paid",
-          applicationId: submitted.id,
+          kind,
+          applicationId: app.id,
           serviceName,
-          applicantName: submitted.full_name,
-          reference: paymentReference || undefined,
-          paymentAmount: APPOINTMENT_FEE_INFO.amount,
+          applicantName: app.full_name,
+          reference: paymentReference || app.payment_reference || undefined,
+          paymentAmount: amount,
           paymentType: "booking-fee",
         })
       );
     } catch {
-      toast.error("Could not save payment reference. Opening WhatsApp anyway.");
+      toast.error("Could not save payment. Opening WhatsApp anyway.");
+      setModalOpen(false);
       redirectToWhatsApp(
         getApplicationWhatsAppMessage({
           stage: "paid",
+          kind,
           applicationId: submitted.id,
           serviceName,
           applicantName: submitted.full_name,
           reference: paymentReference || undefined,
+          paymentAmount: amount,
+          paymentType: "booking-fee",
         })
       );
     } finally {
@@ -102,8 +124,8 @@ export function ApplicationSubmitFlow({
             Application submitted
           </h2>
           <p className="mt-2 text-sm text-navy-600 dark:text-navy-300">
-            Your details are saved. Make your bank transfer, then continue to WhatsApp so we can confirm payment and
-            next steps.
+            Your details are saved and Darboi was emailed. Make your bank transfer, then tap below to
+            confirm payment and open WhatsApp.
           </p>
           <button
             type="button"

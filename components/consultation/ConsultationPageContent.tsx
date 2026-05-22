@@ -23,19 +23,19 @@ import { toast } from "sonner";
 async function submitAndOpenWhatsApp(
   storageSlug: string,
   label: string,
+  kind: "program" | "consultation",
   data: ReturnType<typeof mapDarboiToApplicationData>,
-  files: File[],
-  paymentRef?: string
+  files: File[]
 ) {
   const { application, emailSent } = await submitApplicationViaApi(storageSlug, label, data, files);
   toastApplicationSaved({ emailSent, nextStep: "whatsapp" });
   redirectToWhatsApp(
     getApplicationWhatsAppMessage({
-      stage: paymentRef ? "paid" : "submitted",
+      stage: "submitted",
+      kind,
       applicationId: application.id,
       serviceName: label,
       applicantName: application.full_name,
-      reference: paymentRef,
     })
   );
 }
@@ -85,7 +85,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                     const slug = programSlug || "consultation";
                     const form = mapDarboiToApplicationData(data);
                     const allFiles = [...files.passportPhoto, ...files.passportBioPage];
-                    await submitAndOpenWhatsApp(slug, label, form, allFiles);
+                    await submitAndOpenWhatsApp(slug, label, "program", form, allFiles);
                   } catch (err) {
                     toast.error(
                       err instanceof Error
@@ -96,7 +96,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                 }}
               />
             ) : serviceSlug ? (
-              <ApplicationSubmitFlow storageSlug={serviceSlug} serviceName={label}>
+              <ApplicationSubmitFlow storageSlug={serviceSlug} serviceName={label} kind="service">
                 {({ onSubmit, submitLabel, deferPaymentToModal, disabled }) => (
                   <ApplicationForm
                     serviceSlug={serviceSlug}
@@ -117,7 +117,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                   try {
                     const form = mapDarboiToApplicationData(data);
                     const allFiles = [...files.passportPhoto, ...files.passportBioPage];
-                    await submitAndOpenWhatsApp("consultation", label, form, allFiles);
+                    await submitAndOpenWhatsApp("consultation", label, "consultation", form, allFiles);
                   } catch (err) {
                     toast.error(err instanceof Error ? err.message : "Failed to submit");
                   }

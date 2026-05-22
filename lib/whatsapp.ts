@@ -16,9 +16,17 @@ export function getConsultationWhatsAppMessage(context: string): string {
 }
 
 export type ApplicationWhatsAppStage = "submitted" | "paid";
+export type ApplicationWhatsAppKind = "service" | "program" | "consultation";
+
+function itemLabel(kind: ApplicationWhatsAppKind, isPaid: boolean): string {
+  if (kind === "program") return isPaid ? "Program paid for" : "Program";
+  if (kind === "consultation") return isPaid ? "Consultation paid for" : "Consultation";
+  return isPaid ? "Service paid for" : "Service";
+}
 
 export function getApplicationWhatsAppMessage(options: {
   stage?: ApplicationWhatsAppStage;
+  kind?: ApplicationWhatsAppKind;
   applicationId?: string | null;
   reference?: string | null;
   serviceName?: string;
@@ -27,6 +35,7 @@ export function getApplicationWhatsAppMessage(options: {
   applicantName?: string;
 }): string {
   const name = options.applicantName?.trim();
+  const kind = options.kind ?? "service";
   const isPaid =
     options.stage === "paid" ||
     (options.paymentAmount != null && options.paymentAmount > 0) ||
@@ -47,7 +56,7 @@ export function getApplicationWhatsAppMessage(options: {
   }
 
   if (options.serviceName) {
-    lines.push(isPaid ? `Paid for: ${options.serviceName}` : `Service: ${options.serviceName}`);
+    lines.push(`${itemLabel(kind, isPaid)}: ${options.serviceName}`);
   }
 
   if (isPaid && options.paymentType) {

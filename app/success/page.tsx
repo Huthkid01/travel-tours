@@ -33,6 +33,7 @@ export default function SuccessPage() {
     () =>
       getApplicationWhatsAppMessage({
         stage: "paid",
+        kind: "service",
         applicationId,
         reference: ref,
         serviceName,

@@ -32,7 +32,7 @@ export default function ApplyPage() {
       <PageHero title="Application Form" subtitle={`Apply for ${service.title}`} />
       <section className="section-padding bg-navy-50/50 dark:bg-navy-950/30">
         <div className="container-custom max-w-2xl">
-          <ApplicationSubmitFlow storageSlug={slug} serviceName={service.title}>
+          <ApplicationSubmitFlow storageSlug={slug} serviceName={service.title} kind="service">
             {({ onSubmit, submitLabel, deferPaymentToModal, disabled }) => (
               <ApplicationForm
                 serviceSlug={slug}

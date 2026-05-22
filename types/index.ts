@@ -1,6 +1,6 @@
 export type PaymentStatus = "pending" | "paid" | "failed";
 export type PaymentType = "deposit" | "full" | "booking-fee";
-export type PaymentProvider = "paystack" | "flutterwave";
+export type PaymentProvider = "paystack" | "flutterwave" | "bank-transfer";
 
 export type ProgramStatus = "active" | "draft" | "archived";
 export type AnnouncementType = "promo" | "service" | "notice";

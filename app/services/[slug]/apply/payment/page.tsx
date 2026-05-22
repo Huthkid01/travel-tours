@@ -10,6 +10,7 @@ import {
   notifyPaymentAction,
   updateApplicationPaymentAction,
 } from "@/lib/actions/application";
+import { toastPaymentComplete } from "@/lib/application-toast";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
 import type { Application, PaymentProvider, PaymentType } from "@/types";
 import { useParams, useSearchParams } from "next/navigation";
@@ -55,10 +56,11 @@ export default function PaymentPage() {
       });
 
       if (updated) {
-        await notifyPaymentAction(updated, amount);
-        toast.success("Payment recorded successfully! Opening WhatsApp…");
+        const emailSent = await notifyPaymentAction(updated, amount);
+        toastPaymentComplete({ emailSent });
         const message = getApplicationWhatsAppMessage({
           stage: "paid",
+          kind: "service",
           applicationId: updated.id,
           reference,
           serviceName: service.title,
@@ -73,6 +75,7 @@ export default function PaymentPage() {
       redirectToWhatsApp(
         getApplicationWhatsAppMessage({
           stage: "paid",
+          kind: "service",
           applicationId: application.id,
           reference,
           serviceName: service.title,
