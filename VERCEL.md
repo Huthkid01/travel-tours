@@ -13,6 +13,7 @@ After changing variables, **Redeploy**.
 | `SUPABASE_ANON_KEY` | Supabase → `anon` public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → `service_role` secret |
 | `FORMSUBMIT_EMAIL` | `darboiconsults@gmail.com` |
+| `GMAIL_APP_PASSWORD` | Gmail App Password (recommended — reliable owner emails) |
 | `GOOGLE_FORM_URL` | Your `forms.gle` link |
 | `ADMIN_EMAIL` | Admin login email |
 | `ADMIN_PASSWORD` | Admin login password |
@@ -49,7 +50,8 @@ Delete any of these if still present:
 ## After deploy
 
 1. Run Supabase SQL: `schema.sql` → `v2` → `v3` → `v4`
-2. Submit Contact form once → activate FormSubmit email
-3. Login at `/admin/login`
-4. Admin → Services → Import defaults (first time)
-5. Admin → Payment methods → save bank details
+2. Set `FORMSUBMIT_EMAIL` and `GMAIL_APP_PASSWORD` in Vercel Production → Redeploy
+3. Admin → Applications → **Test owner email** → click FormSubmit confirmation link in inbox
+4. Login at `/admin/login`
+5. Admin → Services → Import defaults (first time)
+6. Admin → Payment methods → save bank details

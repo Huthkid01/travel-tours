@@ -35,7 +35,7 @@ export async function submitApplicationAction(
 
   try {
     const application = await createApplicationServer(serviceName, form, uploaded, applicationId);
-    const emailSent = await notifyOwnerOnApplicationSubmit(application, files);
+    const emailSent = await notifyOwnerOnApplicationSubmit(application);
     return { application, emailSent };
   } catch (err) {
     return {
@@ -82,10 +82,6 @@ export async function updateApplicationPaymentAction(
   return updateApplicationPaymentServer(id, payment);
 }
 
-export async function notifyPaymentAction(
-  application: Application,
-  amount: number,
-  files?: File[]
-): Promise<boolean> {
-  return notifyOwnerOnPayment(application, amount, files);
+export async function notifyPaymentAction(application: Application, amount: number): Promise<boolean> {
+  return notifyOwnerOnPayment(application, amount);
 }

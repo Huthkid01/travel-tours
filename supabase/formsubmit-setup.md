@@ -1,6 +1,6 @@
-# FormSubmit (owner email notifications)
+# Owner email notifications
 
-All main site forms send a copy to **darboiconsults@gmail.com** via [FormSubmit](https://formsubmit.co). Data is also saved in **Supabase** where applicable.
+Applications and contact forms save to **Supabase** and email **darboiconsults@gmail.com**.
 
 ## Vercel / `.env.local`
 
@@ -8,39 +8,44 @@ All main site forms send a copy to **darboiconsults@gmail.com** via [FormSubmit]
 FORMSUBMIT_EMAIL=darboiconsults@gmail.com
 ```
 
-Optional (if FormSubmit gives you an access key for AJAX):
+**Recommended (reliable on Vercel):**
+
+```env
+GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+SMTP_USER=darboiconsults@gmail.com
+```
+
+Create an App Password: Google Account → Security → 2-Step Verification → App passwords.
+
+Optional FormSubmit AJAX key:
 
 ```env
 FORMSUBMIT_ACCESS_KEY=your-access-key
 ```
 
-## First-time activation (required once)
+## Activate FormSubmit (once)
 
-1. Submit the **Contact** form once on the live site (or any application form).
-2. FormSubmit emails you a **confirmation link** — click it so future messages are delivered.
-3. Add the same `FORMSUBMIT_EMAIL` in **Vercel → Settings → Environment Variables** (Production).
+1. Admin → **Applications** → **Test owner email**, or submit Contact on the live site.
+2. Check **darboiconsults@gmail.com** (and spam) for FormSubmit’s **confirmation link** — click it.
+3. Without activation, emails fail silently (`emailSent: false` in logs) but data still appears in Admin.
 
-## What sends email to the owner
+## Gmail fallback
 
-| Form | FormSubmit subject | Also saved in Supabase |
-|------|-------------------|------------------------|
-| **Contact** page | `Contact: {subject}` | `contact_submissions` |
-| **Consultation** (general) | `New application submitted: …` | `applications` |
-| **Consultation** (program `?program=`) | `New application submitted: …` | `applications` |
-| **Service apply** (`/services/.../apply`) | `New application submitted: …` | `applications` |
-| **After bank payment** (Done) | `Payment received: …` | `applications` (updated) |
-| **Lead popup** (“Stay Connected”) | `New lead inquiry: …` | `leads` |
+If FormSubmit fails (common on server-side submits), the app automatically sends via Gmail when `GMAIL_APP_PASSWORD` is set.
 
-Application emails include: name, email, phone, country, address, purpose, notes, application ID, file links (and file attachments when uploaded).
+## What sends email
 
-## Consultation form flow
+| Form | Subject |
+|------|---------|
+| Contact | `Contact: {subject}` |
+| Consultation / apply | `New application submitted: …` |
+| After payment | `Payment received: …` |
+| Lead popup | `New lead inquiry: …` |
 
-1. User clicks **Submit** → saved to Supabase.
-2. `notifyOwnerOnApplicationSubmit` → FormSubmit email to owner.
-3. Success toast → WhatsApp opens (even if email fails; form data is still in Supabase).
+Emails include applicant details and **links to uploaded files** in Supabase (files are not attached — avoids FormSubmit size limits).
 
-If email fails, check Vercel logs for `[notifyOwnerOnApplicationSubmit]` and confirm FormSubmit is activated.
+## Troubleshooting
 
-## Google Form embed
-
-The embedded Google Form on Home/Contact is separate — responses go to Google, not FormSubmit. Use the on-site consultation/application forms for FormSubmit + Supabase.
+- Vercel logs: `[notifyOwnerOnApplicationSubmit]` or `[FormSubmit]`
+- Admin → Applications → **Test owner email**
+- Confirm `FORMSUBMIT_EMAIL` + `GMAIL_APP_PASSWORD` in Vercel Production → Redeploy

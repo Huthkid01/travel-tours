@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     let emailSent = false;
     try {
-      emailSent = await notifyOwnerOnApplicationSubmit(application, files);
+      emailSent = await notifyOwnerOnApplicationSubmit(application);
     } catch (err) {
       console.error("[applications/submit] email failed:", err);
     }

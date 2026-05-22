@@ -1,12 +1,15 @@
 "use client";
 
-import { adminH1, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
+import { adminBtnSecondary, adminH1, adminSubtitle, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
 import type { Application } from "@/types";
+import { Loader2, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function AdminApplicationsPage() {
   const [rows, setRows] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [testingEmail, setTestingEmail] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/applications")
@@ -15,10 +18,41 @@ export default function AdminApplicationsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const testOwnerEmail = async () => {
+    setTestingEmail(true);
+    try {
+      const res = await fetch("/api/admin/test-email", { method: "POST" });
+      const json = (await res.json()) as { ok?: boolean; error?: string; hint?: string; to?: string };
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error || "Test failed");
+      }
+      toast.success(`Test email sent to ${json.to ?? "owner inbox"}. Check inbox and spam.`);
+      if (json.hint) toast.info(json.hint, { duration: 8000 });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not send test email");
+    } finally {
+      setTestingEmail(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className={adminH1}>Applications</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className={adminH1}>Applications</h1>
+          <p className={adminSubtitle}>
+            Submissions are saved here. Owner also gets email via FormSubmit (or Gmail if configured).
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void testOwnerEmail()}
+          disabled={testingEmail}
+          className={adminBtnSecondary}
+        >
+          {testingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+          Test owner email
+        </button>
       </div>
 
       <div className={adminTableWrap}>
