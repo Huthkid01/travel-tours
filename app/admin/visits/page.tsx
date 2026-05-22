@@ -1,5 +1,6 @@
 "use client";
 
+import { adminH1, adminSubtitle, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
 import { Loader2, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -64,8 +65,8 @@ export default function AdminVisitsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Site Visits</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Page views and actions on the live website.</p>
+          <h1 className={adminH1}>Site Visits</h1>
+          <p className={adminSubtitle}>Page views and actions on the live website.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -80,14 +81,15 @@ export default function AdminVisitsPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/80 text-xs uppercase text-slate-500">
+      <p className="text-xs text-slate-500 sm:hidden">Swipe left on the table to see all columns.</p>
+      <div className={adminTableWrap}>
+        <table className="w-full min-w-[640px] text-left text-sm">
+          <thead className={adminTableHead}>
             <tr>
-              <th className="px-4 py-3">Time</th>
-              <th className="px-4 py-3">Action</th>
-              <th className="px-4 py-3">Page / Source</th>
-              <th className="px-4 py-3">Service</th>
+              <th className="whitespace-nowrap px-4 py-3">Time</th>
+              <th className="whitespace-nowrap px-4 py-3">Action</th>
+              <th className="min-w-[8rem] px-4 py-3">Page / Source</th>
+              <th className="min-w-[6rem] px-4 py-3">Service</th>
             </tr>
           </thead>
           <tbody>
@@ -106,11 +108,11 @@ export default function AdminVisitsPage() {
               </tr>
             )}
             {rows.map((row) => (
-              <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50 dark:border-slate-800/80 dark:hover:bg-slate-800/30">
-                <td className="px-4 py-3 text-slate-400">
+              <tr key={row.id} className={adminTableRow}>
+                <td className="whitespace-nowrap px-4 py-3 text-slate-600 dark:text-slate-400">
                   {new Date(row.created_at).toLocaleString()}
                 </td>
-                <td className="px-4 py-3">
+                <td className="whitespace-nowrap px-4 py-3">
                   <span
                     className={
                       row.action_type === "page_view"
@@ -121,8 +123,12 @@ export default function AdminVisitsPage() {
                     {row.action_type}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{row.source || "—"}</td>
-                <td className="px-4 py-3 text-slate-400">{row.service || "—"}</td>
+                <td className="max-w-[14rem] px-4 py-3 text-slate-700 break-words dark:text-slate-300 sm:max-w-none">
+                  {row.source || "—"}
+                </td>
+                <td className="max-w-[10rem] px-4 py-3 text-slate-600 break-words dark:text-slate-400 sm:max-w-none">
+                  {row.service || "—"}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -45,7 +45,7 @@ export function ServiceApplicationForm({
   onSubmit,
 }: ServiceApplicationFormProps) {
   const schema = useMemo(() => buildServiceApplicationSchema(config), [config]);
-  const f = config.fields ?? {};
+  const f = useMemo(() => config.fields ?? {}, [config.fields]);
 
   const steps = useMemo(() => {
     const list: StepDef[] = [
