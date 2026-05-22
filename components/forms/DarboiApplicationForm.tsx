@@ -127,8 +127,31 @@ export function DarboiApplicationForm({
     const stepId = steps[step].id;
 
     if (stepId === "documents") {
-      if (!validateDocuments()) return;
-      setStep((s) => Math.min(s + 1, lastStepIndex));
+      if (!validateDocuments()) {
+        toast.error("Please upload both passport files before submitting.");
+        return;
+      }
+      if (step < lastStepIndex) {
+        setStep((s) => s + 1);
+        return;
+      }
+      const fieldsOk = await trigger();
+      if (!fieldsOk) {
+        toast.error("Please complete all required fields before submitting.");
+        for (let i = 0; i < STEP_FIELDS.length; i++) {
+          const fields = STEP_FIELDS[i];
+          if (!fields.length) continue;
+          const stepOk = await trigger(fields);
+          if (!stepOk) {
+            const targetId = STEPS[i]?.id;
+            const targetIndex = steps.findIndex((s) => s.id === targetId);
+            if (targetIndex >= 0) setStep(targetIndex);
+            break;
+          }
+        }
+        return;
+      }
+      void handleSubmit(submit)();
       return;
     }
 
