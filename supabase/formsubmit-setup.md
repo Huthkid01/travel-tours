@@ -23,8 +23,6 @@ Gmail (`GMAIL_APP_PASSWORD`) is optional — not required if you use FormSubmit 
 3. Click the **activation link** in that email.
 4. After that, contact, consultation, and lead forms will deliver to your inbox.
 
-Or: **Admin → Applications → Test owner email** (sends from your browser the same way).
-
 ## What sends when
 
 | Form | When email sends |
@@ -47,4 +45,4 @@ If an attachment is missing, check FormSubmit size limits (~5MB per file) and co
 - Confirm activation link was clicked.
 - Submit from the real URL `travel-tours-eight.vercel.app`, not localhost only.
 - Check spam folder.
-- Try **Admin → Test owner email** while logged into admin on the live site.
+- Submit the **Contact** form on the live site once to activate FormSubmit.

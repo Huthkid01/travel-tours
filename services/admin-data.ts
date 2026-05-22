@@ -362,6 +362,18 @@ export async function fetchAdminApplications(limit = 50): Promise<Application[]>
   return (data ?? []) as Application[];
 }
 
+/** Remove all portal form rows: applications, lead popup, contact page */
+export async function clearAllFormSubmissions(): Promise<void> {
+  const supabase = getAdminSupabase();
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const tables = ["applications", "leads", "contact_submissions"] as const;
+  for (const table of tables) {
+    const { error } = await supabase.from(table).delete().gte("created_at", "1970-01-01T00:00:00Z");
+    if (error) throw new Error(`Could not clear ${table}: ${error.message}`);
+  }
+}
+
 export async function fetchAdminPrograms(): Promise<Record<string, unknown>[]> {
   const supabase = getAdminSupabase();
   if (!supabase) return [];
