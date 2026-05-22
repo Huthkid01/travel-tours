@@ -1,6 +1,7 @@
 "use client";
 
 import { StatCard } from "@/components/admin/StatCard";
+import { adminBtnSecondary, adminH1, adminSubtitle } from "@/lib/admin-ui";
 import type { AdminDashboardStats } from "@/services/admin-data";
 import {
   Bell,
@@ -48,8 +49,8 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">Dashboard overview</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className={adminH1}>Dashboard overview</h1>
+          <p className={adminSubtitle}>
             Site visits, form submissions, services, and quick links to edit your website.
           </p>
         </div>
@@ -57,7 +58,7 @@ export default function AdminDashboardPage() {
           type="button"
           onClick={load}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+          className={adminBtnSecondary}
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -104,11 +105,11 @@ export default function AdminDashboardPage() {
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950/50 p-4 transition hover:border-blue-500/40 hover:bg-slate-800"
+                className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-500/40 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950/50 dark:hover:bg-slate-800"
               >
-                <Icon className="h-8 w-8 shrink-0 text-blue-400" />
+                <Icon className="h-8 w-8 shrink-0 text-blue-500 dark:text-blue-400" />
                 <div>
-                  <p className="font-medium text-slate-200">{label}</p>
+                  <p className="font-medium text-slate-800 dark:text-slate-200">{label}</p>
                   <p className="text-xs text-slate-500">{desc}</p>
                 </div>
               </Link>
@@ -116,48 +117,48 @@ export default function AdminDashboardPage() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="font-semibold text-white">Activity</h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="font-semibold text-slate-900 dark:text-white">Activity</h2>
           <p className="mt-1 text-xs text-slate-500">Visits and client submissions</p>
           <div className="mt-4 grid gap-3">
             {ACTIVITY_LINKS.map(({ href, label, desc, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950/50 p-4 transition hover:border-blue-500/40 hover:bg-slate-800"
+                className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-500/40 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950/50 dark:hover:bg-slate-800"
               >
-                <Icon className="h-8 w-8 shrink-0 text-blue-400" />
+                <Icon className="h-8 w-8 shrink-0 text-blue-500 dark:text-blue-400" />
                 <div>
-                  <p className="font-medium text-slate-200">{label}</p>
+                  <p className="font-medium text-slate-800 dark:text-slate-200">{label}</p>
                   <p className="text-xs text-slate-500">{desc}</p>
                 </div>
               </Link>
             ))}
           </div>
-          <ul className="mt-6 space-y-2 border-t border-slate-800 pt-4 text-sm">
+          <ul className="mt-6 space-y-2 border-t border-slate-200 pt-4 text-sm dark:border-slate-800">
             <li className="flex justify-between">
-              <span className="text-slate-400">Service applications</span>
-              <span className="font-semibold text-white">{stats?.totalApplications ?? 0}</span>
+              <span className="text-slate-600 dark:text-slate-400">Service applications</span>
+              <span className="font-semibold text-slate-900 dark:text-white">{stats?.totalApplications ?? 0}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-slate-400">Lead popup submissions</span>
-              <span className="font-semibold text-white">{stats?.totalLeads ?? 0}</span>
+              <span className="text-slate-600 dark:text-slate-400">Lead popup submissions</span>
+              <span className="font-semibold text-slate-900 dark:text-white">{stats?.totalLeads ?? 0}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-slate-400">Contact page messages</span>
-              <span className="font-semibold text-white">{stats?.totalContactMessages ?? 0}</span>
+              <span className="text-slate-600 dark:text-slate-400">Contact page messages</span>
+              <span className="font-semibold text-slate-900 dark:text-white">{stats?.totalContactMessages ?? 0}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-slate-400">Pending payment</span>
-              <span className="font-semibold text-amber-400">{stats?.pendingPayments ?? 0}</span>
+              <span className="text-slate-600 dark:text-slate-400">Pending payment</span>
+              <span className="font-semibold text-amber-600 dark:text-amber-400">{stats?.pendingPayments ?? 0}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-slate-400">Active programs</span>
-              <span className="font-semibold text-white">{stats?.activePrograms ?? 0}</span>
+              <span className="text-slate-600 dark:text-slate-400">Active programs</span>
+              <span className="font-semibold text-slate-900 dark:text-white">{stats?.activePrograms ?? 0}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-slate-400">Active announcements</span>
-              <span className="font-semibold text-white">{stats?.activeAnnouncements ?? 0}</span>
+              <span className="text-slate-600 dark:text-slate-400">Active announcements</span>
+              <span className="font-semibold text-slate-900 dark:text-white">{stats?.activeAnnouncements ?? 0}</span>
             </li>
           </ul>
         </section>

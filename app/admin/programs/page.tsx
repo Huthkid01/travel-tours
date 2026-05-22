@@ -161,8 +161,8 @@ export default function AdminProgramsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Program Management</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Program Management</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Manage featured programs ({rows.length} total). Flyer images are stored in Supabase and shown on the site.
           </p>
         </div>
@@ -171,7 +171,7 @@ export default function AdminProgramsPage() {
             type="button"
             onClick={importDefaults}
             disabled={seeding}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 disabled:opacity-60"
           >
             {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             Import all site programs
@@ -197,7 +197,7 @@ export default function AdminProgramsPage() {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="border-b border-slate-800 text-xs uppercase tracking-wide text-slate-500">
             <tr>
@@ -227,11 +227,11 @@ export default function AdminProgramsPage() {
               </tr>
             )}
             {filtered.map((row) => (
-              <tr key={row.id || row.slug} className="border-b border-slate-800/80 hover:bg-slate-800/30">
+              <tr key={row.id || row.slug} className="border-b border-slate-100 hover:bg-slate-50 dark:border-slate-800/80 dark:hover:bg-slate-800/30">
                 <td className="px-4 py-3">
                   <ProgramThumb image={row.image} title={row.title} />
                 </td>
-                <td className="max-w-[200px] px-4 py-3 font-medium text-white">{row.title}</td>
+                <td className="max-w-[200px] px-4 py-3 font-medium text-slate-900 dark:text-white">{row.title}</td>
                 <td className="px-4 py-3 font-mono text-xs text-slate-400">{row.slug}</td>
                 <td className="px-4 py-3 text-slate-400">{row.badge || "—"}</td>
                 <td className="max-w-[220px] truncate px-4 py-3 font-mono text-[11px] text-slate-500" title={row.image}>

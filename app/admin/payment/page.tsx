@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50";
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-600";
 const labelClass = "text-xs font-medium uppercase tracking-wide text-slate-500";
 
 function ToggleRow({
@@ -36,15 +36,15 @@ function ToggleRow({
   icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3">
+    <div className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/60">
       <div className="flex min-w-0 gap-3">
         {Icon && (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
             <Icon className="h-4 w-4" />
           </div>
         )}
         <div>
-          <p className="text-sm font-medium text-white">{title}</p>
+          <p className="text-sm font-medium text-slate-900 dark:text-white">{title}</p>
           {description && <p className="mt-0.5 text-xs text-slate-500">{description}</p>}
         </div>
       </div>
@@ -81,14 +81,14 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
-      <div className="flex items-start gap-3 border-b border-slate-800 bg-slate-950/50 px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600/15 text-blue-400">
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-start gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 dark:border-slate-800 dark:bg-slate-950/50">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600/15 text-blue-600 dark:text-blue-400">
           <Icon className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="font-display text-base font-semibold text-white">{title}</h2>
-          {description && <p className="mt-0.5 text-sm text-slate-400">{description}</p>}
+          <h2 className="font-display text-base font-semibold text-slate-900 dark:text-white">{title}</h2>
+          {description && <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{description}</p>}
         </div>
       </div>
       <div className="space-y-4 p-5">{children}</div>
@@ -163,8 +163,8 @@ export default function AdminPaymentPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Payment methods</h1>
-          <p className="mt-1 max-w-xl text-sm text-slate-400">
+          <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Payment methods</h1>
+          <p className="mt-1 max-w-xl text-sm text-slate-600 dark:text-slate-400">
             Bank details and checkout options shown when clients apply or pay on the site.
           </p>
         </div>
@@ -173,7 +173,7 @@ export default function AdminPaymentPage() {
             type="button"
             onClick={resetDefaults}
             disabled={loading || saving}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <RotateCcw className="h-4 w-4" />
             Reset defaults
@@ -191,7 +191,7 @@ export default function AdminPaymentPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 py-16 text-slate-500">
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-16 text-slate-500 dark:border-slate-800 dark:bg-slate-900">
           <Loader2 className="h-5 w-5 animate-spin" />
           Loading payment settings…
         </div>

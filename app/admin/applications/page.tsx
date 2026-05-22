@@ -1,5 +1,6 @@
 "use client";
 
+import { adminH1, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
 import type { Application } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -17,12 +18,12 @@ export default function AdminApplicationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold text-white">Applications</h1>
+        <h1 className={adminH1}>Applications</h1>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
+      <div className={adminTableWrap}>
         <table className="w-full min-w-[800px] text-left text-sm">
-          <thead className="border-b border-slate-800 bg-slate-950/80 text-xs uppercase text-slate-500">
+          <thead className={adminTableHead}>
             <tr>
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Name</th>
@@ -47,13 +48,13 @@ export default function AdminApplicationsPage() {
               </tr>
             )}
             {rows.map((app) => (
-              <tr key={app.id} className="border-b border-slate-800/80 hover:bg-slate-800/30">
-                <td className="px-4 py-3 text-slate-400">
+              <tr key={app.id} className={adminTableRow}>
+                <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                   {new Date(app.created_at).toLocaleDateString()}
                 </td>
-                <td className="px-4 py-3 font-medium text-white">{app.full_name}</td>
-                <td className="px-4 py-3 text-slate-300">{app.service_name}</td>
-                <td className="px-4 py-3 text-slate-400">
+                <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{app.full_name}</td>
+                <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{app.service_name}</td>
+                <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                   <div>{app.email}</div>
                   <div className="text-xs">{app.phone}</div>
                 </td>
@@ -61,10 +62,10 @@ export default function AdminApplicationsPage() {
                   <span
                     className={
                       app.payment_status === "paid"
-                        ? "text-green-400"
+                        ? "text-green-600 dark:text-green-400"
                         : app.payment_status === "pending"
-                          ? "text-orange-400"
-                          : "text-red-400"
+                          ? "text-orange-600 dark:text-orange-400"
+                          : "text-red-600 dark:text-red-400"
                     }
                   >
                     {app.payment_status}

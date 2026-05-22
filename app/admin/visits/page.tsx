@@ -64,8 +64,8 @@ export default function AdminVisitsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Site Visits</h1>
-          <p className="mt-1 text-sm text-slate-400">Page views and actions on the live website.</p>
+          <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Site Visits</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Page views and actions on the live website.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -82,7 +82,7 @@ export default function AdminVisitsPage() {
 
       <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-800 bg-slate-950/80 text-xs uppercase text-slate-500">
+          <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/80 text-xs uppercase text-slate-500">
             <tr>
               <th className="px-4 py-3">Time</th>
               <th className="px-4 py-3">Action</th>
@@ -106,7 +106,7 @@ export default function AdminVisitsPage() {
               </tr>
             )}
             {rows.map((row) => (
-              <tr key={row.id} className="border-b border-slate-800/80 hover:bg-slate-800/30">
+              <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50 dark:border-slate-800/80 dark:hover:bg-slate-800/30">
                 <td className="px-4 py-3 text-slate-400">
                   {new Date(row.created_at).toLocaleString()}
                 </td>
@@ -115,13 +115,13 @@ export default function AdminVisitsPage() {
                     className={
                       row.action_type === "page_view"
                         ? "rounded bg-blue-500/20 px-2 py-0.5 text-xs text-blue-300"
-                        : "rounded bg-slate-700 px-2 py-0.5 text-xs text-slate-300"
+                        : "rounded bg-slate-700 px-2 py-0.5 text-xs text-slate-700 dark:text-slate-300"
                     }
                   >
                     {row.action_type}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-300">{row.source || "—"}</td>
+                <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{row.source || "—"}</td>
                 <td className="px-4 py-3 text-slate-400">{row.service || "—"}</td>
               </tr>
             ))}

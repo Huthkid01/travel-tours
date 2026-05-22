@@ -29,7 +29,7 @@ function typeBadge(type: string) {
         "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
         type === "promo" && "bg-purple-500/20 text-purple-300",
         type === "service" && "bg-blue-500/20 text-blue-300",
-        type === "notice" && "bg-slate-500/20 text-slate-300"
+        type === "notice" && "bg-slate-500/20 text-slate-700 dark:text-slate-300"
       )}
     >
       {type}
@@ -144,8 +144,8 @@ export default function AdminAnnouncementsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Announcement Management</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Announcement Management</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Manage top banner messages ({rows.length} total). Click Add or Edit to open the popup.
           </p>
         </div>
@@ -154,7 +154,7 @@ export default function AdminAnnouncementsPage() {
             type="button"
             onClick={importDefaults}
             disabled={seeding}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 disabled:opacity-60"
           >
             {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             Import site announcements
@@ -180,7 +180,7 @@ export default function AdminAnnouncementsPage() {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="border-b border-slate-800 text-xs uppercase tracking-wide text-slate-500">
             <tr>
@@ -208,8 +208,8 @@ export default function AdminAnnouncementsPage() {
               </tr>
             )}
             {filtered.map((row) => (
-              <tr key={row.id} className="border-b border-slate-800/80 hover:bg-slate-800/30">
-                <td className="max-w-[320px] px-4 py-3 font-medium text-white">{row.message}</td>
+              <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50 dark:border-slate-800/80 dark:hover:bg-slate-800/30">
+                <td className="max-w-[320px] px-4 py-3 font-medium text-slate-900 dark:text-white">{row.message}</td>
                 <td className="px-4 py-3">{typeBadge(row.type)}</td>
                 <td className="max-w-[180px] truncate px-4 py-3 font-mono text-xs text-slate-500" title={row.link ?? ""}>
                   {row.link || "—"}
