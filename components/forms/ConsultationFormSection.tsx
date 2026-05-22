@@ -6,6 +6,8 @@ import { WhatsAppCTA } from "@/components/layout/WhatsAppCTA";
 import { mapDarboiToApplicationData } from "@/lib/application-mapper";
 import { CONSULTATION_PAYMENT_SETTINGS } from "@/lib/consultation-payment";
 import { getConsultationWhatsAppMessage } from "@/lib/whatsapp";
+import type { DarboiApplicationFormValues } from "@/lib/validations";
+import type { DarboiApplicationFiles } from "@/components/forms/DarboiApplicationForm";
 
 export interface ConsultationFormSectionProps {
   title?: string;
@@ -14,9 +16,18 @@ export interface ConsultationFormSectionProps {
 
 export function ConsultationFormSection({
   title = "Consultation Form",
-  description = "Submit your details below. After you submit, pay by bank transfer to confirm your consultation.",
+  description = "Complete all steps. On step 5, pay by bank transfer to submit your application and open WhatsApp.",
 }: ConsultationFormSectionProps) {
   const label = "General Consultation";
+
+  const mapAndStage = (
+    data: DarboiApplicationFormValues,
+    files: DarboiApplicationFiles,
+    onStageForPayment: (form: ReturnType<typeof mapDarboiToApplicationData>, allFiles: File[]) => void
+  ) => {
+    const allFiles = [...files.passportPhoto, ...files.passportBioPage];
+    onStageForPayment(mapDarboiToApplicationData(data), allFiles);
+  };
 
   return (
     <section className="rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:p-6 dark:border-navy-800 dark:bg-navy-900">
@@ -32,19 +43,25 @@ export function ConsultationFormSection({
             serviceName={label}
             kind="consultation"
             paymentSettings={CONSULTATION_PAYMENT_SETTINGS}
+            submitAfterPayment
           >
-            {({ onSubmit, submitLabel, deferPaymentToModal, disabled }) => (
+            {({
+              onStageForPayment,
+              submitLabel,
+              deferPaymentToModal,
+              paymentStepOpensModal,
+              disabled,
+            }) => (
               <DarboiApplicationForm
                 contextLabel={label}
                 submitLabel={submitLabel}
                 showPaymentInfo={false}
                 deferPaymentToModal={deferPaymentToModal}
+                paymentStepOpensModal={paymentStepOpensModal}
+                paymentFeeLabel={CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
                 disabled={disabled}
-                onSubmit={async (data, files) => {
-                  const form = mapDarboiToApplicationData(data);
-                  const allFiles = [...files.passportPhoto, ...files.passportBioPage];
-                  await onSubmit(form, allFiles);
-                }}
+                onStageForPayment={(data, files) => mapAndStage(data, files, onStageForPayment)}
+                onSubmit={async () => {}}
               />
             )}
           </ApplicationSubmitFlow>

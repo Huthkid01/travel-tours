@@ -6,12 +6,19 @@ export async function submitApplicationViaApi(
   serviceName: string,
   form: ApplicationFormData,
   files: File[],
-  applicationId: string = crypto.randomUUID()
+  applicationId: string = crypto.randomUUID(),
+  options?: { skipOwnerEmail?: boolean }
 ): Promise<{ application: Application; emailSent: boolean }> {
   const body = new FormData();
   body.append(
     "payload",
-    JSON.stringify({ storageSlug, serviceName, form, applicationId })
+    JSON.stringify({
+      storageSlug,
+      serviceName,
+      form,
+      applicationId,
+      skipOwnerEmail: options?.skipOwnerEmail,
+    })
   );
   files.forEach((file, i) => {
     body.append(`file_${i}`, file);

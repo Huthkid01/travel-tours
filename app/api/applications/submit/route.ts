@@ -20,6 +20,8 @@ export async function POST(request: Request) {
       serviceName: string;
       form: ApplicationFormData;
       applicationId?: string;
+      /** When true, owner email is sent after payment (step 5) instead of on submit */
+      skipOwnerEmail?: boolean;
     };
 
     const applicationId = payload.applicationId || crypto.randomUUID();
@@ -51,10 +53,12 @@ export async function POST(request: Request) {
     );
 
     let emailSent = false;
-    try {
-      emailSent = await notifyOwnerOnApplicationSubmit(application);
-    } catch (err) {
-      console.error("[applications/submit] email failed:", err);
+    if (!payload.skipOwnerEmail) {
+      try {
+        emailSent = await notifyOwnerOnApplicationSubmit(application);
+      } catch (err) {
+        console.error("[applications/submit] email failed:", err);
+      }
     }
 
     return NextResponse.json({ application, emailSent });

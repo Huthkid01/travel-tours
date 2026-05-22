@@ -107,7 +107,7 @@ export default async function HomePage() {
           <SectionHeading
             label="Apply"
             title="Consultation Form"
-            description="Submit your application below. Pay by bank transfer after submitting to confirm your consultation."
+            description="Five steps ending with Make payment — bank transfer, then submit and WhatsApp."
             align="center"
           />
           <div className="mt-8">

@@ -25,8 +25,13 @@ export interface DarboiApplicationFormProps {
   showPaymentInfo?: boolean;
   /** When true, payment step is omitted; parent shows bank details in a modal after submit */
   deferPaymentToModal?: boolean;
+  /** Step 5: Make payment — opens bank modal instead of submitting inline */
+  paymentStepOpensModal?: boolean;
+  paymentFeeLabel?: string;
   disabled?: boolean;
   onSubmit: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => Promise<void>;
+  /** Called on step 5 when user taps Make payment (after validation) */
+  onStageForPayment?: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => void;
 }
 
 const STEPS: FormStepConfig[] = [
@@ -50,8 +55,11 @@ export function DarboiApplicationForm({
   submitLabel = "Submit Application",
   showPaymentInfo = true,
   deferPaymentToModal = false,
+  paymentStepOpensModal = false,
+  paymentFeeLabel,
   disabled = false,
   onSubmit,
+  onStageForPayment,
 }: DarboiApplicationFormProps) {
   const [step, setStep] = useState(0);
   const [passportPhoto, setPassportPhoto] = useState<File[]>([]);
@@ -61,16 +69,24 @@ export function DarboiApplicationForm({
   const [loading, setLoading] = useState(false);
   const track = useLeadTrackerContext();
 
-  const steps =
-    showPaymentInfo && !deferPaymentToModal
-      ? STEPS
-      : STEPS.filter((s) => s.id !== "payment");
+  const steps = (() => {
+    if (paymentStepOpensModal) {
+      return STEPS.map((s) =>
+        s.id === "payment"
+          ? { ...s, title: "Make payment", description: "Bank transfer to confirm your consultation" }
+          : s
+      );
+    }
+    if (showPaymentInfo && !deferPaymentToModal) return STEPS;
+    return STEPS.filter((s) => s.id !== "payment");
+  })();
   const lastStepIndex = steps.length - 1;
 
   const {
     register,
     handleSubmit,
     trigger,
+    getValues,
     formState: { errors },
   } = useForm<DarboiApplicationFormValues>({
     resolver: zodResolver(darboiApplicationSchema),
@@ -128,16 +144,26 @@ export function DarboiApplicationForm({
 
     if (stepId === "documents") {
       if (!validateDocuments()) {
-        toast.error("Please upload both passport files before submitting.");
+        toast.error("Please upload both passport files before continuing.");
         return;
       }
       if (step < lastStepIndex) {
         setStep((s) => s + 1);
         return;
       }
+      if (paymentStepOpensModal) return;
+    }
+
+    if (stepId === "payment" && paymentStepOpensModal) {
+      if (!validateDocuments()) {
+        toast.error("Please upload both passport files before payment.");
+        const docIdx = steps.findIndex((s) => s.id === "documents");
+        if (docIdx >= 0) setStep(docIdx);
+        return;
+      }
       const fieldsOk = await trigger();
       if (!fieldsOk) {
-        toast.error("Please complete all required fields before submitting.");
+        toast.error("Please complete all required fields before payment.");
         for (let i = 0; i < STEP_FIELDS.length; i++) {
           const fields = STEP_FIELDS[i];
           if (!fields.length) continue;
@@ -151,7 +177,7 @@ export function DarboiApplicationForm({
         }
         return;
       }
-      void handleSubmit(submit)();
+      onStageForPayment?.(getValues(), { passportPhoto, passportBioPage });
       return;
     }
 
@@ -299,6 +325,36 @@ export function DarboiApplicationForm({
                 <p className="mb-2 text-xs text-navy-500">Up to 5 files — PDF, document, or image. Max 10 MB each.</p>
                 <DocumentUpload files={passportBioPage} onChange={setPassportBioPage} error={passportBioError} maxFiles={5} />
               </div>
+            </div>
+          )}
+
+          {stepId === "payment" && paymentStepOpensModal && (
+            <div className="space-y-4 text-center sm:text-left">
+              <div className="rounded-xl border border-gold-500/30 bg-gold-500/10 px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-400">
+                  Consultation fee
+                </p>
+                <p className="mt-1 font-display text-2xl font-bold text-navy-900 dark:text-white">
+                  {paymentFeeLabel ?? "See amount in next step"}
+                </p>
+              </div>
+              <p className="text-sm text-navy-600 dark:text-navy-300">
+                Tap <strong className="text-navy-900 dark:text-white">Make payment</strong> below to open bank transfer
+                details. Copy the account, pay the fee, then confirm with <strong>I&apos;ve made payment</strong> to
+                submit your application and open WhatsApp.
+              </p>
+            </div>
+          )}
+
+          {stepId === "payment" && !paymentStepOpensModal && showPaymentInfo && !deferPaymentToModal && (
+            <div>
+              <label className={formLabelClass}>Payment reference / depositor name</label>
+              <p className="mb-2 text-xs text-navy-500">Enter your transfer reference after paying by bank transfer</p>
+              <input
+                {...register("paymentReference")}
+                className={formInputClass}
+                placeholder="Transfer reference or depositor name"
+              />
             </div>
           )}
 

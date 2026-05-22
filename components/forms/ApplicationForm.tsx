@@ -20,8 +20,11 @@ interface ApplicationFormProps {
   serviceTitle: string;
   submitLabel?: string;
   deferPaymentToModal?: boolean;
+  paymentStepOpensModal?: boolean;
+  paymentFeeLabel?: string;
   disabled?: boolean;
   onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
+  onStageForPayment?: (data: ApplicationFormData, files: File[]) => void;
 }
 
 export function ApplicationForm({
@@ -29,8 +32,11 @@ export function ApplicationForm({
   serviceTitle,
   submitLabel = "Submit Application",
   deferPaymentToModal = false,
+  paymentStepOpensModal = false,
+  paymentFeeLabel,
   disabled = false,
   onSubmit,
+  onStageForPayment,
 }: ApplicationFormProps) {
   const contextLabel = `Applying for: ${serviceTitle}`;
 
@@ -42,14 +48,24 @@ export function ApplicationForm({
       await onSubmit(mapDarboiToApplicationData(data), [...passportPhoto, ...passportBioPage]);
     };
 
+    const handleVisaStage = (
+      data: DarboiApplicationFormValues,
+      files: DarboiApplicationFiles
+    ) => {
+      onStageForPayment?.(mapDarboiToApplicationData(data), [...files.passportPhoto, ...files.passportBioPage]);
+    };
+
     return (
       <DarboiApplicationForm
         contextLabel={contextLabel}
         submitLabel={submitLabel}
-        showPaymentInfo={!deferPaymentToModal}
+        showPaymentInfo={!deferPaymentToModal && !paymentStepOpensModal}
         deferPaymentToModal={deferPaymentToModal}
+        paymentStepOpensModal={paymentStepOpensModal}
+        paymentFeeLabel={paymentFeeLabel}
         disabled={disabled}
         onSubmit={handleVisaSubmit}
+        onStageForPayment={onStageForPayment ? handleVisaStage : undefined}
       />
     );
   }

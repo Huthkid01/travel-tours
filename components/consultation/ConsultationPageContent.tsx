@@ -54,9 +54,9 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
       <section className="section-padding">
         <div className="container-custom max-w-3xl">
           <p className="mb-6 text-sm text-navy-600 dark:text-navy-300">
-            {programSlug || (serviceSlug && !serviceUsesVisaForm(serviceSlug))
-              ? "Complete the form, then pay by bank transfer to confirm your consultation."
-              : `Complete the application form. Consultation fee is ${CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}.`}
+            Step 5 is <strong className="text-navy-800 dark:text-navy-100">Make payment</strong> — bank
+            details open in a popup. After you pay, tap <strong>I&apos;ve made payment</strong> to submit and open
+            WhatsApp. Fee: {CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}.
           </p>
           <div className="min-w-0 overflow-hidden rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:p-8 dark:border-navy-800 dark:bg-navy-900">
             <ApplicationSubmitFlow
@@ -64,15 +64,26 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
               serviceName={label}
               kind={kind}
               paymentSettings={CONSULTATION_PAYMENT_SETTINGS}
+              submitAfterPayment
             >
-              {({ onSubmit, submitLabel, deferPaymentToModal, disabled }) =>
+              {({
+                onSubmit,
+                onStageForPayment,
+                submitLabel,
+                deferPaymentToModal,
+                paymentStepOpensModal,
+                disabled,
+              }) =>
                 serviceSlug && serviceUsesVisaForm(serviceSlug) ? (
                   <ApplicationForm
                     serviceSlug={serviceSlug}
                     serviceTitle={label}
                     onSubmit={onSubmit}
+                    onStageForPayment={onStageForPayment}
                     submitLabel={submitLabel}
                     deferPaymentToModal={deferPaymentToModal}
+                    paymentStepOpensModal={paymentStepOpensModal}
+                    paymentFeeLabel={CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
                     disabled={disabled}
                   />
                 ) : (
@@ -81,7 +92,13 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                     submitLabel={submitLabel}
                     showPaymentInfo={false}
                     deferPaymentToModal={deferPaymentToModal}
+                    paymentStepOpensModal={paymentStepOpensModal}
+                    paymentFeeLabel={CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
                     disabled={disabled}
+                    onStageForPayment={(data, files) => {
+                      const allFiles = [...files.passportPhoto, ...files.passportBioPage];
+                      onStageForPayment(mapDarboiToApplicationData(data), allFiles);
+                    }}
                     onSubmit={async (data, files) => {
                       const form = mapDarboiToApplicationData(data);
                       const allFiles = [...files.passportPhoto, ...files.passportBioPage];
