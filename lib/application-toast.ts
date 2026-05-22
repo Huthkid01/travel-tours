@@ -16,11 +16,7 @@ export function toastApplicationSaved(options?: {
   }
 
   if (!emailSent) {
-    toast.info(
-      "Your details are saved in our system. A copy to Darboi by email is still pending — you can continue on WhatsApp."
-    );
-  } else if (nextStep !== "whatsapp") {
-    toast.info("A copy was sent to Darboi Consults by email.");
+    toast.error("Application saved, but notification could not be sent. Continue on WhatsApp.");
   }
 }
 
@@ -29,10 +25,6 @@ export function toastPaymentComplete(options?: { emailSent?: boolean }) {
   const { emailSent = true } = options ?? {};
   toast.success("Payment recorded! Opening WhatsApp…");
   if (!emailSent) {
-    toast.info(
-      "Payment is saved in our system. Email notification to Darboi is pending — continue on WhatsApp."
-    );
-  } else {
-    toast.info("Darboi Consults was notified by email about your payment.");
+    toast.error("Payment saved, but notification could not be sent. Continue on WhatsApp.");
   }
 }

@@ -1,57 +1,92 @@
-# Da Boi Consults Limited — Business Portal
+# Darboi Consults Limited — Business Portal
 
 Premium multi-service documentation and travel consultation portal.
 
 **Address:** Head Office, 24 Olowu Road, Ikeja, Lagos, Nigeria  
-**Phone / WhatsApp:** 08038178843
+**Phone / WhatsApp:** 08038178843  
+**Email:** darboiconsults@gmail.com  
+**Live site:** [travel-tours-eight.vercel.app](https://travel-tours-eight.vercel.app)
 
 ## Stack
 
 - **Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion
 - **Forms:** React Hook Form + Zod
-- **Database & Storage:** Supabase
-- **Email:** EmailJS
-- **Payments:** Paystack & Flutterwave (demo keys included)
+- **Database & storage:** Supabase (applications, CMS content, document uploads)
+- **Owner email:** [FormSubmit](https://formsubmit.co) (browser AJAX — see `supabase/formsubmit-setup.md`)
+- **Payments:** Bank transfer (primary flow) · optional Paystack / Flutterwave keys
+- **Admin:** Password-protected dashboard at `/admin`
 
 ## Features
 
-- 16 professional services with search & category filters
-- Dynamic application forms with drag-and-drop document upload
-- Supabase Storage (`documents/{service}/{application-id}/`)
-- Automatic email notifications to admin (EmailJS)
-- Paystack / Flutterwave payments (booking fee, deposit, full)
-- WhatsApp redirect after successful submission
+### Public site
+
+- Homepage hero with welcome loading animation on every visit
+- 16+ services with search and category filters
+- Travel programs with flyer images
+- Dynamic application and consultation forms with document upload
+- Bank transfer payment step → WhatsApp redirect after payment
+- Contact form, lead popup, announcements ticker, testimonials carousel
 - Dark mode, SEO, floating WhatsApp, sticky navbar
 
-## Demo Mode
+### Admin dashboard (`/admin`)
 
-Works without environment variables:
+- **Dashboard** — visits, applications, and quick links
+- **Services** — add, edit, publish, import site defaults
+- **Programs** — featured programs and flyer uploads
+- **Announcements** — banner and ticker messages
+- **Testimonials** — homepage carousel reviews
+- **Applications** — view submissions and test owner email (FormSubmit)
+- **Payment settings** — booking fee and bank details
+- **Site visits** — visitor activity log
 
-- Applications stored in `sessionStorage`
-- Email logged to console
-- Payment shows demo alerts
+## Application flow
+
+1. User selects a service or program → applies online
+2. Completes the form and uploads documents
+3. Makes payment by **bank transfer** (details shown in the form)
+4. After confirming payment → **redirected to WhatsApp** with application details
+5. Data saved to the database; owner notified by **FormSubmit email** (from the visitor’s browser)
 
 ## Setup
 
 ```bash
 npm install
+cp .env.example .env.local   # fill in values
 npm run dev
 ```
 
-### Supabase
+Open [http://localhost:3000](http://localhost:3000). Admin: [http://localhost:3000/admin/login](http://localhost:3000/admin/login).
+
+### Environment variables
+
+Copy `.env.example` to `.env.local`. For production, add the same keys in **Vercel** — see `VERCEL.md`.
+
+| Variable | Purpose |
+|----------|---------|
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Database, storage, admin API |
+| `FORMSUBMIT_EMAIL` | Owner inbox for form notifications |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET` | Admin login |
+| `SITE_URL` | Canonical site URL |
+| `PAYSTACK_PUBLIC_KEY`, `FLUTTERWAVE_PUBLIC_KEY` | Optional card/checkout keys |
+
+### Database
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Run `supabase/schema.sql` in the SQL Editor
-3. Add env vars from `.env.example`
+2. Run SQL in order: `supabase/schema.sql` → `schema-v2` … → `schema-v7-testimonials.sql`
+3. Configure storage per `supabase/storage-setup.md`
+4. Admin setup: `supabase/admin-setup.md`
 
-### FormSubmit (email notifications)
+### FormSubmit (owner email)
 
-1. Set `NEXT_PUBLIC_FORMSUBMIT_EMAIL=darboiconsults@gmail.com` in `.env.local` and Vercel
-2. See `supabase/formsubmit-setup.md` — confirm the inbox once via FormSubmit’s activation email
+1. Set `FORMSUBMIT_EMAIL=darboiconsults@gmail.com` in `.env.local` and Vercel
+2. On the **live site**, submit the Contact form once and click FormSubmit’s activation link in the inbox
+3. Details: `supabase/formsubmit-setup.md`
 
-### Payments
+Optional: `GMAIL_APP_PASSWORD` for server-side email fallback (not required if FormSubmit is activated).
 
-Replace demo keys with live Paystack/Flutterwave public keys.
+### Demo mode
+
+Without Supabase configured, the site still runs with limited persistence (e.g. session-based fallbacks). Configure env vars for full production behaviour.
 
 ## Client logo
 
@@ -60,24 +95,25 @@ Add files to **`public/branding/`** (see `public/branding/README.md`):
 - `logo.png` — main logo (recommended)
 - Optional: `logo-light.png`, `logo-dark.png` for different navbar backgrounds
 
-## Project Structure
+## Project structure
 
 ```
-public/branding/  Client logo files (PNG/SVG)
-app/              Pages (home, services, apply, payment, success, about, contact)
-components/       UI, forms, upload, payment, layout
-data/             Services, FAQs, testimonials, stats
-lib/              Constants, validations, utils
-services/         Supabase applications, storage, email, payment
-supabase/         SQL schema, setup guides
+app/              Pages (home, services, programs, apply, admin, contact, …)
+app/admin/        Admin dashboard (services, programs, applications, …)
+app/api/          REST routes (applications, contact, admin CRUD, …)
+components/       UI, forms, payment, layout, admin modals
+data/             Services, FAQs, testimonials, stats (seed / fallback)
+lib/              Constants, validations, FormSubmit client, WhatsApp helpers
+services/         Server-side data, storage, email, CMS
+supabase/         SQL schemas and setup guides
 types/            TypeScript interfaces
+public/branding/  Client logo assets
 ```
 
-## Flow
+## Deploy
 
-1. User selects a service → `/services/[slug]`
-2. Applies → form + document upload
-3. Pays → Paystack or Flutterwave
-4. Data saved to Supabase → EmailJS notification → WhatsApp redirect
+Push to `main` on GitHub; Vercel deploys automatically if the repo is connected. Full deploy checklist: `VERCEL.md`.
 
-No admin dashboard — fully automated client-facing portal.
+## License
+
+Private — Darboi Consults Limited.

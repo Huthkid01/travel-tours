@@ -56,7 +56,6 @@ export function ContactForm() {
 
       setStatus("success");
       toast.success("Message sent successfully!");
-      toast.info("A copy was sent to Darboi Consults by email.");
       reset();
       setStep(0);
     } catch (err) {

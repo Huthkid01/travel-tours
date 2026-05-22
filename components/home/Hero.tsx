@@ -6,36 +6,13 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Shield } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-
-const HERO_WELCOME_KEY = "darboi-hero-welcome-seen";
+import { useCallback, useState } from "react";
 
 export function Hero() {
-  const [ready, setReady] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const [contentVisible, setContentVisible] = useState(false);
 
-  useEffect(() => {
-    try {
-      const seen = localStorage.getItem(HERO_WELCOME_KEY);
-      if (seen) {
-        setContentVisible(true);
-      } else {
-        setShowIntro(true);
-      }
-    } catch {
-      setContentVisible(true);
-    } finally {
-      setReady(true);
-    }
-  }, []);
-
   const handleIntroComplete = useCallback(() => {
-    try {
-      localStorage.setItem(HERO_WELCOME_KEY, "1");
-    } catch {
-      /* ignore */
-    }
     setShowIntro(false);
     setContentVisible(true);
   }, []);
@@ -45,7 +22,7 @@ export function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gold-900/20 via-navy-950 to-navy-950" />
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1920&q=80')] bg-cover bg-center opacity-15" />
 
-      {ready && showIntro && <HeroWelcomeIntro onComplete={handleIntroComplete} />}
+      {showIntro && <HeroWelcomeIntro onComplete={handleIntroComplete} />}
 
       <div
         className={cn(

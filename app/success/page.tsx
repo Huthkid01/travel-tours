@@ -60,7 +60,7 @@ export default function SuccessPage() {
           Payment Successful
         </h1>
         <p className="mt-4 text-navy-600 dark:text-navy-300">
-          Thank you! Your payment was recorded and Darboi Consults has been notified by email.
+          Thank you! Your payment was recorded successfully.
         </p>
         {applicationId && (
           <p className="mt-2 text-sm text-navy-500">Reference: {applicationId.slice(0, 8)}…</p>
