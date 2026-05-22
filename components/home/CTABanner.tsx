@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { motion } from "framer-motion";
+import { ScrollRevealFade } from "@/components/motion/ScrollRevealFade";
 
 interface CTABannerProps {
   title?: string;
@@ -23,12 +23,7 @@ export function CTABanner({
   return (
     <section className="section-padding">
       <div className="container-custom">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900 px-8 py-16 text-center md:px-16"
-        >
+        <ScrollRevealFade className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900 px-8 py-16 text-center md:px-16">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1920&q=80')] bg-cover bg-center opacity-20" />
           <div className="relative z-10">
             <h2 className="font-display text-3xl font-bold text-white md:text-4xl">{title}</h2>
@@ -47,7 +42,7 @@ export function CTABanner({
               </Button>
             </div>
           </div>
-        </motion.div>
+        </ScrollRevealFade>
       </div>
     </section>
   );

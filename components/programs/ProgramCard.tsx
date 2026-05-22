@@ -8,7 +8,7 @@ import { trackEvent } from "@/lib/analytics";
 import { getProgramFlyerCandidates, isProgramFlyerImage } from "@/lib/program-flyers";
 import { openWhatsApp, getProgramWhatsAppMessage } from "@/lib/whatsapp";
 import type { Program } from "@/types";
-import { motion } from "framer-motion";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { ArrowRight, Sparkles, ZoomIn } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -49,11 +49,9 @@ export function ProgramCard({
 
   return (
     <>
-      <motion.article
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: index * 0.08 }}
+      <ScrollReveal
+        as="article"
+        index={index}
         className={cn(
           "interactive-card group flex h-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900",
           layout === "carousel" && "min-w-[280px] sm:min-w-[320px]"
@@ -158,7 +156,7 @@ export function ProgramCard({
             </>
           )}
         </div>
-      </motion.article>
+      </ScrollReveal>
 
       <ProgramImageLightbox
         open={lightboxOpen}

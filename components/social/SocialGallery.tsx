@@ -3,7 +3,8 @@
 import { trackEvent } from "@/lib/analytics";
 import { SOCIAL_LINKS } from "@/lib/constants";
 import type { SocialPostPreview } from "@/types";
-import { motion } from "framer-motion";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { ScrollRevealScale } from "@/components/motion/ScrollRevealScale";
 import { ExternalLink, Instagram, Play } from "lucide-react";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 
@@ -46,15 +47,13 @@ export function SocialGallery({
         </h3>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {instagramPosts.map((post, i) => (
-            <motion.a
+            <ScrollRevealScale
+              as="a"
               key={post.id}
+              index={i}
               href={post.url || instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.06 }}
               onClick={() => trackSocial("instagram", post.id)}
               className="interactive-card group relative aspect-square overflow-hidden rounded-xl"
             >
@@ -62,7 +61,7 @@ export function SocialGallery({
               <div className="absolute inset-0 flex items-end bg-gradient-to-t from-navy-950/80 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
                 <p className="line-clamp-2 text-xs text-white">{post.caption}</p>
               </div>
-            </motion.a>
+            </ScrollRevealScale>
           ))}
         </div>
         <a
@@ -84,18 +83,19 @@ export function SocialGallery({
         </h3>
         <div className="grid gap-3 sm:grid-cols-2">
           {tiktokPosts.map((post, i) => (
-            <motion.a
+            <ScrollReveal
+              as="article"
               key={post.id}
-              href={post.url || tiktokUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              onClick={() => trackSocial("tiktok", post.id)}
+              index={i}
               className="interactive-card group overflow-hidden rounded-xl border border-navy-800 bg-navy-900"
             >
+              <a
+                href={post.url || tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackSocial("tiktok", post.id)}
+                className="block"
+              >
               <div className="relative aspect-[9/14]">
                 <RemoteImage src={post.image} alt={post.caption} fill className="object-cover opacity-90" sizes="250px" />
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -105,7 +105,8 @@ export function SocialGallery({
                 </div>
               </div>
               <p className="p-3 text-sm text-navy-300">{post.caption}</p>
-            </motion.a>
+              </a>
+            </ScrollReveal>
           ))}
         </div>
         <a

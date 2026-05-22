@@ -7,7 +7,7 @@ import type { ServiceItem } from "@/types";
 import { getLucideIcon } from "@/lib/icons";
 import { ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 
 interface ServiceCardProps {
   service: ServiceItem;
@@ -19,12 +19,7 @@ export function ServiceCard({ service, index = 0 }: ServiceCardProps) {
   const Icon = getLucideIcon(service.icon);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05 }}
-    >
+    <ScrollReveal index={index}>
       <Link
         href={`/services/${service.slug}`}
         prefetch
@@ -57,6 +52,6 @@ export function ServiceCard({ service, index = 0 }: ServiceCardProps) {
           View details <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </span>
       </Link>
-    </motion.div>
+    </ScrollReveal>
   );
 }

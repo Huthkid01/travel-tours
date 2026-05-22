@@ -3,6 +3,7 @@
 import { mediaShowcaseItems } from "@/data/media-showcase";
 import { trackEvent } from "@/lib/analytics";
 import type { MediaShowcaseItem } from "@/types";
+import { ScrollRevealScale } from "@/components/motion/ScrollRevealScale";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, X, ZoomIn } from "lucide-react";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -57,13 +58,11 @@ export function MediaShowcase() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((item, i) => (
-          <motion.button
+          <ScrollRevealScale
+            as="button"
             key={item.id}
+            index={i}
             type="button"
-            initial={{ opacity: 0, scale: 0.96 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.05 }}
             onClick={() => openItem(item)}
             className="interactive-card group relative aspect-[4/3] overflow-hidden rounded-2xl text-left"
           >
@@ -76,7 +75,7 @@ export function MediaShowcase() {
               <p className="text-xs uppercase tracking-wider text-gold-400">{item.category}</p>
               <p className="font-semibold text-white">{item.title}</p>
             </div>
-          </motion.button>
+          </ScrollRevealScale>
         ))}
       </div>
 

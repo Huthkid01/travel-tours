@@ -2,7 +2,7 @@
 
 import { SOCIAL_LINKS } from "@/lib/constants";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
-import { motion } from "framer-motion";
+import { ScrollRevealScale } from "@/components/motion/ScrollRevealScale";
 import { ExternalLink, Instagram } from "lucide-react";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 
@@ -20,15 +20,13 @@ export function InstagramFeedPreview() {
     <div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {previewPosts.map((post, i) => (
-          <motion.a
+          <ScrollRevealScale
+            as="a"
             key={post.id}
+            index={i}
             href={SOCIAL_LINKS.instagram}
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.08 }}
             onClick={() => track({ actionType: "social_click", service: "instagram", source: "feed_preview" })}
             className="interactive-card group relative aspect-square overflow-hidden rounded-xl"
           >
@@ -36,7 +34,7 @@ export function InstagramFeedPreview() {
             <div className="absolute inset-0 flex items-center justify-center bg-navy-950/0 transition-colors group-hover:bg-navy-950/40">
               <Instagram className="h-8 w-8 text-white opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
-          </motion.a>
+          </ScrollRevealScale>
         ))}
       </div>
       <a

@@ -1,7 +1,7 @@
 "use client";
 
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 interface SectionHeadingProps {
   label?: string;
@@ -19,11 +19,7 @@ export function SectionHeading({
   className,
 }: SectionHeadingProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
+    <ScrollReveal
       className={cn(
         "mb-12 max-w-2xl",
         align === "center" && "mx-auto text-center",
@@ -41,6 +37,6 @@ export function SectionHeading({
       {description && (
         <p className="mt-4 text-lg text-navy-600 dark:text-navy-300">{description}</p>
       )}
-    </motion.div>
+    </ScrollReveal>
   );
 }

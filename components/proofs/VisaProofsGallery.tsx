@@ -4,6 +4,7 @@ import { PriceLabel } from "@/components/ui/PriceLabel";
 import { visaProofs } from "@/data/visa-proofs";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatePresence, motion } from "framer-motion";
 import { BadgeCheck, Shield, Sparkles, X, ZoomIn } from "lucide-react";
 import Image from "next/image";
@@ -35,12 +36,10 @@ export function VisaProofsGallery() {
 
       <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
         {visaProofs.map((proof, i) => (
-          <motion.article
+          <ScrollReveal
+            as="article"
             key={proof.id}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.05 }}
+            index={i}
             className="interactive-card group flex h-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900"
           >
             <button
@@ -89,7 +88,7 @@ export function VisaProofsGallery() {
                 <PriceLabel variant="consultation" className="text-xs sm:text-sm" />
               </div>
             </div>
-          </motion.article>
+          </ScrollReveal>
         ))}
       </div>
 
