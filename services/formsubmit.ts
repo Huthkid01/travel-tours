@@ -1,76 +1,43 @@
 import "server-only";
 
-import { getFormSubmitEmail, getSiteUrl, isFormSubmitServerConfigured } from "@/lib/env.server";
+import { isFormSubmitServerConfigured } from "@/lib/env.server";
 import { formatPrice } from "@/lib/utils";
-import { isGmailSmtpConfigured, sendOwnerMailViaGmail } from "@/services/owner-mail-fallback";
+import { sendOwnerEmail } from "@/services/owner-email";
 import type { Application, ContactFormData } from "@/types";
 
-const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax";
+/** Contact form → owner inbox (server: Gmail preferred) */
+export async function sendContactForm(data: ContactFormData): Promise<void> {
+  if (!isFormSubmitServerConfigured()) {
+    console.log("[owner-email demo] Contact:", data);
+    return;
+  }
 
-function getFormSubmitAccessKey(): string | undefined {
-  return process.env.FORMSUBMIT_ACCESS_KEY?.trim() || undefined;
-}
-
-function getRecipientEmail(): string {
-  return getFormSubmitEmail();
-}
-
-async function postFormSubmit(formData: FormData): Promise<void> {
-  const email = encodeURIComponent(getRecipientEmail());
-  const accessKey = getFormSubmitAccessKey();
-  const endpoint = accessKey
-    ? `${FORMSUBMIT_ENDPOINT}/${email}/${encodeURIComponent(accessKey)}`
-    : `${FORMSUBMIT_ENDPOINT}/${email}`;
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    body: formData,
-    headers: {
-      Accept: "application/json",
-      Referer: getSiteUrl(),
-    },
-  });
-
-  const json = (await res.json().catch(() => ({}))) as {
-    success?: string | boolean;
-    message?: string;
+  const fields: Record<string, string> = {
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    subject: data.subject,
+    message: data.message,
   };
 
-  const message = (json.message || "").toLowerCase();
-  const ok =
-    res.ok &&
-    (json.success === "true" ||
-      json.success === true ||
-      message.includes("thank") ||
-      (res.status === 200 && !message.includes("fail") && !message.includes("error")));
-
-  if (!ok) {
-    const msg = json.message || `FormSubmit request failed (${res.status})`;
-    if (/activat/i.test(msg)) {
-      throw new Error(
-        "FormSubmit inbox not activated. Check darboiconsults@gmail.com for FormSubmit confirmation link and click it."
-      );
-    }
-    throw new Error(msg);
+  const formData = new FormData();
+  formData.append("_subject", `Contact: ${data.subject}`);
+  formData.append("_captcha", "false");
+  formData.append("_template", "table");
+  formData.append("_replyto", data.email);
+  for (const [key, value] of Object.entries(fields)) {
+    formData.append(key, value);
   }
+
+  await sendOwnerEmail({
+    subject: `Contact: ${data.subject}`,
+    replyTo: data.email,
+    fields,
+    formData,
+  });
 }
 
-async function deliverOwnerEmail(
-  subject: string,
-  replyTo: string | undefined,
-  fields: Record<string, string>,
-  formData: FormData
-): Promise<"formsubmit" | "gmail"> {
-  try {
-    await postFormSubmit(formData);
-    return "formsubmit";
-  } catch (formSubmitErr) {
-    console.error("[FormSubmit]", formSubmitErr);
-    if (!isGmailSmtpConfigured()) throw formSubmitErr;
-    await sendOwnerMailViaGmail({ subject, replyTo, fields });
-    return "gmail";
-  }
-}
+export type ApplicationEmailStage = "submitted" | "paid";
 
 function applicationFields(
   app: Application,
@@ -105,36 +72,7 @@ function applicationFields(
   };
 }
 
-/** Contact form → owner inbox */
-export async function sendContactForm(data: ContactFormData): Promise<void> {
-  if (!isFormSubmitServerConfigured()) {
-    console.log("[FormSubmit Demo] Contact:", data);
-    return;
-  }
-
-  const fields: Record<string, string> = {
-    name: data.name,
-    email: data.email,
-    phone: data.phone,
-    subject: data.subject,
-    message: data.message,
-  };
-
-  const formData = new FormData();
-  formData.append("_subject", `Contact: ${data.subject}`);
-  formData.append("_captcha", "false");
-  formData.append("_template", "table");
-  formData.append("_replyto", data.email);
-  for (const [key, value] of Object.entries(fields)) {
-    formData.append(key, value);
-  }
-
-  await deliverOwnerEmail(`Contact: ${data.subject}`, data.email, fields, formData);
-}
-
-export type ApplicationEmailStage = "submitted" | "paid";
-
-/** Application notification — on submit and after payment (file links only, no attachments) */
+/** Application notification — on submit and after payment */
 export async function sendApplicationForm(
   app: Application,
   options?: {
@@ -143,7 +81,7 @@ export async function sendApplicationForm(
   }
 ): Promise<void> {
   if (!isFormSubmitServerConfigured()) {
-    console.log("[FormSubmit Demo] Application:", app, options?.stage ?? "submitted");
+    console.log("[owner-email demo] Application:", app, options?.stage ?? "submitted");
     return;
   }
 
@@ -163,7 +101,12 @@ export async function sendApplicationForm(
     formData.append(key, value);
   }
 
-  await deliverOwnerEmail(subject, app.email, fields, formData);
+  await sendOwnerEmail({
+    subject,
+    replyTo: app.email,
+    fields,
+    formData,
+  });
 }
 
 export interface LeadFormData {
@@ -176,7 +119,7 @@ export interface LeadFormData {
 /** Lead popup → owner inbox */
 export async function sendLeadForm(data: LeadFormData): Promise<void> {
   if (!isFormSubmitServerConfigured()) {
-    console.log("[FormSubmit Demo] Lead:", data);
+    console.log("[owner-email demo] Lead:", data);
     return;
   }
 
@@ -197,5 +140,10 @@ export async function sendLeadForm(data: LeadFormData): Promise<void> {
     formData.append(key, value);
   }
 
-  await deliverOwnerEmail(`New lead inquiry: ${data.interest}`, data.email, fields, formData);
+  await sendOwnerEmail({
+    subject: `New lead inquiry: ${data.interest}`,
+    replyTo: data.email,
+    fields,
+    formData,
+  });
 }

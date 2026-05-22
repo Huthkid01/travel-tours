@@ -2,61 +2,57 @@
 
 Applications and contact forms save to **Supabase** and email **darboiconsults@gmail.com**.
 
-## FormSubmit URL (two formats — same service)
+## Important: FormSubmit 403 from Vercel
 
-| Use case | URL |
-|----------|-----|
-| Plain HTML form in a static page | `https://formsubmit.co/darboiconsults@gmail.com` |
-| Next.js / React / AJAX (this site) | `https://formsubmit.co/ajax/darboiconsults@gmail.com` |
+FormSubmit **blocks** requests from Vercel/server (`403 Forbidden`). You will **not** get activation emails from **Admin → Test owner email** (server).
 
-The contact form sends from the **visitor’s browser** to the **ajax** URL (like FormSubmit’s docs for SPAs). Application forms use the **server** ajax URL after payment.
+| Where email is sent from | Works? |
+|--------------------------|--------|
+| **Gmail** (`GMAIL_APP_PASSWORD` in Vercel) | Yes — use this for applications & admin test |
+| **Browser** (contact form, admin browser test) | Yes — can trigger FormSubmit activation link |
+| **Vercel server** → FormSubmit ajax | No (403) |
 
-**Your email** is `darboiconsults@gmail.com` — set in `FORMSUBMIT_EMAIL` in Vercel, not `your@email.com`.
+## Required for reliable email (recommended)
 
-## Vercel / `.env.local`
+In **Vercel → Environment Variables** (Production):
 
 ```env
 FORMSUBMIT_EMAIL=darboiconsults@gmail.com
-```
-
-**Recommended (reliable on Vercel):**
-
-```env
-GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+GMAIL_APP_PASSWORD=your-google-app-password
 SMTP_USER=darboiconsults@gmail.com
 ```
 
-Create an App Password: Google Account → Security → 2-Step Verification → App passwords.
+Create App Password: https://myaccount.google.com/apppasswords (needs 2-Step Verification).
 
-Optional FormSubmit AJAX key:
+**Redeploy** after adding variables.
 
-```env
-FORMSUBMIT_ACCESS_KEY=your-access-key
-```
+## FormSubmit URLs (reference)
 
-## Activate FormSubmit (once)
+| Use case | URL |
+|----------|-----|
+| Plain HTML form | `https://formsubmit.co/darboiconsults@gmail.com` |
+| Browser / AJAX (contact form) | `https://formsubmit.co/ajax/darboiconsults@gmail.com` |
 
-1. Admin → **Applications** → **Test owner email**, or submit Contact on the live site.
-2. Check **darboiconsults@gmail.com** (and spam) for FormSubmit’s **confirmation link** — click it.
-3. Without activation, emails fail silently (`emailSent: false` in logs) but data still appears in Admin.
+## Activate FormSubmit (optional)
 
-## Gmail fallback
+Only if you want FormSubmit in addition to Gmail:
 
-If FormSubmit fails (common on server-side submits), the app automatically sends via Gmail when `GMAIL_APP_PASSWORD` is set.
+1. On the live site, submit the **Contact** form once (from Chrome on your phone/PC).
+2. Check **darboiconsults@gmail.com** for FormSubmit’s **confirmation link** and click it.
+
+Or in Admin → Applications → **Test owner email** (tries Gmail first, then browser FormSubmit).
 
 ## What sends email
 
-| Form | Subject |
-|------|---------|
-| Contact | `Contact: {subject}` |
-| Consultation / apply | `New application submitted: …` |
-| After payment | `Payment received: …` |
-| Lead popup | `New lead inquiry: …` |
-
-Emails include applicant details and **links to uploaded files** in Supabase (files are not attached — avoids FormSubmit size limits).
+| Form | How |
+|------|-----|
+| Contact | Browser FormSubmit, then Gmail backup via API |
+| Consultation (after payment) | Gmail server |
+| Lead popup | Gmail server |
+| Admin test | Gmail server, then browser FormSubmit fallback |
 
 ## Troubleshooting
 
-- Vercel logs: `[notifyOwnerOnApplicationSubmit]` or `[FormSubmit]`
-- Admin → Applications → **Test owner email**
-- Confirm `FORMSUBMIT_EMAIL` + `GMAIL_APP_PASSWORD` in Vercel Production → Redeploy
+- **403 FormSubmit** — expected on server; set `GMAIL_APP_PASSWORD`.
+- **Admin test fails** — `GMAIL_APP_PASSWORD` missing on Vercel (not only `.env.local`).
+- **No mail at all** — check spam; verify App Password; Admin → Test owner email.

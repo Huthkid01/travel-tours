@@ -13,7 +13,8 @@ After changing variables, **Redeploy**.
 | `SUPABASE_ANON_KEY` | Supabase → `anon` public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → `service_role` secret |
 | `FORMSUBMIT_EMAIL` | `darboiconsults@gmail.com` |
-| `GMAIL_APP_PASSWORD` | Gmail App Password (recommended — reliable owner emails) |
+| `GMAIL_APP_PASSWORD` | **Required** — Google App Password (FormSubmit returns 403 from Vercel) |
+| `SMTP_USER` | `darboiconsults@gmail.com` |
 | `GOOGLE_FORM_URL` | Your `forms.gle` link |
 | `ADMIN_EMAIL` | Admin login email |
 | `ADMIN_PASSWORD` | Admin login password |
