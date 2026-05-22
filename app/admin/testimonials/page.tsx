@@ -6,6 +6,7 @@ import {
   type AdminTestimonialForm,
 } from "@/components/admin/AdminTestimonialModal";
 import { adminBtnSecondary, adminH1, adminSubtitle, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
+import { useConfirm } from "@/hooks/useConfirm";
 import { cn } from "@/lib/utils";
 import type { Testimonial } from "@/types";
 import { Loader2, Pencil, Plus, Star, Trash2, Upload } from "lucide-react";
@@ -27,6 +28,7 @@ function rowToForm(row: Testimonial): AdminTestimonialForm {
 }
 
 export default function AdminTestimonialsPage() {
+  const confirmDialog = useConfirm();
   const [rows, setRows] = useState<Testimonial[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminTestimonialForm | null>(null);
@@ -120,7 +122,16 @@ export default function AdminTestimonialsPage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this testimonial?")) return;
+    if (
+      !(await confirmDialog({
+        title: "Delete testimonial",
+        description: "Delete this testimonial? This cannot be undone.",
+        confirmLabel: "Delete",
+        variant: "danger",
+      }))
+    ) {
+      return;
+    }
     const res = await fetch(`/api/admin/testimonials?id=${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Deleted");

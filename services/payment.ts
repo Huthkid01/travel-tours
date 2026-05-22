@@ -1,3 +1,4 @@
+import { appConfirm } from "@/lib/confirm";
 import { CURRENCY, SITE_CONFIG } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
 import type { PaymentProvider, PaymentType, ServiceItem } from "@/types";
@@ -43,14 +44,19 @@ export function getPaymentLabel(type: PaymentType): string {
   return PAYMENT_LABELS[type];
 }
 
-export function initiateFlutterwavePayment(config: PaymentConfig, keys: PaymentGatewayKeys): void {
+export async function initiateFlutterwavePayment(
+  config: PaymentConfig,
+  keys: PaymentGatewayKeys
+): Promise<void> {
   const { amount, email, name, reference, onSuccess } = config;
 
   if (keys.flutterwave.includes("demo")) {
     console.log("[Flutterwave Demo]", { amount, email, name, reference });
-    const confirmed = window.confirm(
-      `Flutterwave Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nClick OK when done to continue to WhatsApp.`
-    );
+    const confirmed = await appConfirm({
+      title: "Flutterwave demo payment",
+      description: `Amount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nConfirm when done to continue to WhatsApp.`,
+      confirmLabel: "Continue",
+    });
     if (confirmed) onSuccess?.();
     return;
   }
@@ -75,14 +81,19 @@ export function initiateFlutterwavePayment(config: PaymentConfig, keys: PaymentG
   document.body.appendChild(script);
 }
 
-export function initiatePaystackPayment(config: PaymentConfig, keys: PaymentGatewayKeys): void {
+export async function initiatePaystackPayment(
+  config: PaymentConfig,
+  keys: PaymentGatewayKeys
+): Promise<void> {
   const { amount, email, name, reference, onSuccess } = config;
 
   if (keys.paystack.includes("demo")) {
     console.log("[Paystack Demo]", { amount, email, name, reference });
-    const confirmed = window.confirm(
-      `Paystack Demo Payment\n\nAmount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nClick OK when done to continue to WhatsApp.`
-    );
+    const confirmed = await appConfirm({
+      title: "Paystack demo payment",
+      description: `Amount: ${formatPrice(amount)}\nEmail: ${email}\nReference: ${reference}\n\nConfirm when done to continue to WhatsApp.`,
+      confirmLabel: "Continue",
+    });
     if (confirmed) onSuccess?.();
     return;
   }

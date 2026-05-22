@@ -1,5 +1,6 @@
 import { AnnouncementProvider } from "@/components/layout/AnnouncementContext";
 import { LayoutShell } from "@/components/layout/LayoutShell";
+import { ConfirmProvider } from "@/components/providers/ConfirmProvider";
 import { LeadTrackerProvider } from "@/components/providers/LeadTrackerProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { defaultMetadata } from "@/lib/seo";
@@ -33,12 +34,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider>
-          <LeadTrackerProvider>
-            <AnnouncementProvider>
-              <LayoutShell>{children}</LayoutShell>
-              <Toaster position="top-right" richColors closeButton />
-            </AnnouncementProvider>
-          </LeadTrackerProvider>
+          <ConfirmProvider>
+            <LeadTrackerProvider>
+              <AnnouncementProvider>
+                <LayoutShell>{children}</LayoutShell>
+                <Toaster position="top-right" richColors closeButton />
+              </AnnouncementProvider>
+            </LeadTrackerProvider>
+          </ConfirmProvider>
         </ThemeProvider>
       </body>
     </html>

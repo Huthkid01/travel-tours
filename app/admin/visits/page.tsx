@@ -1,6 +1,7 @@
 "use client";
 
 import { adminH1, adminSubtitle, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
+import { useConfirm } from "@/hooks/useConfirm";
 import { formatCountryLabel } from "@/lib/visitor-geo";
 import { Loader2, Trash2, Users } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -51,7 +52,16 @@ export default function AdminVisitsPage() {
   }, [load]);
 
   const clearAll = async () => {
-    if (!confirm("Clear all visit data? This cannot be undone.")) return;
+    if (
+      !(await confirmDialog({
+        title: "Clear visit data",
+        description: "Clear all visit data? This cannot be undone.",
+        confirmLabel: "Clear all",
+        variant: "danger",
+      }))
+    ) {
+      return;
+    }
     setClearing(true);
     try {
       const res = await fetch("/api/admin/visits", { method: "DELETE" });

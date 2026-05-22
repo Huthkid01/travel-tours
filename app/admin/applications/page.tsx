@@ -2,12 +2,14 @@
 
 import { AdminApplicationViewModal } from "@/components/admin/AdminApplicationViewModal";
 import { adminH1, adminSubtitle, adminTableHead, adminTableRow, adminTableWrap } from "@/lib/admin-ui";
+import { useConfirm } from "@/hooks/useConfirm";
 import type { Application } from "@/types";
 import { Eye, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function AdminApplicationsPage() {
+  const confirmDialog = useConfirm();
   const [rows, setRows] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewing, setViewing] = useState<Application | null>(null);
@@ -30,9 +32,13 @@ export default function AdminApplicationsPage() {
 
   const clearAllForms = async () => {
     if (
-      !confirm(
-        "Clear ALL form submissions? This deletes every application, lead popup entry, and contact message. Uploaded files may remain in storage. This cannot be undone."
-      )
+      !(await confirmDialog({
+        title: "Clear all form data",
+        description:
+          "Clear ALL form submissions? This deletes every application, lead popup entry, and contact message. Uploaded files may remain in storage. This cannot be undone.",
+        confirmLabel: "Clear all",
+        variant: "danger",
+      }))
     ) {
       return;
     }

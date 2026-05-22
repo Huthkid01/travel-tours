@@ -82,9 +82,9 @@ export function ApplicationPayment({ application, service, onPaymentComplete }: 
 
     try {
       if (provider === "paystack") {
-        initiatePaystackPayment(config, gatewayKeys);
+        await initiatePaystackPayment(config, gatewayKeys);
       } else {
-        initiateFlutterwavePayment(config, gatewayKeys);
+        await initiateFlutterwavePayment(config, gatewayKeys);
       }
       if (loading) setLoading(false);
     } catch {

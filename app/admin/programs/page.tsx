@@ -2,6 +2,7 @@
 
 import { AdminProgramModal, type AdminProgramForm } from "@/components/admin/AdminProgramModal";
 import { resolveProgramImageSrc } from "@/lib/admin-program-image";
+import { useConfirm } from "@/hooks/useConfirm";
 import { cn } from "@/lib/utils";
 import { ImageIcon, Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
@@ -42,6 +43,7 @@ function ProgramThumb({ image, title }: { image?: string; title: string }) {
 }
 
 export default function AdminProgramsPage() {
+  const confirmDialog = useConfirm();
   const [rows, setRows] = useState<ProgramRow[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminProgramForm | null>(null);
@@ -131,7 +133,16 @@ export default function AdminProgramsPage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this program?")) return;
+    if (
+      !(await confirmDialog({
+        title: "Delete program",
+        description: "Delete this program? This cannot be undone.",
+        confirmLabel: "Delete",
+        variant: "danger",
+      }))
+    ) {
+      return;
+    }
     const res = await fetch(`/api/admin/programs?id=${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Deleted");

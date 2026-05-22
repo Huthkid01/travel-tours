@@ -4,6 +4,7 @@ import {
   DEFAULT_PAYMENT_SETTINGS,
   type PaymentSettings,
 } from "@/data/payment-settings-default";
+import { useConfirm } from "@/hooks/useConfirm";
 import { cn } from "@/lib/utils";
 import {
   Building2,
@@ -95,6 +96,7 @@ function SectionCard({
 }
 
 export default function AdminPaymentPage() {
+  const confirmDialog = useConfirm();
   const [form, setForm] = useState<PaymentSettings>(DEFAULT_PAYMENT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -144,8 +146,17 @@ export default function AdminPaymentPage() {
     }
   };
 
-  const resetDefaults = () => {
-    if (!confirm("Reset form to site defaults? (You still need to click Save.)")) return;
+  const resetDefaults = async () => {
+    if (
+      !(await confirmDialog({
+        title: "Reset payment settings",
+        description: "Reset form to site defaults? You still need to click Save.",
+        confirmLabel: "Reset",
+        variant: "danger",
+      }))
+    ) {
+      return;
+    }
     setForm(DEFAULT_PAYMENT_SETTINGS);
   };
 

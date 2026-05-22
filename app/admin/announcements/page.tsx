@@ -6,6 +6,7 @@ import {
   type AdminAnnouncementForm,
 } from "@/components/admin/AdminAnnouncementModal";
 import type { Announcement } from "@/types";
+import { useConfirm } from "@/hooks/useConfirm";
 import { cn } from "@/lib/utils";
 import { Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -38,6 +39,7 @@ function typeBadge(type: string) {
 }
 
 export default function AdminAnnouncementsPage() {
+  const confirmDialog = useConfirm();
   const [rows, setRows] = useState<Announcement[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminAnnouncementForm | null>(null);
@@ -130,7 +132,16 @@ export default function AdminAnnouncementsPage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this announcement?")) return;
+    if (
+      !(await confirmDialog({
+        title: "Delete announcement",
+        description: "Delete this announcement? This cannot be undone.",
+        confirmLabel: "Delete",
+        variant: "danger",
+      }))
+    ) {
+      return;
+    }
     const res = await fetch(`/api/admin/announcements?id=${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Deleted");

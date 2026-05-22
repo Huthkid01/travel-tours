@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminServiceModal, type AdminServiceForm } from "@/components/admin/AdminServiceModal";
+import { useConfirm } from "@/hooks/useConfirm";
 import { cn } from "@/lib/utils";
 import { Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -46,6 +47,7 @@ function statusBadge(status: string) {
 }
 
 export default function AdminServicesPage() {
+  const confirmDialog = useConfirm();
   const [rows, setRows] = useState<ServiceRow[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminServiceForm | null>(null);
@@ -145,7 +147,16 @@ export default function AdminServicesPage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this service?")) return;
+    if (
+      !(await confirmDialog({
+        title: "Delete service",
+        description: "Delete this service? This cannot be undone.",
+        confirmLabel: "Delete",
+        variant: "danger",
+      }))
+    ) {
+      return;
+    }
     const res = await fetch(`/api/admin/services?id=${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Deleted");
