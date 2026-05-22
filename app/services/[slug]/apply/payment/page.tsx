@@ -1,10 +1,11 @@
 "use client";
 
 import { FormProgressBar } from "@/components/forms/FormProgressBar";
-import { ApplicationPayment } from "@/components/payment/ApplicationPayment";
+import { BankTransferCheckout } from "@/components/payment/BankTransferCheckout";
 import { PageHero } from "@/components/layout/PageHero";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { getServiceBySlug } from "@/data/services";
+import { APPOINTMENT_FEE_INFO } from "@/data/darboi-application-form";
 import {
   getApplicationAction,
   notifyPaymentAction,
@@ -12,7 +13,6 @@ import {
 } from "@/lib/actions/application";
 import { toastPaymentComplete } from "@/lib/application-toast";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
-import type { Application, PaymentProvider, PaymentType } from "@/types";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ export default function PaymentPage() {
   const applicationId = searchParams.get("applicationId");
 
   const service = getServiceBySlug(slug);
-  const [application, setApplication] = useState<Application | null>(null);
+  const [application, setApplication] = useState<Awaited<ReturnType<typeof getApplicationAction>>>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,37 +38,33 @@ export default function PaymentPage() {
     });
   }, [applicationId]);
 
-  const handlePaymentComplete = async (
-    reference: string,
-    type: PaymentType,
-    amount: number,
-    provider: PaymentProvider
-  ) => {
+  const handlePaymentComplete = async (reference: string, amount: number) => {
     if (!application || !service) return;
 
     try {
       const updated = await updateApplicationPaymentAction(application.id, {
         reference,
         status: "paid",
-        type,
+        type: "booking-fee",
         amount,
-        provider,
+        provider: "bank-transfer",
       });
 
       if (updated) {
         const emailSent = await notifyPaymentAction(updated, amount);
         toastPaymentComplete({ emailSent });
-        const message = getApplicationWhatsAppMessage({
-          stage: "paid",
-          kind: "service",
-          applicationId: updated.id,
-          reference,
-          serviceName: service.title,
-          paymentAmount: amount,
-          paymentType: type,
-          applicantName: updated.full_name,
-        });
-        redirectToWhatsApp(message);
+        redirectToWhatsApp(
+          getApplicationWhatsAppMessage({
+            stage: "paid",
+            kind: "service",
+            applicationId: updated.id,
+            reference,
+            serviceName: service.title,
+            paymentAmount: amount,
+            paymentType: "booking-fee",
+            applicantName: updated.full_name,
+          })
+        );
       }
     } catch {
       toast.error("Payment recorded. Opening WhatsApp with your reference.");
@@ -80,7 +76,7 @@ export default function PaymentPage() {
           reference,
           serviceName: service.title,
           paymentAmount: amount,
-          paymentType: type,
+          paymentType: "booking-fee",
           applicantName: application.full_name,
         })
       );
@@ -111,13 +107,13 @@ export default function PaymentPage() {
 
   return (
     <>
-      <PageHero title="Secure Payment" subtitle={`Complete payment for ${service.title}`} />
+      <PageHero title="Bank transfer" subtitle={`Complete payment for ${service.title}`} />
       <section className="section-padding bg-navy-50/50 dark:bg-navy-950/30">
         <div className="container-custom max-w-2xl space-y-6">
           <div className="text-center sm:text-left">
-            <p className="text-xs font-bold tracking-[0.2em] text-gold-600 uppercase">Checkout</p>
+            <p className="text-xs font-bold tracking-[0.2em] text-gold-600 uppercase">Payment</p>
             <p className="mt-1 text-sm text-navy-600 dark:text-navy-400">
-              Application received — complete payment to finish
+              Application received — pay by bank transfer to finish
             </p>
           </div>
 
@@ -128,15 +124,19 @@ export default function PaymentPage() {
 
           <div className="overflow-hidden rounded-2xl border border-navy-100 bg-white shadow-sm dark:border-navy-800 dark:bg-navy-900">
             <div className="border-b border-navy-100 bg-navy-50/80 px-4 py-4 sm:px-6 dark:border-navy-800 dark:bg-navy-950/50">
-              <h2 className="font-display text-lg font-bold text-navy-900 dark:text-white">Secure payment</h2>
+              <h2 className="font-display text-lg font-bold text-navy-900 dark:text-white">
+                Bank transfer
+              </h2>
               <p className="mt-0.5 text-sm text-navy-600 dark:text-navy-400">
-                Choose payment type and pay online or use bank transfer above
+                Copy account details, transfer, then confirm below
               </p>
             </div>
             <div className="p-4 sm:p-6">
-              <ApplicationPayment
+              <BankTransferCheckout
                 application={application}
-                service={service}
+                serviceTitle={service.title}
+                amount={APPOINTMENT_FEE_INFO.amount}
+                amountLabel={APPOINTMENT_FEE_INFO.amountLabel}
                 onPaymentComplete={handlePaymentComplete}
               />
             </div>

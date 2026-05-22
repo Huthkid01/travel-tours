@@ -94,21 +94,19 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
         <div
           className={cn(
             "flex items-start gap-2 border-b border-slate-200 dark:border-slate-800",
-            collapsed ? "justify-center p-3" : "justify-between p-4"
+            collapsed ? "justify-between p-4 lg:justify-center lg:p-3" : "justify-between p-4"
           )}
         >
-          {!collapsed && (
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold tracking-wider text-gold-400 uppercase">Admin Panel</p>
-              <p className="mt-1 font-display text-lg font-bold leading-tight">{BRAND.short}</p>
-            </div>
-          )}
+          <div className={cn("min-w-0 flex-1", collapsed && "lg:hidden")}>
+            <p className="text-xs font-semibold tracking-wider text-gold-400 uppercase">Admin Panel</p>
+            <p className="mt-1 font-display text-lg font-bold leading-tight">{BRAND.short}</p>
+          </div>
           <button
             type="button"
             onClick={toggleCollapsed}
             className={cn(
-              "shrink-0 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white",
-              collapsed && "mx-auto"
+              "hidden shrink-0 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 lg:inline-flex dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white",
+              collapsed && "lg:mx-auto"
             )}
             aria-label={collapsed ? "Open sidebar" : "Close sidebar"}
             title={collapsed ? "Open sidebar" : "Close sidebar"}
@@ -117,21 +115,27 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
           </button>
         </div>
 
-        {!collapsed && (
-          <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+        <div
+          className={cn(
+            "border-b border-slate-200 px-4 py-3 dark:border-slate-800",
+            collapsed && "lg:hidden"
+          )}
+        >
             <p className="text-xs text-slate-500">Logged in as</p>
             <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{email}</p>
-          </div>
-        )}
+        </div>
 
         <nav className="flex-1 overflow-y-auto p-2">
           {NAV_SECTIONS.map((section) => (
             <div key={section.title} className="mb-3">
-              {!collapsed && (
-                <p className="mb-2 px-3 text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                  {section.title}
-                </p>
-              )}
+              <p
+                className={cn(
+                  "mb-2 px-3 text-[10px] font-semibold tracking-wider text-slate-500 uppercase",
+                  collapsed && "lg:hidden"
+                )}
+              >
+                {section.title}
+              </p>
               <div className="space-y-0.5">
                 {section.items.map(({ href, label, icon: Icon }) => (
                   <Link
@@ -141,14 +145,14 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
                     title={collapsed ? label : undefined}
                     className={cn(
                       "flex items-center rounded-lg py-2.5 text-sm font-medium transition",
-                      collapsed ? "justify-center px-2" : "gap-3 px-3",
+                      collapsed ? "gap-3 px-3 lg:justify-center lg:px-2" : "gap-3 px-3",
                       isActive(href)
                         ? "bg-blue-600/20 text-blue-300"
                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    {!collapsed && <span>{label}</span>}
+                    <span className={cn(collapsed && "lg:hidden")}>{label}</span>
                   </Link>
                 ))}
               </div>
@@ -159,7 +163,7 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
         <div
           className={cn(
             "border-t border-slate-200 p-2 dark:border-slate-800",
-            collapsed && "flex flex-col items-center gap-1"
+            collapsed && "lg:flex lg:flex-col lg:items-center lg:gap-1"
           )}
         >
           <Link
@@ -169,11 +173,12 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
             className={cn(
               "rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white",
               collapsed
-                ? "flex h-10 w-10 items-center justify-center"
+                ? "mb-2 block px-3 py-2 text-sm lg:mb-0 lg:flex lg:h-10 lg:w-10 lg:items-center lg:justify-center lg:px-0 lg:py-0"
                 : "mb-2 block px-3 py-2 text-sm"
             )}
           >
-            {collapsed ? <ExternalLink className="h-4 w-4" /> : "View live site →"}
+            <span className={cn(collapsed && "lg:sr-only")}>View live site →</span>
+            <ExternalLink className={cn("hidden h-4 w-4", collapsed && "lg:block")} />
           </Link>
           <button
             type="button"
@@ -181,11 +186,13 @@ export function AdminShell({ children, email }: { children: ReactNode; email: st
             title="Log out"
             className={cn(
               "flex items-center rounded-lg text-sm text-red-400 hover:bg-red-500/10",
-              collapsed ? "h-10 w-10 justify-center" : "w-full gap-2 px-3 py-2"
+              collapsed
+                ? "w-full gap-2 px-3 py-2 lg:h-10 lg:w-10 lg:justify-center lg:gap-0 lg:px-0"
+                : "w-full gap-2 px-3 py-2"
             )}
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            {!collapsed && "Log out"}
+            <span className={cn(collapsed && "lg:hidden")}>Log out</span>
           </button>
         </div>
       </aside>

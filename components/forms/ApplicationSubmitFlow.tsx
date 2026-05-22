@@ -5,6 +5,7 @@ import { PaymentDetailsModal } from "@/components/payment/PaymentDetailsModal";
 import { toastApplicationSaved, toastPaymentComplete } from "@/lib/application-toast";
 import { submitApplicationViaApi } from "@/lib/submit-application-client";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
+import type { PaymentSettings } from "@/data/payment-settings-default";
 import type { Application, ApplicationFormData } from "@/types";
 import { CheckCircle, CreditCard } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -15,6 +16,8 @@ interface ApplicationSubmitFlowProps {
   serviceName: string;
   /** program | service — affects WhatsApp wording */
   kind?: "program" | "service" | "consultation";
+  /** Override fee shown in payment modal (e.g. consultation ₦35,000) */
+  paymentSettings?: PaymentSettings;
   children: (props: {
     onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
     submitLabel: string;
@@ -124,8 +127,8 @@ export function ApplicationSubmitFlow({
             Application submitted
           </h2>
           <p className="mt-2 text-sm text-navy-600 dark:text-navy-300">
-            Your details are saved and Darboi was emailed. Make your bank transfer, then tap below to
-            confirm payment and open WhatsApp.
+            Your details are saved and Darboi was emailed. Pay{" "}
+            <strong>{settings.feeAmountLabel}</strong> by bank transfer, then tap below.
           </p>
           <button
             type="button"
@@ -133,13 +136,14 @@ export function ApplicationSubmitFlow({
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold-500 px-6 py-3.5 text-sm font-bold text-navy-950 hover:bg-gold-400 sm:w-auto"
           >
             <CreditCard className="h-5 w-5" />
-            Continue to Payment
+            Make payment
           </button>
         </div>
         <PaymentDetailsModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onDone={handlePaymentDone}
+          settings={settings}
           loadingDone={finishing}
         />
       </>

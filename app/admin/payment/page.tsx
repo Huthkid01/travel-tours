@@ -7,12 +7,10 @@ import {
 import { cn } from "@/lib/utils";
 import {
   Building2,
-  CreditCard,
   Eye,
   Loader2,
   RotateCcw,
   Save,
-  Smartphone,
   Wallet,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -130,7 +128,11 @@ export default function AdminPaymentPage() {
       const res = await fetch("/api/admin/payment-settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          paystackEnabled: false,
+          flutterwaveEnabled: false,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Save failed");
@@ -285,34 +287,6 @@ export default function AdminPaymentPage() {
                 />
               </label>
             </SectionCard>
-
-            <SectionCard
-              title="Online gateways"
-              description="API keys live in Vercel env; toggles control visibility on checkout."
-              icon={CreditCard}
-            >
-              <p className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs text-slate-500">
-                Set{" "}
-                <code className="text-slate-400">PAYSTACK_PUBLIC_KEY</code> and{" "}
-                <code className="text-slate-400">FLUTTERWAVE_PUBLIC_KEY</code> in Vercel (server-only).
-              </p>
-
-              <ToggleRow
-                checked={form.paystackEnabled}
-                onChange={(v) => setForm({ ...form, paystackEnabled: v })}
-                title="Paystack"
-                description="Card and bank payments via Paystack."
-                icon={CreditCard}
-              />
-
-              <ToggleRow
-                checked={form.flutterwaveEnabled}
-                onChange={(v) => setForm({ ...form, flutterwaveEnabled: v })}
-                title="Flutterwave"
-                description="Alternative card and mobile money checkout."
-                icon={Smartphone}
-              />
-            </SectionCard>
           </div>
 
           <aside className="space-y-4">
@@ -354,26 +328,9 @@ export default function AdminPaymentPage() {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                    Checkout buttons
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {form.paystackEnabled && (
-                      <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-400">
-                        Paystack
-                      </span>
-                    )}
-                    {form.flutterwaveEnabled && (
-                      <span className="rounded-full bg-purple-500/15 px-2.5 py-1 text-xs font-medium text-purple-300">
-                        Flutterwave
-                      </span>
-                    )}
-                    {!form.paystackEnabled && !form.flutterwaveEnabled && (
-                      <span className="text-xs text-slate-500">No online gateways enabled</span>
-                    )}
-                  </div>
-                </div>
+                <p className="text-xs text-slate-500">
+                  Clients pay by bank transfer only (copy details in the payment popup).
+                </p>
               </div>
             </div>
           </aside>

@@ -220,8 +220,8 @@ function mapPaymentSettings(row: Record<string, unknown>): PaymentSettings {
     accountNumber: String(row.account_number ?? DEFAULT_PAYMENT_SETTINGS.accountNumber),
     accountName: String(row.account_name ?? DEFAULT_PAYMENT_SETTINGS.accountName),
     afterPaymentNote: String(row.after_payment_note ?? DEFAULT_PAYMENT_SETTINGS.afterPaymentNote),
-    paystackEnabled: row.paystack_enabled !== false,
-    flutterwaveEnabled: row.flutterwave_enabled !== false,
+    paystackEnabled: Boolean(row.paystack_enabled),
+    flutterwaveEnabled: Boolean(row.flutterwave_enabled),
     showBankTransfer: row.show_bank_transfer !== false,
   };
 }

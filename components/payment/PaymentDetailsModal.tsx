@@ -14,6 +14,7 @@ interface PaymentDetailsModalProps {
   onDone: (paymentReference: string) => void;
   settings?: PaymentSettings;
   loadingDone?: boolean;
+  doneLabel?: string;
 }
 
 function CopyRow({ label, value }: { label: string; value: string }) {
@@ -56,6 +57,7 @@ export function PaymentDetailsModal({
   onDone,
   settings: settingsProp,
   loadingDone = false,
+  doneLabel = "I've made payment — Open WhatsApp",
 }: PaymentDetailsModalProps) {
   const { settings: fetched, loading } = usePaymentSettings();
   const settings = settingsProp ?? (loading ? DEFAULT_PAYMENT_SETTINGS : fetched);
@@ -94,8 +96,15 @@ export function PaymentDetailsModal({
         </div>
 
         <div className="space-y-3 p-5">
+          <div className="rounded-xl border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-400">
+              Amount to pay
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-navy-900 dark:text-white">
+              {settings.feeAmountLabel}
+            </p>
+          </div>
           <p className="text-sm font-semibold text-navy-900 dark:text-white">{settings.title}</p>
-          <CopyRow label="Fee" value={settings.feeAmountLabel} />
           <CopyRow label="Bank" value={settings.bankName} />
           <CopyRow label="Account number" value={settings.accountNumber} />
           <CopyRow label="Account name" value={settings.accountName} />
@@ -128,7 +137,7 @@ export function PaymentDetailsModal({
               "rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-bold text-navy-950 hover:bg-gold-400 disabled:opacity-60"
             )}
           >
-            {loadingDone ? "Please wait…" : "Done — Open WhatsApp"}
+            {loadingDone ? "Please wait…" : doneLabel}
           </button>
         </div>
       </div>

@@ -21,7 +21,7 @@ export const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
   accountNumber: APPOINTMENT_FEE_INFO.accountNumber,
   accountName: APPOINTMENT_FEE_INFO.accountName,
   afterPaymentNote: "After payment, enter your transfer reference or depositor name below.",
-  paystackEnabled: true,
-  flutterwaveEnabled: true,
+  paystackEnabled: false,
+  flutterwaveEnabled: false,
   showBankTransfer: true,
 };
