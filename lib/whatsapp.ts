@@ -1,10 +1,11 @@
+import { getServiceWhatsAppPrompt } from "@/data/service-whatsapp-messages";
 import { getWhatsAppUrl } from "@/lib/constants";
 import { getPaymentLabel } from "@/services/payment";
 import { formatPrice } from "@/lib/utils";
 import type { PaymentType } from "@/types";
 
-export function getServiceWhatsAppMessage(serviceName: string): string {
-  return `Hello, I am interested in the ${serviceName} service from Darboi Consults Limited.`;
+export function getServiceWhatsAppMessage(slug: string, title: string): string {
+  return getServiceWhatsAppPrompt(slug, title);
 }
 
 export function getProgramWhatsAppMessage(programTitle: string): string {

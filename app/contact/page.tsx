@@ -1,5 +1,4 @@
 import { ContactForm } from "@/components/forms/ContactForm";
-import { GoogleFormSection } from "@/components/forms/GoogleFormSection";
 import { MapEmbed } from "@/components/layout/MapEmbed";
 import { TikTokIcon } from "@/components/social/TikTokIcon";
 import { PageHero } from "@/components/layout/PageHero";
@@ -76,11 +75,6 @@ export default function ContactPage() {
               </div>
             </div>
             <ContactForm />
-          </div>
-          <div className="mt-16 max-w-3xl">
-            <GoogleFormSection
-              description="Submit a full consultation application with documents. Bank transfer payment applies after submit."
-            />
           </div>
         </div>
       </section>

@@ -1,8 +1,9 @@
 import { AnnouncementSidebar } from "@/components/announcements/AnnouncementSidebar";
 import { PageHero } from "@/components/layout/PageHero";
 import { ServiceCard } from "@/components/services/ServiceCard";
+import { ServiceWhatsAppButton } from "@/components/services/ServiceWhatsAppButton";
 import { Button } from "@/components/ui/Button";
-import { PriceLabel, PricingBlock } from "@/components/ui/PriceLabel";
+import { PriceLabel } from "@/components/ui/PriceLabel";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { SHOW_PRICING } from "@/lib/features";
 import { fetchRelatedServices, fetchServiceBySlug, fetchServices } from "@/services/cms";
@@ -83,17 +84,16 @@ export default async function ServiceDetailPage({ params }: Props) {
                   </ul>
                 ) : (
                   <div className="mt-4 space-y-2">
-                    <PriceLabel variant="consultation" className="text-base" />
-                    <PriceLabel variant="contact" className="text-sm" />
-                    <PricingBlock className="mt-4" />
+                    <PriceLabel variant="contact" className="text-base" />
+                    <p className="mt-4 rounded-xl border border-navy-100 bg-navy-50/80 px-4 py-3 text-xs text-navy-600 dark:border-navy-700 dark:bg-navy-950/50 dark:text-navy-400">
+                      Use <strong className="text-navy-800 dark:text-navy-200">Apply Now</strong> to submit your documents. Pricing is confirmed after review.
+                    </p>
                   </div>
                 )}
                 <Button href={`/services/${slug}/apply`} className="mt-8 w-full" size="lg">
                   Apply Now
                 </Button>
-                <Button href={`/consultation?service=${slug}`} variant="outline" className="mt-3 w-full" size="sm">
-                  Request Consultation
-                </Button>
+                <ServiceWhatsAppButton slug={slug} title={service.title} />
               </div>
               <AnnouncementSidebar />
             </div>

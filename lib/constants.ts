@@ -21,8 +21,11 @@ export const SITE_CONFIG = {
   addressLines: ["Head Office", "24 Olowu Road, Ikeja, Lagos, Nigeria"] as const,
   description:
     "Premium documentation, certification, and travel consultation services. Professional support from application to delivery.",
+  mapCenter: { lat: 6.6014, lng: 3.3515 },
   mapEmbedUrl:
     "https://maps.google.com/maps?q=24+Olowu+Road,+Ikeja,+Lagos,+Nigeria&hl=en&z=16&output=embed",
+  mapOpenUrl:
+    "https://www.google.com/maps/search/?api=1&query=24+Olowu+Road,+Ikeja,+Lagos,+Nigeria",
   url:
     typeof window !== "undefined"
       ? window.location.origin
