@@ -58,6 +58,7 @@ export function PaymentDetailsModal({
   onDone,
   settings: settingsProp,
   loadingDone = false,
+  loadingLabel = "Saving your application…",
   doneLabel = "I've made payment — Open WhatsApp",
 }: PaymentDetailsModalProps) {
   const { settings: fetched, loading } = usePaymentSettings();
@@ -138,7 +139,7 @@ export function PaymentDetailsModal({
               "rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-bold text-navy-950 hover:bg-gold-400 disabled:opacity-60"
             )}
           >
-            {loadingDone ? "Please wait…" : doneLabel}
+            {loadingDone ? loadingLabel : doneLabel}
           </button>
         </div>
       </div>
