@@ -47,6 +47,14 @@
 
 html {
   scroll-behavior: smooth;
+  /* Fixed announcement bar + navbar — anchor links land below header */
+  scroll-padding-top: 7.25rem;
+}
+
+@media (min-width: 640px) {
+  html {
+    scroll-padding-top: 7.75rem;
+  }
 }
 
 body {

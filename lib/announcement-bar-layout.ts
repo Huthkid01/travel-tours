@@ -6,10 +6,14 @@ export const announcementBarShellClass =
 export const announcementBarHeightClass = "h-9 sm:h-11";
 
 export const navbarShellClass =
-  "pointer-events-auto fixed right-0 left-0 z-200 transition-[top] duration-300";
+  "pointer-events-auto fixed right-0 left-0 z-200 transition-[top,background-color,box-shadow] duration-300";
 
-export const navbarHomeGradientClass =
-  "bg-linear-to-b from-navy-950/80 to-transparent";
+/** Homepage at top — readable over hero while staying fixed */
+export const navbarHomeTopClass =
+  "border-b border-white/10 bg-navy-950/90 shadow-sm backdrop-blur-md";
+
+export const navbarScrolledClass =
+  "border-b border-navy-100/80 bg-white/95 shadow-md backdrop-blur-xl dark:border-navy-800/80 dark:bg-navy-950/95";
 
 export const mobileMenuBackdropClass =
   "fixed right-0 bottom-0 left-0 z-150 bg-navy-950/50 lg:hidden";

@@ -11,7 +11,8 @@ import {
   announcementNavbarTopClass,
   mobileMenuBackdropClass,
   mobileMenuPanelClass,
-  navbarHomeGradientClass,
+  navbarHomeTopClass,
+  navbarScrolledClass,
   navbarShellClass,
 } from "@/lib/announcement-bar-layout";
 import { NAV_LINKS } from "@/lib/constants";
@@ -44,7 +45,9 @@ export function Navbar() {
 
   const announcementVisible = useAnnouncementVisible();
   const isHome = pathname === "/";
-  const lightNav = isHome && !scrolled;
+  /** Solid bar while scrolling or on inner pages — always fixed at top */
+  const solidNav = scrolled || !isHome || mobileOpen;
+  const lightNav = isHome && !solidNav;
 
   const closeMobile = () => setMobileOpen(false);
 
@@ -90,7 +93,7 @@ export function Navbar() {
         className={cn(
           navbarShellClass,
           announcementVisible ? announcementNavbarTopClass : "top-0",
-          lightNav ? navbarHomeGradientClass : "bg-white/95 shadow-lg backdrop-blur-xl dark:bg-navy-950/95"
+          solidNav ? navbarScrolledClass : navbarHomeTopClass
         )}
       >
         <nav className="container-custom flex h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
