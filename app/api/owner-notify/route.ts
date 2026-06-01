@@ -1,3 +1,4 @@
+import { resolveSubmissionUrl } from "@/lib/resolve-submission-url";
 import { getApplicationServer } from "@/services/applications.server";
 import { isGmailSmtpConfigured } from "@/services/owner-mail-fallback";
 import {
@@ -27,8 +28,11 @@ export async function POST(request: Request) {
       applicationId?: string;
       stage?: "submitted" | "paid";
       paymentAmount?: number;
+      submittedFrom?: string;
       data?: ContactFormData | LeadFormData;
     };
+
+    const submissionUrl = resolveSubmissionUrl(request, body.submittedFrom);
 
     if (body.type === "application" && body.applicationId) {
       const app = await getApplicationServer(body.applicationId);
@@ -38,17 +42,18 @@ export async function POST(request: Request) {
       await sendApplicationForm(app, {
         stage: body.stage ?? "paid",
         paymentAmount: body.paymentAmount,
+        submissionUrl,
       });
       return NextResponse.json({ ok: true, method: "gmail" });
     }
 
     if (body.type === "contact" && body.data) {
-      await sendContactForm(body.data as ContactFormData);
+      await sendContactForm(body.data as ContactFormData, { submissionUrl });
       return NextResponse.json({ ok: true, method: "gmail" });
     }
 
     if (body.type === "lead" && body.data) {
-      await sendLeadForm(body.data as LeadFormData);
+      await sendLeadForm(body.data as LeadFormData, { submissionUrl });
       return NextResponse.json({ ok: true, method: "gmail" });
     }
 

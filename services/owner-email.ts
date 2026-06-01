@@ -20,6 +20,7 @@ export async function sendOwnerEmail(options: {
   replyTo?: string;
   fields: Record<string, string>;
   attachments?: MailAttachment[];
+  submissionUrl: string;
 }): Promise<OwnerEmailResult> {
   if (!isGmailSmtpConfigured()) {
     throw new Error(

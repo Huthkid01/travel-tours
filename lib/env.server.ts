@@ -36,8 +36,17 @@ export function getGoogleFormShareUrl(): string | undefined {
 }
 
 export function getSiteUrl(): string {
-  if (process.env.SITE_URL?.trim()) return process.env.SITE_URL.trim();
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  const site = process.env.SITE_URL?.trim();
+  if (site) return site.replace(/\/$/, "");
+
+  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (production) {
+    return production.startsWith("http") ? production.replace(/\/$/, "") : `https://${production}`;
+  }
+
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "")}`;
+
   return "http://localhost:3000";
 }
 

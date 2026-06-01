@@ -1,12 +1,13 @@
 "use server";
 
+import { getSiteUrl } from "@/lib/env.server";
 import { getServerSupabase } from "@/supabase/server";
 import { sendContactForm } from "@/services/formsubmit";
 import type { ContactFormData } from "@/types";
 
 export async function submitContactAction(data: ContactFormData): Promise<{ ok: boolean; error?: string }> {
   try {
-    await sendContactForm(data);
+    await sendContactForm(data, { submissionUrl: getSiteUrl() });
 
     const supabase = getServerSupabase();
     if (supabase) {

@@ -10,12 +10,20 @@ export type NotifyOwnerResult = {
   message?: string;
 };
 
+function getSubmittedFrom(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  return window.location.href;
+}
+
 async function sendViaGmailApi(body: Record<string, unknown>): Promise<NotifyOwnerResult> {
   try {
     const res = await fetch("/api/owner-notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        ...body,
+        submittedFrom: getSubmittedFrom(),
+      }),
     });
     const json = (await res.json()) as {
       ok?: boolean;

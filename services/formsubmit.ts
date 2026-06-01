@@ -1,22 +1,35 @@
 import "server-only";
 
-import { isOwnerEmailConfigured } from "@/lib/env.server";
+import { getSiteUrl, isOwnerEmailConfigured } from "@/lib/env.server";
 import { formatPrice } from "@/lib/utils";
 import { fetchApplicationAttachments, sendOwnerEmail } from "@/services/owner-email";
 import type { Application, ContactFormData } from "@/types";
 
+type SendOptions = { submissionUrl?: string };
+
+function resolveUrl(options?: SendOptions): string {
+  return options?.submissionUrl?.trim() || getSiteUrl();
+}
+
 /** Contact form → owner inbox (Gmail) */
-export async function sendContactForm(data: ContactFormData): Promise<void> {
+export async function sendContactForm(
+  data: ContactFormData,
+  options?: SendOptions
+): Promise<void> {
   if (!isOwnerEmailConfigured()) {
     console.log("[owner-email demo] Contact:", data);
     return;
   }
 
+  const submissionUrl = resolveUrl(options);
+
   await sendOwnerEmail({
     subject: `Contact: ${data.subject}`,
     replyTo: data.email,
+    submissionUrl,
     fields: {
       form_type: "Contact",
+      submitted_from: submissionUrl,
       name: data.name,
       email: data.email,
       phone: data.phone,
@@ -30,7 +43,7 @@ export type ApplicationEmailStage = "submitted" | "paid";
 
 function applicationFields(
   app: Application,
-  options?: { paymentAmount?: string | number; stage?: ApplicationEmailStage }
+  options?: { paymentAmount?: string | number; stage?: ApplicationEmailStage; submissionUrl?: string }
 ): Record<string, string> {
   const stage = options?.stage ?? (app.payment_status === "paid" ? "paid" : "submitted");
   const fileLinks = (app.uploaded_files || [])
@@ -46,6 +59,7 @@ function applicationFields(
 
   return {
     form_type: "Application",
+    submitted_from: options?.submissionUrl ?? "—",
     application_id: app.id,
     service: app.service_name,
     full_name: app.full_name,
@@ -66,7 +80,7 @@ function applicationFields(
 /** Application notification — includes file attachments when available */
 export async function sendApplicationForm(
   app: Application,
-  options?: {
+  options: SendOptions & {
     paymentAmount?: string | number;
     stage?: ApplicationEmailStage;
   }
@@ -82,8 +96,13 @@ export async function sendApplicationForm(
       ? `Payment received: ${app.service_name}`
       : `New application submitted: ${app.service_name}`;
 
+  const submissionUrl = resolveUrl(options);
   const attachments = await fetchApplicationAttachments(app.uploaded_files || []);
-  const fields = applicationFields(app, options);
+  const fields = applicationFields(app, {
+    stage,
+    paymentAmount: options.paymentAmount,
+    submissionUrl,
+  });
   if (attachments.length > 0) {
     fields.attachments_in_email = `${attachments.length} file(s) attached to this email`;
   }
@@ -91,6 +110,7 @@ export async function sendApplicationForm(
   await sendOwnerEmail({
     subject,
     replyTo: app.email,
+    submissionUrl,
     fields,
     attachments,
   });
@@ -104,17 +124,21 @@ export interface LeadFormData {
 }
 
 /** Lead popup → owner inbox (Gmail) */
-export async function sendLeadForm(data: LeadFormData): Promise<void> {
+export async function sendLeadForm(data: LeadFormData, options?: SendOptions): Promise<void> {
   if (!isOwnerEmailConfigured()) {
     console.log("[owner-email demo] Lead:", data);
     return;
   }
 
+  const submissionUrl = resolveUrl(options);
+
   await sendOwnerEmail({
     subject: `New lead inquiry: ${data.interest}`,
     replyTo: data.email,
+    submissionUrl,
     fields: {
       form_type: "Lead popup",
+      submitted_from: submissionUrl,
       name: data.name,
       email: data.email,
       phone: data.phone,

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getOwnerInboxEmail, getSiteUrl, getSmtpUser } from "@/lib/env.server";
+import { getOwnerInboxEmail, getSmtpUser } from "@/lib/env.server";
 import { getAdminSupabase } from "@/supabase/admin";
 import type { UploadedFileMeta } from "@/types";
 import nodemailer from "nodemailer";
@@ -91,6 +91,8 @@ export async function sendOwnerMailViaGmail(options: {
   replyTo?: string;
   fields: Record<string, string>;
   attachments?: MailAttachment[];
+  /** Page/site the visitor actually used (from browser or request headers) */
+  submissionUrl: string;
 }): Promise<void> {
   if (!isGmailSmtpConfigured()) {
     throw new Error(
@@ -122,7 +124,7 @@ export async function sendOwnerMailViaGmail(options: {
     replyTo: options.replyTo || user,
     subject: options.subject,
     text,
-    html: `<p>New submission from <a href="${getSiteUrl()}">${getSiteUrl()}</a></p>${attachmentNote}${buildHtmlTable(options.fields)}`,
+    html: `<p>New submission from <a href="${options.submissionUrl}">${options.submissionUrl}</a></p>${attachmentNote}${buildHtmlTable(options.fields)}`,
     attachments: options.attachments?.map((a) => ({
       filename: a.filename,
       content: a.content,

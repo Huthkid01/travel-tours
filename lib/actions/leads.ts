@@ -1,13 +1,13 @@
 "use server";
 
-import { isSupabaseServerConfigured } from "@/lib/env.server";
+import { getSiteUrl, isSupabaseServerConfigured } from "@/lib/env.server";
 import { getServerSupabase } from "@/supabase/server";
 import { sendLeadForm } from "@/services/formsubmit";
 import type { LeadPayload } from "@/services/leads";
 
 export async function submitLeadAction(data: LeadPayload): Promise<{ ok: boolean; error?: string }> {
   try {
-    await sendLeadForm(data);
+    await sendLeadForm(data, { submissionUrl: getSiteUrl() });
   } catch (err) {
     return {
       ok: false,
