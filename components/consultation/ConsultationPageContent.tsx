@@ -108,6 +108,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
               {({
                 onSubmit,
                 onStageForPayment,
+                onStepProgress,
                 submitLabel,
                 deferPaymentToModal,
                 paymentStepOpensModal,
@@ -119,6 +120,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                     serviceTitle={label}
                     onSubmit={onSubmit}
                     onStageForPayment={onStageForPayment}
+                    onStepProgress={onStepProgress}
                     submitLabel={submitLabel}
                     deferPaymentToModal={deferPaymentToModal}
                     paymentStepOpensModal={paymentStepOpensModal}
@@ -138,6 +140,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                       const allFiles = [...files.passportPhoto, ...files.passportBioPage];
                       onStageForPayment(mapDarboiToApplicationData(data), allFiles);
                     }}
+                    onStepComplete={(data) => onStepProgress(mapDarboiToApplicationData(data))}
                     onSubmit={async (data, files) => {
                       const form = mapDarboiToApplicationData(data);
                       const allFiles = [...files.passportPhoto, ...files.passportBioPage];

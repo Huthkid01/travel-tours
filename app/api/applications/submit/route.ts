@@ -1,4 +1,4 @@
-import { createApplicationServer } from "@/services/applications.server";
+import { upsertApplicationServer } from "@/services/applications.server";
 import { uploadApplicationFilesServer } from "@/services/storage.server";
 import type { ApplicationFormData } from "@/types";
 import { NextResponse } from "next/server";
@@ -44,11 +44,11 @@ export async function POST(request: Request) {
       }
     }
 
-    const application = await createApplicationServer(
+    const application = await upsertApplicationServer(
       payload.serviceName,
       payload.form,
-      uploaded,
-      applicationId
+      applicationId,
+      uploaded
     );
 
     /** Email via Gmail after payment (/api/owner-notify) */

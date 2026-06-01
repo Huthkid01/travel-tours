@@ -47,6 +47,7 @@ export function ConsultationFormSection({
           >
             {({
               onStageForPayment,
+              onStepProgress,
               submitLabel,
               deferPaymentToModal,
               paymentStepOpensModal,
@@ -61,6 +62,7 @@ export function ConsultationFormSection({
                 paymentFeeLabel={CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
                 disabled={disabled}
                 onStageForPayment={(data, files) => mapAndStage(data, files, onStageForPayment)}
+                onStepComplete={(data) => onStepProgress(mapDarboiToApplicationData(data))}
                 onSubmit={async () => {}}
               />
             )}

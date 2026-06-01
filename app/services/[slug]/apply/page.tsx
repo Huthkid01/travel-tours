@@ -33,12 +33,21 @@ export default function ApplyPage() {
       <section className="section-padding bg-navy-50/50 dark:bg-navy-950/30">
         <div className="container-custom max-w-2xl">
           <ApplicationSubmitFlow storageSlug={slug} serviceName={service.title} kind="service">
-            {({ onSubmit, onStageForPayment, submitLabel, deferPaymentToModal, paymentStepOpensModal, disabled }) => (
+            {({
+              onSubmit,
+              onStageForPayment,
+              onStepProgress,
+              submitLabel,
+              deferPaymentToModal,
+              paymentStepOpensModal,
+              disabled,
+            }) => (
               <ApplicationForm
                 serviceSlug={slug}
                 serviceTitle={service.title}
                 onSubmit={onSubmit}
                 onStageForPayment={onStageForPayment}
+                onStepProgress={onStepProgress}
                 submitLabel={submitLabel}
                 deferPaymentToModal={deferPaymentToModal}
                 paymentStepOpensModal={paymentStepOpensModal}

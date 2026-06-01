@@ -32,6 +32,8 @@ export interface DarboiApplicationFormProps {
   onSubmit: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => Promise<void>;
   /** Called on step 5 when user taps Make payment (after validation) */
   onStageForPayment?: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => void;
+  /** Called after each step is validated — parent can save draft */
+  onStepComplete?: (data: DarboiApplicationFormValues, stepId: string) => void;
 }
 
 const STEPS: FormStepConfig[] = [
@@ -60,6 +62,7 @@ export function DarboiApplicationForm({
   disabled = false,
   onSubmit,
   onStageForPayment,
+  onStepComplete,
 }: DarboiApplicationFormProps) {
   const [step, setStep] = useState(0);
   const [passportPhoto, setPassportPhoto] = useState<File[]>([]);
@@ -148,6 +151,7 @@ export function DarboiApplicationForm({
         return;
       }
       if (step < lastStepIndex) {
+        onStepComplete?.(getValues(), stepId);
         setStep((s) => s + 1);
         return;
       }
@@ -209,6 +213,7 @@ export function DarboiApplicationForm({
       const ok = await trigger(fields);
       if (!ok) return;
     }
+    onStepComplete?.(getValues(), stepId);
     setStep((s) => s + 1);
   };
 

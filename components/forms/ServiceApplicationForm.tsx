@@ -32,6 +32,7 @@ interface ServiceApplicationFormProps {
   deferPaymentToModal?: boolean;
   disabled?: boolean;
   onSubmit: (data: ServiceApplicationFormValues, files: File[]) => Promise<void>;
+  onStepComplete?: (data: ServiceApplicationFormValues, stepId: string) => void;
 }
 
 type StepDef = FormStepConfig & { fieldKeys?: (keyof ServiceApplicationFormValues)[]; kind: string };
@@ -43,6 +44,7 @@ export function ServiceApplicationForm({
   deferPaymentToModal = false,
   disabled = false,
   onSubmit,
+  onStepComplete,
 }: ServiceApplicationFormProps) {
   const schema = useMemo(() => buildServiceApplicationSchema(config), [config]);
   const f = useMemo(() => config.fields ?? {}, [config.fields]);
@@ -137,6 +139,7 @@ export function ServiceApplicationForm({
     register,
     handleSubmit,
     trigger,
+    getValues,
     formState: { errors },
   } = useForm<ServiceApplicationFormValues>({
     resolver: zodResolver(schema),
@@ -178,6 +181,7 @@ export function ServiceApplicationForm({
     if (stepDef.kind === "documents") {
       if (!validateUploads()) return;
       if (step < lastStepIndex) {
+        onStepComplete?.(getValues(), stepDef.id);
         setStep((s) => s + 1);
         return;
       }
@@ -195,6 +199,7 @@ export function ServiceApplicationForm({
       const ok = await trigger(keys);
       if (!ok) return;
     }
+    onStepComplete?.(getValues(), stepDef.id);
     setStep((s) => s + 1);
   };
 

@@ -11,13 +11,13 @@ import type {
   UploadedFileMeta,
 } from "@/types";
 
-export async function createApplicationServer(
+function buildApplicationRecord(
   serviceName: string,
   form: ApplicationFormData,
   uploadedFiles: UploadedFileMeta[],
   id: string
-): Promise<Application> {
-  const record: Application = {
+): Application {
+  return {
     id,
     service_name: serviceName,
     full_name: form.fullName,
@@ -32,31 +32,62 @@ export async function createApplicationServer(
     payment_reference: null,
     created_at: new Date().toISOString(),
   };
+}
+
+/** Create or update application (keeps existing files when new upload list is empty) */
+export async function upsertApplicationServer(
+  serviceName: string,
+  form: ApplicationFormData,
+  id: string,
+  uploadedFiles?: UploadedFileMeta[]
+): Promise<Application> {
+  let files = uploadedFiles ?? [];
+  if (files.length === 0) {
+    const existing = await getApplicationServer(id);
+    if (existing?.uploaded_files?.length) {
+      files = existing.uploaded_files;
+    }
+  }
+
+  const record = buildApplicationRecord(serviceName, form, files, id);
 
   const supabase = getServerSupabase();
   if (!supabase) return record;
 
   const { data, error } = await supabase
     .from("applications")
-    .insert({
-      id: record.id,
-      service_name: record.service_name,
-      full_name: record.full_name,
-      email: record.email,
-      phone: record.phone,
-      country: record.country,
-      address: record.address,
-      purpose: record.purpose,
-      notes: record.notes,
-      uploaded_files: record.uploaded_files,
-      payment_status: record.payment_status,
-      payment_reference: record.payment_reference,
-    })
+    .upsert(
+      {
+        id: record.id,
+        service_name: record.service_name,
+        full_name: record.full_name,
+        email: record.email,
+        phone: record.phone,
+        country: record.country,
+        address: record.address,
+        purpose: record.purpose,
+        notes: record.notes,
+        uploaded_files: record.uploaded_files,
+        payment_status: record.payment_status,
+        payment_reference: record.payment_reference,
+      },
+      { onConflict: "id" }
+    )
     .select()
     .single();
 
   if (error) throw new Error(error.message);
   return data as Application;
+}
+
+/** @deprecated Use upsertApplicationServer */
+export async function createApplicationServer(
+  serviceName: string,
+  form: ApplicationFormData,
+  uploadedFiles: UploadedFileMeta[],
+  id: string
+): Promise<Application> {
+  return upsertApplicationServer(serviceName, form, id, uploadedFiles);
 }
 
 export async function getApplicationServer(id: string): Promise<Application | null> {

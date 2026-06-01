@@ -25,6 +25,7 @@ interface ApplicationFormProps {
   disabled?: boolean;
   onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
   onStageForPayment?: (data: ApplicationFormData, files: File[]) => void;
+  onStepProgress?: (data: ApplicationFormData) => void;
 }
 
 export function ApplicationForm({
@@ -37,6 +38,7 @@ export function ApplicationForm({
   disabled = false,
   onSubmit,
   onStageForPayment,
+  onStepProgress,
 }: ApplicationFormProps) {
   const contextLabel = `Applying for: ${serviceTitle}`;
 
@@ -84,6 +86,11 @@ export function ApplicationForm({
       deferPaymentToModal={deferPaymentToModal}
       disabled={disabled}
       onSubmit={handleServiceSubmit}
+      onStepComplete={
+        onStepProgress
+          ? (data) => onStepProgress(mapServiceToApplicationData(data, config, serviceTitle))
+          : undefined
+      }
     />
   );
 }

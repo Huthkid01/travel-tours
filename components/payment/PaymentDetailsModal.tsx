@@ -15,6 +15,8 @@ interface PaymentDetailsModalProps {
   settings?: PaymentSettings;
   loadingDone?: boolean;
   loadingLabel?: string;
+  /** Shown under bank details while application uploads in background */
+  statusHint?: string;
   doneLabel?: string;
 }
 
@@ -58,7 +60,8 @@ export function PaymentDetailsModal({
   onDone,
   settings: settingsProp,
   loadingDone = false,
-  loadingLabel = "Saving your application…",
+  loadingLabel = "Confirming payment…",
+  statusHint,
   doneLabel = "I've made payment — Open WhatsApp",
 }: PaymentDetailsModalProps) {
   const { settings: fetched, loading } = usePaymentSettings();
@@ -110,6 +113,12 @@ export function PaymentDetailsModal({
           <CopyRow label="Bank" value={settings.bankName} />
           <CopyRow label="Account number" value={settings.accountNumber} />
           <CopyRow label="Account name" value={settings.accountName} />
+
+          {statusHint && (
+            <p className="rounded-lg border border-gold-500/25 bg-gold-500/10 px-3 py-2 text-xs text-navy-700 dark:text-navy-200">
+              {statusHint}
+            </p>
+          )}
 
           <div className="pt-2">
             <label className={formLabelClass}>Payment reference / depositor name</label>
