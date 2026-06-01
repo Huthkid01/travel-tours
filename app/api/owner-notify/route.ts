@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       {
         ok: false,
         error:
-          "Gmail backup is not configured. Set GMAIL_APP_PASSWORD in Vercel, or activate FormSubmit by submitting the Contact form once on the live site.",
+          "Gmail is not configured. In Vercel → Settings → Environment Variables, add GMAIL_APP_PASSWORD (Google App Password for darboiconsults@gmail.com) and redeploy.",
       },
       { status: 503 }
     );

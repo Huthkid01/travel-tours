@@ -1,12 +1,10 @@
 # Owner email via FormSubmit
 
-All forms email **darboiconsults@gmail.com** using FormSubmit from the **visitor’s browser**:
+All forms email **darboiconsults@gmail.com**.
 
-`https://formsubmit.co/ajax/darboiconsults@gmail.com`
+**Recommended on Vercel:** Gmail SMTP via `GMAIL_APP_PASSWORD` (same-origin `/api/owner-notify` — no CORS issues).
 
-(This is the AJAX version of `https://formsubmit.co/darboiconsults@gmail.com` from their docs.)
-
-Server requests from Vercel are **not** used (FormSubmit returns 403).
+**Optional:** FormSubmit from the browser (hidden form POST if `fetch` to `/ajax/` is blocked by CORS or error 521).
 
 ## Vercel env
 
@@ -15,7 +13,7 @@ FORMSUBMIT_EMAIL=darboiconsults@gmail.com
 NEXT_PUBLIC_FORMSUBMIT_EMAIL=darboiconsults@gmail.com
 ```
 
-Optional backup (used automatically if FormSubmit fails):
+**Required for reliable email on Vercel** (create at https://myaccount.google.com/apppasswords):
 
 ```env
 GMAIL_APP_PASSWORD=your-16-char-app-password

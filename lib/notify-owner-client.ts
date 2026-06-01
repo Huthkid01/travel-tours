@@ -34,44 +34,51 @@ async function tryGmailBackup(body: Record<string, unknown>): Promise<NotifyOwne
       ok: false,
       message:
         json.error ||
-        "Backup email failed. Add GMAIL_APP_PASSWORD in Vercel, or activate FormSubmit on the live site.",
+        "Gmail is not configured on the server. Set GMAIL_APP_PASSWORD in Vercel and redeploy.",
     };
   } catch {
     return { ok: false, message: "Could not reach the server for backup email." };
   }
 }
 
-/** FormSubmit from the browser, then Gmail via API if that fails */
+const GMAIL_SETUP_HINT =
+  "Add GMAIL_APP_PASSWORD in Vercel (Google App Password for darboiconsults@gmail.com), then redeploy.";
+
+/** Gmail via your API first (no CORS), then FormSubmit in the browser */
 export async function notifyApplicationOwner(
   app: Application,
   options?: { stage?: "submitted" | "paid"; paymentAmount?: number }
 ): Promise<NotifyOwnerResult> {
   const stage = options?.stage ?? (app.payment_status === "paid" ? "paid" : "submitted");
+
+  const gmail = await tryGmailBackup({
+    type: "application",
+    applicationId: app.id,
+    stage,
+    paymentAmount: options?.paymentAmount,
+  });
+  if (gmail.ok) return gmail;
+
   const fs = await sendApplicationViaFormSubmitClient(app, {
     stage,
     paymentAmount: options?.paymentAmount,
   });
   if (fs.ok) return { ok: true, method: "formsubmit" };
 
-  const backup = await tryGmailBackup({
-    type: "application",
-    applicationId: app.id,
-    stage,
-    paymentAmount: options?.paymentAmount,
-  });
-  if (backup.ok) return backup;
-
-  return { ok: false, message: fs.message ?? backup.message };
+  return {
+    ok: false,
+    message: gmail.message?.includes("GMAIL") ? gmail.message : `${fs.message ?? gmail.message} ${GMAIL_SETUP_HINT}`,
+  };
 }
 
 export async function notifyContactOwner(data: ContactFormData): Promise<NotifyOwnerResult> {
+  const gmail = await tryGmailBackup({ type: "contact", data });
+  if (gmail.ok) return gmail;
+
   const fs = await sendContactViaFormSubmitClient(data);
   if (fs.ok) return { ok: true, method: "formsubmit" };
 
-  const backup = await tryGmailBackup({ type: "contact", data });
-  if (backup.ok) return backup;
-
-  return { ok: false, message: fs.message ?? backup.message };
+  return { ok: false, message: fs.message ?? `${gmail.message} ${GMAIL_SETUP_HINT}` };
 }
 
 export async function notifyLeadOwner(data: {
@@ -80,11 +87,11 @@ export async function notifyLeadOwner(data: {
   email: string;
   interest: string;
 }): Promise<NotifyOwnerResult> {
+  const gmail = await tryGmailBackup({ type: "lead", data });
+  if (gmail.ok) return gmail;
+
   const fs = await sendLeadViaFormSubmitClient(data);
   if (fs.ok) return { ok: true, method: "formsubmit" };
 
-  const backup = await tryGmailBackup({ type: "lead", data });
-  if (backup.ok) return backup;
-
-  return { ok: false, message: fs.message ?? backup.message };
+  return { ok: false, message: fs.message ?? `${gmail.message} ${GMAIL_SETUP_HINT}` };
 }

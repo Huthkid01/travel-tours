@@ -1,5 +1,6 @@
 "use client";
 
+import { postFormSubmitViaHiddenForm } from "@/lib/formsubmit-iframe";
 import { SITE_CONFIG } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
 import type { Application, ContactFormData, UploadedFileMeta } from "@/types";
@@ -23,56 +24,74 @@ function getFormSubmitAjaxUrl(): string {
   return `https://formsubmit.co/ajax/${email}`;
 }
 
-/** Browser → FormSubmit AJAX (must be activated once on your live domain) */
+function activationMessage(): string {
+  return "FormSubmit is not activated yet. Submit the Contact form on the live site once, then click the link in darboiconsults@gmail.com (check spam). Or set GMAIL_APP_PASSWORD in Vercel.";
+}
+
+/** fetch → formsubmit.co/ajax (often blocked by CORS or 521) */
+async function postFormSubmitAjax(formData: FormData): Promise<FormSubmitClientResult> {
+  if (!formData.has("_url")) {
+    formData.append("_url", typeof window !== "undefined" ? window.location.href : SITE_CONFIG.url);
+  }
+
+  const res = await fetch(getFormSubmitAjaxUrl(), {
+    method: "POST",
+    body: formData,
+    headers: { Accept: "application/json" },
+  });
+
+  const json = (await res.json().catch(() => ({}))) as {
+    success?: string | boolean;
+    message?: string;
+  };
+
+  const msg = (json.message || "").toLowerCase();
+  const ok =
+    res.ok &&
+    (json.success === "true" ||
+      json.success === true ||
+      msg.includes("thank") ||
+      (res.status === 200 && !msg.includes("fail") && !msg.includes("error")));
+
+  if (!ok) {
+    const raw = json.message || `FormSubmit failed (${res.status})`;
+    if (/activat/i.test(raw)) return { ok: false, message: activationMessage() };
+    if (res.status === 403) {
+      return {
+        ok: false,
+        message:
+          "FormSubmit blocked this request. Set GMAIL_APP_PASSWORD in Vercel, or use the hidden-form fallback.",
+      };
+    }
+    return { ok: false, message: raw };
+  }
+
+  return { ok: true };
+}
+
+/** AJAX when possible; hidden iframe POST when CORS/network fails */
 async function postFormSubmitClient(formData: FormData): Promise<FormSubmitClientResult> {
-  formData.append("_url", typeof window !== "undefined" ? window.location.href : SITE_CONFIG.url);
+  const snapshot = new FormData();
+  for (const [key, value] of formData.entries()) {
+    if (typeof value === "string") snapshot.append(key, value);
+  }
 
   try {
-    const res = await fetch(getFormSubmitAjaxUrl(), {
-      method: "POST",
-      body: formData,
-      headers: { Accept: "application/json" },
-    });
-
-    const json = (await res.json().catch(() => ({}))) as {
-      success?: string | boolean;
-      message?: string;
-    };
-
-    const msg = (json.message || "").toLowerCase();
-    const ok =
-      res.ok &&
-      (json.success === "true" ||
-        json.success === true ||
-        msg.includes("thank") ||
-        (res.status === 200 && !msg.includes("fail") && !msg.includes("error")));
-
-    if (!ok) {
-      const raw = json.message || `FormSubmit failed (${res.status})`;
-      if (/activat/i.test(raw)) {
-        return {
-          ok: false,
-          message:
-            "FormSubmit is not activated yet. Open the live site Contact page, submit once, then click the link in darboiconsults@gmail.com (check spam).",
-        };
-      }
-      if (res.status === 403) {
-        return {
-          ok: false,
-          message:
-            "FormSubmit blocked this request. Use the live site (not localhost preview), or set GMAIL_APP_PASSWORD on Vercel for backup email.",
-        };
-      }
-      return { ok: false, message: raw };
-    }
-
-    return { ok: true };
-  } catch (err) {
-    return {
-      ok: false,
-      message: err instanceof Error ? err.message : "Could not reach FormSubmit",
-    };
+    const ajax = await postFormSubmitAjax(snapshot);
+    if (ajax.ok) return ajax;
+  } catch {
+    /* CORS, 521, net::ERR_FAILED — fall through to iframe */
   }
+
+  const iframe = await postFormSubmitViaHiddenForm(snapshot);
+  if (iframe.ok) return iframe;
+
+  return {
+    ok: false,
+    message:
+      iframe.message ??
+      "Could not send via FormSubmit. Add GMAIL_APP_PASSWORD in Vercel → Environment Variables → redeploy.",
+  };
 }
 
 export async function sendContactViaFormSubmitClient(
