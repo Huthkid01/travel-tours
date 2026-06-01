@@ -39,7 +39,7 @@ export function ContactForm() {
       if (!notify.ok) {
         throw new Error(
           notify.message ||
-            "Could not send email. Activate FormSubmit on the live Contact page, or set GMAIL_APP_PASSWORD in Vercel."
+            "Could not send email. Activate FormSubmit on the live site (check darboiconsults@gmail.com), or set GMAIL_APP_PASSWORD in Vercel."
         );
       }
 

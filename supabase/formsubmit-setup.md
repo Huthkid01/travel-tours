@@ -1,10 +1,12 @@
-# Owner email via FormSubmit
+# Owner email via FormSubmit (browser only)
 
-All forms email **darboiconsults@gmail.com**.
+All forms email **darboiconsults@gmail.com** using the **real FormSubmit endpoint** from the visitor’s browser:
 
-**Recommended on Vercel:** Gmail SMTP via `GMAIL_APP_PASSWORD` (same-origin `/api/owner-notify` — no CORS issues).
+`https://formsubmit.co/darboiconsults@gmail.com`
 
-**Optional:** FormSubmit from the browser (hidden form POST if `fetch` to `/ajax/` is blocked by CORS or error 521).
+We use a normal HTML `<form method="POST">` in a hidden iframe (same as FormSubmit’s docs). We do **not** use `/ajax/` or `fetch()` (those cause CORS errors on Vercel).
+
+Server requests from Vercel to FormSubmit are **not** used (403). Optional Gmail backup: `GMAIL_APP_PASSWORD`.
 
 ## Vercel env
 
@@ -13,7 +15,13 @@ FORMSUBMIT_EMAIL=darboiconsults@gmail.com
 NEXT_PUBLIC_FORMSUBMIT_EMAIL=darboiconsults@gmail.com
 ```
 
-**Required for reliable email on Vercel** (create at https://myaccount.google.com/apppasswords):
+Optional access key (from formsubmit.co dashboard):
+
+```env
+NEXT_PUBLIC_FORMSUBMIT_ACCESS_KEY=your-key
+```
+
+Optional Gmail backup:
 
 ```env
 GMAIL_APP_PASSWORD=your-16-char-app-password
@@ -22,32 +30,28 @@ SMTP_USER=darboiconsults@gmail.com
 
 ## Activate FormSubmit (once)
 
-1. On the **live site**, open **Contact** and send a test message (use Chrome, not a preview iframe).
+1. On the **live site**, open **Contact** and send a test message.
 2. Check **darboiconsults@gmail.com** and **spam** for email from FormSubmit.
 3. Click the **activation link** in that email.
-4. After that, contact, consultation, and lead forms will deliver to your inbox.
+4. After that, all forms can deliver to your inbox.
 
 ## What sends when
 
 | Form | When email sends |
 |------|------------------|
-| Contact | On submit (browser FormSubmit) |
-| Lead popup | On submit (browser FormSubmit) |
+| Contact | On submit |
+| Lead popup | On submit |
 | Service / program / consultation apply | **Only** after “I've made payment” (then WhatsApp opens) |
 
 Data is always saved in the admin dashboard even if email fails.
 
 ## Application documents in email
 
-Application and consultation forms **attach uploaded files** to the FormSubmit email (same as a normal HTML file upload), not only Supabase links. Gmail shows them under **attachments** — open or preview images/PDFs there.
-
-If an attachment is missing, check FormSubmit size limits (~5MB per file) and confirm files uploaded successfully in Admin → Applications.
+Emails include **links** to uploaded files in Supabase (`uploaded_documents` field). Open links in the email or use Admin → Applications.
 
 ## If email still fails
 
 - Confirm activation link was clicked.
-- Submit from the real URL `travel-tours-eight.vercel.app`, not localhost only.
-- Check spam folder.
-- Submit the **Contact** form on the live site once to activate FormSubmit.
-- If you see an error toast on submit, add `GMAIL_APP_PASSWORD` in Vercel and redeploy (backup email via `/api/owner-notify`).
-- Past rows in Admin → Applications were saved to the database even when email failed; they are not resent automatically.
+- Submit from `travel-tours-eight.vercel.app` (not only localhost).
+- Check spam.
+- Add `GMAIL_APP_PASSWORD` in Vercel for automatic backup via `/api/owner-notify`.
