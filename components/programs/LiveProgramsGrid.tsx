@@ -9,15 +9,19 @@ type LiveProgramsGridProps = {
   initialPrograms?: Program[];
   variant?: "compact" | "full";
   className?: string;
+  /** Poll for CMS updates (off on home to avoid image flicker while scrolling) */
+  liveUpdates?: boolean;
 };
 
 export function LiveProgramsGrid({
   initialPrograms = [],
   variant = "compact",
   className,
+  liveUpdates = false,
 }: LiveProgramsGridProps) {
   const { data: programs } = useLiveCms<Program[]>("/api/programs", {
     initial: initialPrograms,
+    enabled: liveUpdates,
   });
   const list = programs ?? initialPrograms;
 
@@ -27,7 +31,13 @@ export function LiveProgramsGrid({
   return (
     <div className={cn("contents", className)}>
       {list.map((program, i) => (
-        <ProgramCard key={program.id} program={program} index={i} variant={variant} />
+        <ProgramCard
+          key={program.id}
+          program={program}
+          index={i}
+          variant={variant}
+          imagePriority={i < 4}
+        />
       ))}
     </div>
   );

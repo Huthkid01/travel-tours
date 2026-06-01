@@ -8,7 +8,6 @@ import { trackEvent } from "@/lib/analytics";
 import { getProgramFlyerCandidates, isProgramFlyerImage } from "@/lib/program-flyers";
 import { openWhatsApp, getProgramWhatsAppMessage } from "@/lib/whatsapp";
 import type { Program } from "@/types";
-import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { ArrowRight, Sparkles, ZoomIn } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -20,6 +19,8 @@ interface ProgramCardProps {
   layout?: "grid" | "carousel";
   /** Home grid: title, description, consultation only (matches featured layout) */
   variant?: "compact" | "full";
+  /** Preload flyer image (first row on home / programs grid) */
+  imagePriority?: boolean;
 }
 
 export function ProgramCard({
@@ -27,6 +28,7 @@ export function ProgramCard({
   index = 0,
   layout = "grid",
   variant = "full",
+  imagePriority = false,
 }: ProgramCardProps) {
   const track = useLeadTrackerContext();
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -49,11 +51,9 @@ export function ProgramCard({
 
   return (
     <>
-      <ScrollReveal
-        as="article"
-        index={index}
+      <article
         className={cn(
-          "interactive-card group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900",
+          "interactive-card stable-media group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900",
           layout === "carousel" && "min-w-[280px] sm:min-w-[320px]"
         )}
       >
@@ -73,8 +73,9 @@ export function ProgramCard({
           <ProgramFlyerImage
             program={program}
             fill
-            sizes="(max-width: 640px) 85vw, (max-width: 1024px) 45vw, 320px"
-            className="transition-transform duration-700 group-hover:scale-[1.02]"
+            priority={imagePriority}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
+            className="md:transition-transform md:duration-700 md:group-hover:scale-[1.02]"
           />
           <div
             className={cn(
@@ -156,7 +157,7 @@ export function ProgramCard({
             </>
           )}
         </div>
-      </ScrollReveal>
+      </article>
 
       <ProgramImageLightbox
         open={lightboxOpen}

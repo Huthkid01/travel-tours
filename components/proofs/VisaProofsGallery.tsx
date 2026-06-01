@@ -4,7 +4,6 @@ import { PriceLabel } from "@/components/ui/PriceLabel";
 import { visaProofs } from "@/data/visa-proofs";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatePresence, motion } from "framer-motion";
 import { BadgeCheck, Shield, Sparkles, X, ZoomIn } from "lucide-react";
 import Image from "next/image";
@@ -36,11 +35,9 @@ export function VisaProofsGallery() {
 
       <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 [&>*]:min-w-0">
         {visaProofs.map((proof, i) => (
-          <ScrollReveal
-            as="article"
+          <article
             key={proof.id}
-            index={i}
-            className="interactive-card group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900"
+            className="interactive-card stable-media group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-navy-800 bg-navy-900"
           >
             <button
               type="button"
@@ -56,9 +53,9 @@ export function VisaProofsGallery() {
                   src={proof.image}
                   alt={proof.title}
                   fill
-                  className="object-contain p-1.5 transition-transform duration-500 group-hover:scale-[1.02] sm:p-2"
-                  sizes="(max-width: 640px) 45vw, 320px"
-                  unoptimized
+                  className="object-contain p-1.5 sm:p-2 md:transition-transform md:duration-500 md:group-hover:scale-[1.02]"
+                  sizes="(max-width: 640px) 50vw, 320px"
+                  priority={i < 3}
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/80 via-navy-950/10 to-transparent" />
                 <span className="pointer-events-none absolute top-2 left-2 flex items-center gap-1 rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-bold text-navy-950 sm:top-3 sm:left-3 sm:px-2.5 sm:text-xs">
@@ -88,7 +85,7 @@ export function VisaProofsGallery() {
                 <PriceLabel variant="consultation" className="text-xs sm:text-sm" />
               </div>
             </div>
-          </ScrollReveal>
+          </article>
         ))}
       </div>
 
@@ -124,7 +121,7 @@ export function VisaProofsGallery() {
                   fill
                   className="object-contain p-4"
                   sizes="512px"
-                  unoptimized
+                  priority
                 />
               </div>
               <div className="border-t border-navy-800 p-4">

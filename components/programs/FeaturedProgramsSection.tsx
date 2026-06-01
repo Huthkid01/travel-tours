@@ -21,7 +21,7 @@ export async function FeaturedProgramsSection() {
         />
 
         <div className="mt-10 grid grid-cols-2 gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-3 [&>*]:min-w-0">
-          <LiveProgramsGrid initialPrograms={programs} variant="compact" />
+          <LiveProgramsGrid initialPrograms={programs} variant="compact" liveUpdates={false} />
         </div>
 
         <div className="mt-10 text-center">

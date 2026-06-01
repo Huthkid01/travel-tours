@@ -24,7 +24,13 @@ export function useLiveCms<T>(url: string, options?: UseLiveCmsOptions<T>) {
       const json = await res.json();
       if (!res.ok || json?.error) return;
       if (mounted.current) {
-        setData(json as T);
+        const next = json as T;
+        setData((prev) => {
+          if (prev !== undefined && JSON.stringify(prev) === JSON.stringify(next)) {
+            return prev;
+          }
+          return next;
+        });
         setLoading(false);
       }
     } catch {

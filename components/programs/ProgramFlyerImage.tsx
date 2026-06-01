@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { Program } from "@/types";
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 interface ProgramFlyerImageProps {
   program: Pick<Program, "slug" | "title" | "image" | "imageType">;
@@ -36,7 +36,7 @@ function FlyerPlaceholder({ slug, title }: { slug: string; title: string }) {
   );
 }
 
-export function ProgramFlyerImage({
+function ProgramFlyerImageInner({
   program,
   fill = false,
   className,
@@ -49,6 +49,11 @@ export function ProgramFlyerImage({
     [program.slug, program.image]
   );
   const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    setIndex(0);
+  }, [program.slug, program.image]);
+
   const src = candidates[index];
   const isFlyer = isProgramFlyerImage(src ?? program.image, program.imageType);
   const isLocal = src?.startsWith("/");
@@ -123,3 +128,5 @@ export function ProgramFlyerImage({
     />
   );
 }
+
+export const ProgramFlyerImage = memo(ProgramFlyerImageInner);

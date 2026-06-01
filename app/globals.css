@@ -121,3 +121,10 @@ input[type="date"]::-webkit-date-and-time-value {
   min-width: 0;
   text-align: left;
 }
+
+/* Prevent image flicker on mobile scroll (GPU layer + no layout shift) */
+.stable-media img {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}

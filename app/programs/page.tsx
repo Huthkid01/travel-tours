@@ -34,7 +34,7 @@ export default async function ProgramsPage() {
                 description="Browse our featured programs. Pricing available on request after consultation."
               />
               <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 [&>*]:min-w-0">
-                <LiveProgramsGrid initialPrograms={programs} variant="compact" />
+                <LiveProgramsGrid initialPrograms={programs} variant="compact" liveUpdates />
               </div>
             </div>
             <div className="lg:col-span-1">
