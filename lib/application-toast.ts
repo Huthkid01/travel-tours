@@ -2,10 +2,11 @@ import { toast } from "sonner";
 
 /** User-facing feedback after an application is saved to the database */
 export function toastApplicationSaved(options?: {
+  /** Only set when an email was attempted (e.g. after payment) */
   emailSent?: boolean;
   nextStep?: "payment" | "whatsapp";
 }) {
-  const { emailSent = true, nextStep } = options ?? {};
+  const { emailSent, nextStep } = options ?? {};
 
   if (nextStep === "payment") {
     toast.success("Your application was submitted successfully! Continue to payment.");
@@ -15,16 +16,16 @@ export function toastApplicationSaved(options?: {
     toast.success("Your application was submitted successfully!");
   }
 
-  if (!emailSent) {
+  if (emailSent === false) {
     toast.error("Application saved, but notification could not be sent. Continue on WhatsApp.");
   }
 }
 
 /** After bank transfer + Done on payment modal */
 export function toastPaymentComplete(options?: { emailSent?: boolean }) {
-  const { emailSent = true } = options ?? {};
+  const { emailSent } = options ?? {};
   toast.success("Payment recorded! Opening WhatsApp…");
-  if (!emailSent) {
+  if (emailSent === false) {
     toast.error("Payment saved, but notification could not be sent. Continue on WhatsApp.");
   }
 }

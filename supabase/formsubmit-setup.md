@@ -12,9 +12,15 @@ Server requests from Vercel are **not** used (FormSubmit returns 403).
 
 ```env
 FORMSUBMIT_EMAIL=darboiconsults@gmail.com
+NEXT_PUBLIC_FORMSUBMIT_EMAIL=darboiconsults@gmail.com
 ```
 
-Gmail (`GMAIL_APP_PASSWORD`) is optional — not required if you use FormSubmit only.
+Optional backup (used automatically if FormSubmit fails):
+
+```env
+GMAIL_APP_PASSWORD=your-16-char-app-password
+SMTP_USER=darboiconsults@gmail.com
+```
 
 ## Activate FormSubmit (once)
 
@@ -28,9 +34,8 @@ Gmail (`GMAIL_APP_PASSWORD`) is optional — not required if you use FormSubmit 
 | Form | When email sends |
 |------|------------------|
 | Contact | On submit (browser FormSubmit) |
-| Consultation | After “I've made payment” (browser FormSubmit) |
 | Lead popup | On submit (browser FormSubmit) |
-| Service apply | On submit + after payment (browser FormSubmit) |
+| Service / program / consultation apply | **Only** after “I've made payment” (then WhatsApp opens) |
 
 Data is always saved in the admin dashboard even if email fails.
 
@@ -46,3 +51,5 @@ If an attachment is missing, check FormSubmit size limits (~5MB per file) and co
 - Submit from the real URL `travel-tours-eight.vercel.app`, not localhost only.
 - Check spam folder.
 - Submit the **Contact** form on the live site once to activate FormSubmit.
+- If you see an error toast on submit, add `GMAIL_APP_PASSWORD` in Vercel and redeploy (backup email via `/api/owner-notify`).
+- Past rows in Admin → Applications were saved to the database even when email failed; they are not resent automatically.

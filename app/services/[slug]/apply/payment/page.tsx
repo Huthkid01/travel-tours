@@ -8,11 +8,10 @@ import { getServiceBySlug } from "@/data/services";
 import { APPOINTMENT_FEE_INFO } from "@/data/darboi-application-form";
 import {
   getApplicationAction,
-  notifyPaymentAction,
   updateApplicationPaymentAction,
 } from "@/lib/actions/application";
 import { toastPaymentComplete } from "@/lib/application-toast";
-import { sendApplicationViaFormSubmitClient } from "@/lib/formsubmit-client";
+import { notifyApplicationOwner } from "@/lib/notify-owner-client";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -62,12 +61,14 @@ export default function PaymentPage() {
           paymentType: "booking-fee",
           applicantName: updated.full_name,
         });
-        toastPaymentComplete({ emailSent: true });
-        void sendApplicationViaFormSubmitClient(updated, {
+        const notify = await notifyApplicationOwner(updated, {
           stage: "paid",
           paymentAmount: amount,
         });
-        void notifyPaymentAction(updated, amount);
+        if (!notify.ok) {
+          toast.error(notify.message ?? "Payment saved but email could not be sent.");
+        }
+        toastPaymentComplete({ emailSent: notify.ok });
         redirectToWhatsApp(waMessage);
       }
     } catch {

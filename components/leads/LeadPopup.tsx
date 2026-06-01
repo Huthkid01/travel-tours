@@ -2,7 +2,7 @@
 
 import { FormStepFlow } from "@/components/forms/FormStepFlow";
 import { formInputClass } from "@/components/forms/form-step-styles";
-import { sendLeadViaFormSubmitClient } from "@/lib/formsubmit-client";
+import { notifyLeadOwner } from "@/lib/notify-owner-client";
 import { trackEvent } from "@/lib/analytics";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MessageSquare, User, X } from "lucide-react";
@@ -49,9 +49,9 @@ export function LeadPopup() {
   };
 
   const onSubmit = async (data: LeadForm) => {
-    const emailResult = await sendLeadViaFormSubmitClient(data);
-    if (!emailResult.ok) {
-      toast.error(emailResult.message ?? "FormSubmit could not send. Try WhatsApp.");
+    const notify = await notifyLeadOwner(data);
+    if (!notify.ok) {
+      toast.error(notify.message ?? "Could not send email. Try WhatsApp or contact us directly.");
       return;
     }
     await fetch("/api/leads", {

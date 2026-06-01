@@ -3,7 +3,7 @@
 import { FormStepFlow } from "@/components/forms/FormStepFlow";
 import { formInputClass } from "@/components/forms/form-step-styles";
 import { contactSchema, type ContactFormValues } from "@/lib/validations";
-import { sendContactViaFormSubmitClient } from "@/lib/formsubmit-client";
+import { notifyContactOwner } from "@/lib/notify-owner-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { CheckCircle, Mail, MessageSquare, User } from "lucide-react";
@@ -35,11 +35,11 @@ export function ContactForm() {
   const onSubmit = async (data: ContactFormValues) => {
     setStatus("loading");
     try {
-      const clientResult = await sendContactViaFormSubmitClient(data);
-      if (!clientResult.ok) {
+      const notify = await notifyContactOwner(data);
+      if (!notify.ok) {
         throw new Error(
-          clientResult.message ||
-            "FormSubmit could not send. Check darboiconsults@gmail.com for the activation email (first time only)."
+          notify.message ||
+            "Could not send email. Activate FormSubmit on the live Contact page, or set GMAIL_APP_PASSWORD in Vercel."
         );
       }
 

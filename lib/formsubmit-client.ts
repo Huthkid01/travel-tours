@@ -6,12 +6,29 @@ import type { Application, ContactFormData, UploadedFileMeta } from "@/types";
 
 export type FormSubmitClientResult = { ok: boolean; message?: string };
 
-/** Browser → https://formsubmit.co/ajax/darboiconsults@gmail.com (works; server/Vercel gets 403) */
+function getFormSubmitRecipient(): string {
+  return (
+    process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL?.trim() ||
+    process.env.NEXT_PUBLIC_OWNER_EMAIL?.trim() ||
+    SITE_CONFIG.email
+  );
+}
+
+function getFormSubmitAjaxUrl(): string {
+  const email = encodeURIComponent(getFormSubmitRecipient());
+  const accessKey = process.env.NEXT_PUBLIC_FORMSUBMIT_ACCESS_KEY?.trim();
+  if (accessKey) {
+    return `https://formsubmit.co/ajax/${email}/${encodeURIComponent(accessKey)}`;
+  }
+  return `https://formsubmit.co/ajax/${email}`;
+}
+
+/** Browser → FormSubmit AJAX (must be activated once on your live domain) */
 async function postFormSubmitClient(formData: FormData): Promise<FormSubmitClientResult> {
-  const recipient = encodeURIComponent(SITE_CONFIG.email);
+  formData.append("_url", typeof window !== "undefined" ? window.location.href : SITE_CONFIG.url);
 
   try {
-    const res = await fetch(`https://formsubmit.co/ajax/${recipient}`, {
+    const res = await fetch(getFormSubmitAjaxUrl(), {
       method: "POST",
       body: formData,
       headers: { Accept: "application/json" },
@@ -36,13 +53,14 @@ async function postFormSubmitClient(formData: FormData): Promise<FormSubmitClien
         return {
           ok: false,
           message:
-            "Check darboiconsults@gmail.com (and spam) for FormSubmit’s activation email and click the link — required once.",
+            "FormSubmit is not activated yet. Open the live site Contact page, submit once, then click the link in darboiconsults@gmail.com (check spam).",
         };
       }
       if (res.status === 403) {
         return {
           ok: false,
-          message: "FormSubmit blocked this request. Try again from Chrome on the live site, not an embedded preview.",
+          message:
+            "FormSubmit blocked this request. Use the live site (not localhost preview), or set GMAIL_APP_PASSWORD on Vercel for backup email.",
         };
       }
       return { ok: false, message: raw };
@@ -92,7 +110,6 @@ export async function sendLeadViaFormSubmitClient(data: {
   return postFormSubmitClient(formData);
 }
 
-/** Clickable document links for the owner email (attachments often lack preview in inbox) */
 function formatDocumentLinksForEmail(files: UploadedFileMeta[]): string {
   const withUrl = files.filter((f) => f.url && !f.url.startsWith("demo://"));
   if (withUrl.length === 0) return "No files uploaded";
@@ -106,8 +123,6 @@ export async function sendApplicationViaFormSubmitClient(
   options?: {
     paymentAmount?: number;
     stage?: "submitted" | "paid";
-    /** @deprecated Files are not attached — links from app.uploaded_files are used instead */
-    files?: File[];
   }
 ): Promise<FormSubmitClientResult> {
   const stage = options?.stage ?? (app.payment_status === "paid" ? "paid" : "submitted");
@@ -117,7 +132,6 @@ export async function sendApplicationViaFormSubmitClient(
       : `New application submitted: ${app.service_name}`;
 
   const documentLinks = formatDocumentLinksForEmail(app.uploaded_files || []);
-
   const amountLabel =
     options?.paymentAmount != null ? formatPrice(options.paymentAmount) : "—";
 

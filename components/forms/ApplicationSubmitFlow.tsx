@@ -3,7 +3,7 @@
 import { usePaymentSettings } from "@/components/forms/usePaymentSettings";
 import { PaymentDetailsModal } from "@/components/payment/PaymentDetailsModal";
 import { toastApplicationSaved, toastPaymentComplete } from "@/lib/application-toast";
-import { sendApplicationViaFormSubmitClient } from "@/lib/formsubmit-client";
+import { notifyApplicationOwner } from "@/lib/notify-owner-client";
 import { submitApplicationViaApi } from "@/lib/submit-application-client";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
 import type { PaymentSettings } from "@/data/payment-settings-default";
@@ -50,33 +50,6 @@ export function ApplicationSubmitFlow({
   const { settings: liveSettings } = usePaymentSettings();
   const settings = paymentSettingsOverride ?? liveSettings;
 
-  const emailOwnerViaFormSubmit = async (
-    app: Application,
-    stage: "submitted" | "paid",
-    paymentAmount?: number
-  ): Promise<boolean> => {
-    const result = await sendApplicationViaFormSubmitClient(app, {
-      stage,
-      paymentAmount,
-    });
-    if (!result.ok) {
-      toast.error(
-        result.message ??
-          "Could not email Darboi via FormSubmit. Check darboiconsults@gmail.com for the activation link."
-      );
-      return false;
-    }
-    return true;
-  };
-
-  const emailOwnerInBackground = (
-    app: Application,
-    stage: "submitted" | "paid",
-    paymentAmount?: number
-  ) => {
-    void emailOwnerViaFormSubmit(app, stage, paymentAmount);
-  };
-
   const handleFormSubmit = async (data: ApplicationFormData, files: File[]) => {
     setSubmitting(true);
     try {
@@ -89,8 +62,7 @@ export function ApplicationSubmitFlow({
         { skipOwnerEmail: true }
       );
       sessionStorage.setItem("pending_application_id", application.id);
-      emailOwnerInBackground(application, "submitted");
-      toastApplicationSaved({ emailSent: true, nextStep: "payment" });
+      toastApplicationSaved({ nextStep: "payment" });
       setSubmitted(application);
     } catch (err) {
       toast.error(
@@ -169,11 +141,15 @@ export function ApplicationSubmitFlow({
         paymentType: "booking-fee",
       });
 
+      const notify = await notifyApplicationOwner(app, { stage: "paid", paymentAmount: amount });
+      if (!notify.ok) {
+        toast.error(notify.message ?? "Application saved but email could not be sent.");
+      }
+
       pendingRef.current = null;
       setModalOpen(false);
       setFinishing(false);
-      toastPaymentComplete({ emailSent: true });
-      emailOwnerInBackground(app, "paid", amount);
+      toastPaymentComplete({ emailSent: notify.ok });
       redirectToWhatsApp(waMessage);
       return;
     } catch {
@@ -236,10 +212,14 @@ export function ApplicationSubmitFlow({
         paymentType: "booking-fee",
       });
 
+      const notify = await notifyApplicationOwner(app, { stage: "paid", paymentAmount: amount });
+      if (!notify.ok) {
+        toast.error(notify.message ?? "Payment saved but email could not be sent.");
+      }
+
       setModalOpen(false);
       setFinishing(false);
-      toastPaymentComplete({ emailSent: true });
-      emailOwnerInBackground(app, "paid", amount);
+      toastPaymentComplete({ emailSent: notify.ok });
       redirectToWhatsApp(waMessage);
       return;
     } catch {
