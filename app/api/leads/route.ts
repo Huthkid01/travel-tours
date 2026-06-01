@@ -2,7 +2,7 @@ import { getServerSupabase } from "@/supabase/server";
 import type { LeadPayload } from "@/services/leads";
 import { NextResponse } from "next/server";
 
-/** Save lead only — email via FormSubmit from browser */
+/** Save lead — email via Gmail (/api/owner-notify) */
 export async function POST(request: Request) {
   try {
     const data = (await request.json()) as LeadPayload;

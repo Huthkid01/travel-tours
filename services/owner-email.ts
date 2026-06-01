@@ -1,48 +1,41 @@
 import "server-only";
 
-import { getFormSubmitEmail } from "@/lib/env.server";
-import { isGmailSmtpConfigured, sendOwnerMailViaGmail } from "@/services/owner-mail-fallback";
-import { postFormSubmitServer } from "@/services/formsubmit-server";
+import { getOwnerInboxEmail, isOwnerEmailConfigured } from "@/lib/env.server";
+import {
+  fetchApplicationAttachments,
+  isGmailSmtpConfigured,
+  sendOwnerMailViaGmail,
+  type MailAttachment,
+} from "@/services/owner-mail-fallback";
 
-export type OwnerEmailMethod = "gmail" | "formsubmit";
+export type OwnerEmailMethod = "gmail";
 
 export type OwnerEmailResult = {
   method: OwnerEmailMethod;
 };
 
-/**
- * Send owner notification from the server.
- * Gmail first (works on Vercel). FormSubmit server/ajax often returns 403 from datacenters.
- */
+/** Send owner notification from the server via Gmail (Nodemailer) */
 export async function sendOwnerEmail(options: {
   subject: string;
   replyTo?: string;
   fields: Record<string, string>;
-  formData: FormData;
+  attachments?: MailAttachment[];
 }): Promise<OwnerEmailResult> {
-  if (isGmailSmtpConfigured()) {
-    await sendOwnerMailViaGmail({
-      subject: options.subject,
-      replyTo: options.replyTo,
-      fields: options.fields,
-    });
-    return { method: "gmail" };
-  }
-
-  try {
-    await postFormSubmitServer(options.formData);
-    return { method: "formsubmit" };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Email failed";
+  if (!isGmailSmtpConfigured()) {
     throw new Error(
-      `${msg} — Add GMAIL_APP_PASSWORD in Vercel (Google App Password) and redeploy. FormSubmit does not work reliably from the server.`
+      "Gmail is not configured. Set SMTP_USER, GMAIL_APP_PASSWORD, and OWNER_INBOX_EMAIL in Vercel, then redeploy."
     );
   }
+
+  await sendOwnerMailViaGmail(options);
+  return { method: "gmail" };
 }
 
+export { fetchApplicationAttachments };
+
 export function getOwnerEmailSetupHint(): string {
-  if (isGmailSmtpConfigured()) {
-    return `Emails send via Gmail to ${getFormSubmitEmail()}.`;
+  if (isOwnerEmailConfigured()) {
+    return `Form emails send from ${process.env.SMTP_USER} to ${getOwnerInboxEmail()} via Gmail.`;
   }
-  return `Set GMAIL_APP_PASSWORD in Vercel for ${getFormSubmitEmail()}. FormSubmit from the server is blocked (403); use the contact form in a browser once to activate FormSubmit, or use Gmail.`;
+  return `Set SMTP_USER, GMAIL_APP_PASSWORD, and OWNER_INBOX_EMAIL in Vercel.`;
 }

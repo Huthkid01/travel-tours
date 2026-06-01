@@ -12,8 +12,23 @@ export function isSupabaseServerConfigured(): boolean {
   return Boolean(getSupabaseUrl() && getSupabaseAnonKey());
 }
 
+/** Inbox that receives form notifications */
+export function getOwnerInboxEmail(): string {
+  return (
+    process.env.OWNER_INBOX_EMAIL?.trim() ||
+    process.env.FORMSUBMIT_EMAIL?.trim() ||
+    "darboiconsults@gmail.com"
+  );
+}
+
+/** Gmail account that sends mail (must match GMAIL_APP_PASSWORD) */
+export function getSmtpUser(): string {
+  return process.env.SMTP_USER?.trim() || "";
+}
+
+/** @deprecated Use getOwnerInboxEmail */
 export function getFormSubmitEmail(): string {
-  return process.env.FORMSUBMIT_EMAIL?.trim() || "darboiconsults@gmail.com";
+  return getOwnerInboxEmail();
 }
 
 export function getGoogleFormShareUrl(): string | undefined {
@@ -34,7 +49,13 @@ export function getFlutterwavePublicKey(): string {
   return process.env.FLUTTERWAVE_PUBLIC_KEY?.trim() || "FLWPUBK_TEST-demo";
 }
 
+export function isOwnerEmailConfigured(): boolean {
+  const pass = process.env.GMAIL_APP_PASSWORD?.trim().replace(/\s+/g, "");
+  const user = getSmtpUser();
+  return Boolean(pass && user.includes("@"));
+}
+
+/** @deprecated Use isOwnerEmailConfigured */
 export function isFormSubmitServerConfigured(): boolean {
-  const email = getFormSubmitEmail();
-  return Boolean(email && email.includes("@"));
+  return isOwnerEmailConfigured();
 }

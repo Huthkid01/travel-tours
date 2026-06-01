@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       {
         ok: false,
         error:
-          "Gmail is not configured. In Vercel → Settings → Environment Variables, add GMAIL_APP_PASSWORD (Google App Password for darboiconsults@gmail.com) and redeploy.",
+          "Gmail is not configured. In Vercel add SMTP_USER (sender), GMAIL_APP_PASSWORD, and OWNER_INBOX_EMAIL (darboiconsults@gmail.com), then redeploy.",
       },
       { status: 503 }
     );

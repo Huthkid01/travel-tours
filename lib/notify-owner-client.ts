@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  sendApplicationViaFormSubmitBrowser,
-  sendContactViaFormSubmitBrowser,
-  sendLeadViaFormSubmitBrowser,
-} from "@/lib/formsubmit-browser";
 import type { Application, ContactFormData } from "@/types";
 
-type NotifyMethod = "formsubmit" | "gmail";
+type NotifyMethod = "gmail";
 
 export type NotifyOwnerResult = {
   ok: boolean;
@@ -15,7 +10,7 @@ export type NotifyOwnerResult = {
   message?: string;
 };
 
-async function tryGmailBackup(body: Record<string, unknown>): Promise<NotifyOwnerResult> {
+async function sendViaGmailApi(body: Record<string, unknown>): Promise<NotifyOwnerResult> {
   try {
     const res = await fetch("/api/owner-notify", {
       method: "POST",
@@ -28,49 +23,34 @@ async function tryGmailBackup(body: Record<string, unknown>): Promise<NotifyOwne
       error?: string;
     };
     if (res.ok && json.ok) {
-      return { ok: true, method: json.method ?? "gmail" };
+      return { ok: true, method: "gmail" };
     }
     return {
       ok: false,
-      message: json.error || "Gmail backup is not configured (GMAIL_APP_PASSWORD in Vercel).",
+      message:
+        json.error ||
+        "Email could not be sent. Set SMTP_USER, GMAIL_APP_PASSWORD, and OWNER_INBOX_EMAIL in Vercel.",
     };
   } catch {
-    return { ok: false, message: "Could not reach the server for backup email." };
+    return { ok: false, message: "Could not reach the server to send email." };
   }
 }
 
-/** Browser FormSubmit (real POST to formsubmit.co), optional Gmail backup */
 export async function notifyApplicationOwner(
   app: Application,
   options?: { stage?: "submitted" | "paid"; paymentAmount?: number }
 ): Promise<NotifyOwnerResult> {
   const stage = options?.stage ?? (app.payment_status === "paid" ? "paid" : "submitted");
-
-  const fs = await sendApplicationViaFormSubmitBrowser(app, {
-    stage,
-    paymentAmount: options?.paymentAmount,
-  });
-  if (fs.ok) return { ok: true, method: "formsubmit" };
-
-  const gmail = await tryGmailBackup({
+  return sendViaGmailApi({
     type: "application",
     applicationId: app.id,
     stage,
     paymentAmount: options?.paymentAmount,
   });
-  if (gmail.ok) return gmail;
-
-  return { ok: false, message: fs.message ?? gmail.message };
 }
 
 export async function notifyContactOwner(data: ContactFormData): Promise<NotifyOwnerResult> {
-  const fs = await sendContactViaFormSubmitBrowser(data);
-  if (fs.ok) return { ok: true, method: "formsubmit" };
-
-  const gmail = await tryGmailBackup({ type: "contact", data });
-  if (gmail.ok) return gmail;
-
-  return { ok: false, message: fs.message ?? gmail.message };
+  return sendViaGmailApi({ type: "contact", data });
 }
 
 export async function notifyLeadOwner(data: {
@@ -79,11 +59,5 @@ export async function notifyLeadOwner(data: {
   email: string;
   interest: string;
 }): Promise<NotifyOwnerResult> {
-  const fs = await sendLeadViaFormSubmitBrowser(data);
-  if (fs.ok) return { ok: true, method: "formsubmit" };
-
-  const gmail = await tryGmailBackup({ type: "lead", data });
-  if (gmail.ok) return gmail;
-
-  return { ok: false, message: fs.message ?? gmail.message };
+  return sendViaGmailApi({ type: "lead", data });
 }

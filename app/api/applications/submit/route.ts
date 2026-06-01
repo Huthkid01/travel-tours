@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       applicationId
     );
 
-    /** Email via FormSubmit from the user's browser (server gets 403) */
+    /** Email via Gmail after payment (/api/owner-notify) */
     return NextResponse.json({ application, emailSent: false });
   } catch (err) {
     return NextResponse.json(

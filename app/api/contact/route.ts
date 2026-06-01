@@ -2,7 +2,7 @@ import { getServerSupabase } from "@/supabase/server";
 import type { ContactFormData } from "@/types";
 import { NextResponse } from "next/server";
 
-/** Save contact message only — email is sent via FormSubmit from the visitor's browser */
+/** Save contact message — email is sent via Gmail (/api/owner-notify) */
 export async function POST(request: Request) {
   try {
     const data = (await request.json()) as ContactFormData;
