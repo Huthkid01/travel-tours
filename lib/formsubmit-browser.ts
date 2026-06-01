@@ -7,6 +7,7 @@ import type { Application, ContactFormData, UploadedFileMeta } from "@/types";
 export type FormSubmitResult = { ok: boolean; message?: string };
 
 const DONE_PATH = "/formsubmit-ok";
+const MESSAGE_TYPE = "formsubmit:success";
 
 export function getFormSubmitRecipient(): string {
   return (
@@ -20,17 +21,17 @@ export function getFormSubmitRecipient(): string {
 export function getFormSubmitActionUrl(): string {
   const email = getFormSubmitRecipient();
   const accessKey = process.env.NEXT_PUBLIC_FORMSUBMIT_ACCESS_KEY?.trim();
-  const base = `https://formsubmit.co/${encodeURIComponent(email)}`;
-  return accessKey ? `${base}/${encodeURIComponent(accessKey)}` : base;
+  const base = `https://formsubmit.co/${email}`;
+  return accessKey ? `${base}/${accessKey}` : base;
 }
 
 function activationMessage(): string {
-  return "FormSubmit is not activated yet. Submit any form on the live site once, then click the activation link in darboiconsults@gmail.com (check spam).";
+  return "FormSubmit is not activated yet. Submit once on the live site, then click the activation link in darboiconsults@gmail.com (check spam).";
 }
 
 /**
- * POST via a real HTML <form> in a hidden iframe (browser navigation, no fetch/CORS).
- * @see https://formsubmit.co
+ * POST with a real HTML form in a popup window (top-level navigation).
+ * FormSubmit blocks iframes (X-Frame-Options: sameorigin) — do not use hidden iframe.
  */
 export function postFormSubmitBrowser(
   fields: Record<string, string>,
@@ -40,9 +41,9 @@ export function postFormSubmitBrowser(
     return Promise.resolve({ ok: false, message: "Not in browser" });
   }
 
-  const timeoutMs = options?.timeoutMs ?? 12_000;
-  const iframeName = `formsubmit_${Date.now()}`;
+  const timeoutMs = options?.timeoutMs ?? 90_000;
   const nextUrl = `${window.location.origin}${DONE_PATH}`;
+  const popupName = `formsubmit_${Date.now()}`;
 
   const formData: Record<string, string> = {
     _captcha: "false",
@@ -53,17 +54,47 @@ export function postFormSubmitBrowser(
   };
 
   return new Promise((resolve) => {
-    const iframe = document.createElement("iframe");
-    iframe.name = iframeName;
-    iframe.title = "FormSubmit";
-    iframe.setAttribute("aria-hidden", "true");
-    iframe.style.cssText =
-      "position:absolute;width:0;height:0;border:0;opacity:0;pointer-events:none";
+    let settled = false;
+    let popup: Window | null = null;
+
+    const finish = (result: FormSubmitResult) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      window.removeEventListener("message", onMessage);
+      form.remove();
+      try {
+        if (popup && !popup.closed) popup.close();
+      } catch {
+        /* ignore */
+      }
+      resolve(result);
+    };
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === MESSAGE_TYPE) {
+        finish({ ok: true });
+      }
+    };
+
+    window.addEventListener("message", onMessage);
+
+    popup = window.open("about:blank", popupName, "popup=yes,width=480,height=360");
+
+    if (!popup) {
+      finish({
+        ok: false,
+        message:
+          "Could not open FormSubmit window. Allow popups for this site, then try again.",
+      });
+      return;
+    }
 
     const form = document.createElement("form");
     form.method = "POST";
     form.action = getFormSubmitActionUrl();
-    form.target = iframeName;
+    form.target = popupName;
     form.acceptCharset = "UTF-8";
     form.style.display = "none";
 
@@ -75,35 +106,14 @@ export function postFormSubmitBrowser(
       form.appendChild(input);
     }
 
-    let settled = false;
-    const finish = (result: FormSubmitResult) => {
-      if (settled) return;
-      settled = true;
-      window.clearTimeout(timer);
-      iframe.remove();
-      form.remove();
-      resolve(result);
-    };
-
-    iframe.addEventListener("load", () => {
-      try {
-        const href = iframe.contentWindow?.location?.href ?? "";
-        if (href.includes(DONE_PATH)) {
-          finish({ ok: true });
-        }
-      } catch {
-        /* cross-origin until FormSubmit redirects to /formsubmit-ok */
-      }
-    });
-
     const timer = window.setTimeout(() => {
       finish({
-        ok: true,
-        message: "Submitted via FormSubmit (delivery may take a moment).",
+        ok: false,
+        message: `${activationMessage()} If a popup opened, complete any step there and allow popups.`,
       });
     }, timeoutMs);
 
-    document.body.append(iframe, form);
+    document.body.append(form);
     form.submit();
   });
 }
@@ -196,9 +206,5 @@ export async function sendApplicationViaFormSubmitBrowser(
     }
   });
 
-  const result = await postFormSubmitBrowser(fields);
-  if (!result.ok && !result.message) {
-    return { ok: false, message: activationMessage() };
-  }
-  return result;
+  return postFormSubmitBrowser(fields);
 }

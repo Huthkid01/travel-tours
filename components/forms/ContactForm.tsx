@@ -35,11 +35,15 @@ export function ContactForm() {
   const onSubmit = async (data: ContactFormValues) => {
     setStatus("loading");
     try {
+      toast.info("Allow popups if asked — FormSubmit opens briefly to send your email.", {
+        duration: 5000,
+      });
+
       const notify = await notifyContactOwner(data);
       if (!notify.ok) {
         throw new Error(
           notify.message ||
-            "Could not send email. Activate FormSubmit on the live site (check darboiconsults@gmail.com), or set GMAIL_APP_PASSWORD in Vercel."
+            "Email was not sent. Allow popups, activate FormSubmit (check darboiconsults@gmail.com), or set GMAIL_APP_PASSWORD in Vercel."
         );
       }
 

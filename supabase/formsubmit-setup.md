@@ -4,7 +4,9 @@ All forms email **darboiconsults@gmail.com** using the **real FormSubmit endpoin
 
 `https://formsubmit.co/darboiconsults@gmail.com`
 
-We use a normal HTML `<form method="POST">` in a hidden iframe (same as FormSubmit’s docs). We do **not** use `/ajax/` or `fetch()` (those cause CORS errors on Vercel).
+We use a normal HTML `<form method="POST">` in a **popup window** (top-level navigation). FormSubmit **blocks hidden iframes** (`X-Frame-Options: sameorigin`). We do **not** use `/ajax/` or `fetch()`.
+
+**Allow popups** on `travel-tours-eight.vercel.app` when submitting a form.
 
 Server requests from Vercel to FormSubmit are **not** used (403). Optional Gmail backup: `GMAIL_APP_PASSWORD`.
 
