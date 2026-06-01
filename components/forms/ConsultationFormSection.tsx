@@ -4,7 +4,7 @@ import { ApplicationSubmitFlow } from "@/components/forms/ApplicationSubmitFlow"
 import { DarboiApplicationForm } from "@/components/forms/DarboiApplicationForm";
 import { WhatsAppCTA } from "@/components/layout/WhatsAppCTA";
 import { mapDarboiToApplicationData } from "@/lib/application-mapper";
-import { CONSULTATION_PAYMENT_SETTINGS } from "@/lib/consultation-payment";
+import { PaymentSettingsFeeLabel } from "@/components/payment/PaymentSettingsLabel";
 import { getConsultationWhatsAppMessage } from "@/lib/whatsapp";
 import type { DarboiApplicationFormValues } from "@/lib/validations";
 import type { DarboiApplicationFiles } from "@/components/forms/DarboiApplicationForm";
@@ -34,7 +34,7 @@ export function ConsultationFormSection({
       <h2 className="font-display text-xl font-bold text-navy-900 sm:text-2xl dark:text-white">{title}</h2>
       {description && <p className="mt-2 text-sm text-navy-600 sm:text-base dark:text-navy-300">{description}</p>}
       <p className="mt-2 text-sm font-medium text-gold-600 dark:text-gold-400">
-        Consultation fee: {CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
+        <PaymentSettingsFeeLabel prefix="Consultation fee" />
       </p>
       <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-navy-200 sm:mt-6 dark:border-navy-700">
         <div className="p-4 sm:p-6">
@@ -42,7 +42,6 @@ export function ConsultationFormSection({
             storageSlug="consultation"
             serviceName={label}
             kind="consultation"
-            paymentSettings={CONSULTATION_PAYMENT_SETTINGS}
             submitAfterPayment
           >
             {({
@@ -51,6 +50,7 @@ export function ConsultationFormSection({
               submitLabel,
               deferPaymentToModal,
               paymentStepOpensModal,
+              paymentFeeLabel,
               disabled,
             }) => (
               <DarboiApplicationForm
@@ -59,7 +59,7 @@ export function ConsultationFormSection({
                 showPaymentInfo={false}
                 deferPaymentToModal={deferPaymentToModal}
                 paymentStepOpensModal={paymentStepOpensModal}
-                paymentFeeLabel={CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
+                paymentFeeLabel={paymentFeeLabel}
                 disabled={disabled}
                 onStageForPayment={(data, files) => mapAndStage(data, files, onStageForPayment)}
                 onStepComplete={(data) => onStepProgress(mapDarboiToApplicationData(data))}

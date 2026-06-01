@@ -8,7 +8,8 @@ import { getProgramBySlug } from "@/data/programs";
 import { serviceUsesVisaForm } from "@/data/service-application-forms";
 import { mapDarboiToApplicationData } from "@/lib/application-mapper";
 import { getConsultationWhatsAppMessage } from "@/lib/whatsapp";
-import { CONSULTATION_PAYMENT_SETTINGS } from "@/lib/consultation-payment";
+import { PaymentSettingsFeeLabel } from "@/components/payment/PaymentSettingsLabel";
+import { usePaymentSettings } from "@/components/forms/usePaymentSettings";
 import { serviceOffersConsultation } from "@/lib/service-consultation";
 import type { ServiceItem } from "@/types";
 import Link from "next/link";
@@ -16,6 +17,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 export function ConsultationPageContent({ services }: { services: ServiceItem[] }) {
+  const { settings: payment } = usePaymentSettings();
   const searchParams = useSearchParams();
   const programSlug = searchParams.get("program");
   const serviceSlug = searchParams.get("service");
@@ -85,7 +87,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
           <h1 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">Application Form</h1>
           <p className="mt-2 text-navy-300">{label}</p>
           <p className="mt-2 text-sm text-gold-400/90">
-            Consultation fee: {CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
+            <PaymentSettingsFeeLabel prefix="Consultation fee" />
           </p>
         </div>
       </section>
@@ -95,14 +97,13 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
           <p className="mb-6 text-sm text-navy-600 dark:text-navy-300">
             Step 5 is <strong className="text-navy-800 dark:text-navy-100">Make payment</strong> — bank
             details open in a popup. After you pay, tap <strong>I&apos;ve made payment</strong> to submit and open
-            WhatsApp. Fee: {CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}.
+            WhatsApp. Fee: <strong>{payment.feeAmountLabel}</strong>.
           </p>
           <div className="min-w-0 overflow-hidden rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:p-8 dark:border-navy-800 dark:bg-navy-900">
             <ApplicationSubmitFlow
               storageSlug={storageSlug}
               serviceName={label}
               kind={kind}
-              paymentSettings={CONSULTATION_PAYMENT_SETTINGS}
               submitAfterPayment
             >
               {({
@@ -112,6 +113,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                 submitLabel,
                 deferPaymentToModal,
                 paymentStepOpensModal,
+                paymentFeeLabel,
                 disabled,
               }) =>
                 serviceSlug && serviceUsesVisaForm(serviceSlug) ? (
@@ -124,7 +126,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                     submitLabel={submitLabel}
                     deferPaymentToModal={deferPaymentToModal}
                     paymentStepOpensModal={paymentStepOpensModal}
-                    paymentFeeLabel={CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
+                    paymentFeeLabel={paymentFeeLabel}
                     disabled={disabled}
                   />
                 ) : (
@@ -134,7 +136,7 @@ export function ConsultationPageContent({ services }: { services: ServiceItem[] 
                     showPaymentInfo={false}
                     deferPaymentToModal={deferPaymentToModal}
                     paymentStepOpensModal={paymentStepOpensModal}
-                    paymentFeeLabel={CONSULTATION_PAYMENT_SETTINGS.feeAmountLabel}
+                    paymentFeeLabel={paymentFeeLabel}
                     disabled={disabled}
                     onStageForPayment={(data, files) => {
                       const allFiles = [...files.passportPhoto, ...files.passportBioPage];

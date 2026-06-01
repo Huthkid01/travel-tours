@@ -1,7 +1,7 @@
 "use client";
 
 import { usePaymentSettings } from "@/components/forms/usePaymentSettings";
-import { DEFAULT_PAYMENT_SETTINGS, type PaymentSettings } from "@/data/payment-settings-default";
+import { DEFAULT_PAYMENT_SETTINGS } from "@/data/payment-settings-default";
 import { formInputClass, formLabelClass } from "@/components/forms/form-step-styles";
 import { cn } from "@/lib/utils";
 import { Check, Copy, X } from "lucide-react";
@@ -12,7 +12,8 @@ interface PaymentDetailsModalProps {
   open: boolean;
   onClose: () => void;
   onDone: (paymentReference: string) => void;
-  settings?: PaymentSettings;
+  /** Overrides admin fee label when paying a specific application amount */
+  amountLabel?: string;
   loadingDone?: boolean;
   loadingLabel?: string;
   /** Shown under bank details while application uploads in background */
@@ -58,14 +59,15 @@ export function PaymentDetailsModal({
   open,
   onClose,
   onDone,
-  settings: settingsProp,
+  amountLabel,
   loadingDone = false,
   loadingLabel = "Confirming payment…",
   statusHint,
   doneLabel = "I've made payment — Open WhatsApp",
 }: PaymentDetailsModalProps) {
-  const { settings: fetched, loading } = usePaymentSettings();
-  const settings = settingsProp ?? (loading ? DEFAULT_PAYMENT_SETTINGS : fetched);
+  const { settings, loading } = usePaymentSettings();
+  const display = loading ? DEFAULT_PAYMENT_SETTINGS : settings;
+  const feeLabel = amountLabel?.trim() || display.feeAmountLabel;
   const [paymentReference, setPaymentReference] = useState("");
 
   if (!open) return null;
@@ -101,35 +103,47 @@ export function PaymentDetailsModal({
         </div>
 
         <div className="space-y-3 p-5">
-          <div className="rounded-xl border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-center">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-400">
-              Amount to pay
+          {!display.showBankTransfer ? (
+            <p className="rounded-lg border border-navy-200 bg-navy-50 px-4 py-3 text-sm text-navy-700 dark:border-navy-700 dark:bg-navy-950/50 dark:text-navy-200">
+              Bank transfer is not available right now. Please contact us on WhatsApp to complete payment.
             </p>
-            <p className="mt-1 font-display text-2xl font-bold text-navy-900 dark:text-white">
-              {settings.feeAmountLabel}
-            </p>
-          </div>
-          <p className="text-sm font-semibold text-navy-900 dark:text-white">{settings.title}</p>
-          <CopyRow label="Bank" value={settings.bankName} />
-          <CopyRow label="Account number" value={settings.accountNumber} />
-          <CopyRow label="Account name" value={settings.accountName} />
+          ) : (
+            <>
+              <div className="rounded-xl border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-center">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-400">
+                  Amount to pay
+                </p>
+                <p className="mt-1 font-display text-2xl font-bold text-navy-900 dark:text-white">
+                  {feeLabel}
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-navy-900 dark:text-white">{display.title}</p>
+              <CopyRow label="Bank" value={display.bankName} />
+              <CopyRow label="Account number" value={display.accountNumber} />
+              <CopyRow label="Account name" value={display.accountName} />
 
-          {statusHint && (
-            <p className="rounded-lg border border-gold-500/25 bg-gold-500/10 px-3 py-2 text-xs text-navy-700 dark:text-navy-200">
-              {statusHint}
-            </p>
+              {display.afterPaymentNote?.trim() && (
+                <p className="text-xs text-navy-600 dark:text-navy-400">{display.afterPaymentNote}</p>
+              )}
+
+              {statusHint && (
+                <p className="rounded-lg border border-gold-500/25 bg-gold-500/10 px-3 py-2 text-xs text-navy-700 dark:text-navy-200">
+                  {statusHint}
+                </p>
+              )}
+
+              <div className="pt-2">
+                <label className={formLabelClass}>Payment reference / depositor name</label>
+                <p className="mb-2 text-xs text-navy-500">After you transfer, enter the reference or name used</p>
+                <input
+                  className={formInputClass}
+                  value={paymentReference}
+                  onChange={(e) => setPaymentReference(e.target.value)}
+                  placeholder="Transfer reference or depositor name"
+                />
+              </div>
+            </>
           )}
-
-          <div className="pt-2">
-            <label className={formLabelClass}>Payment reference / depositor name</label>
-            <p className="mb-2 text-xs text-navy-500">After you transfer, enter the reference or name used</p>
-            <input
-              className={formInputClass}
-              value={paymentReference}
-              onChange={(e) => setPaymentReference(e.target.value)}
-              placeholder="Transfer reference or depositor name"
-            />
-          </div>
         </div>
 
         <div className="flex flex-col gap-2 border-t border-navy-100 p-5 dark:border-navy-800 sm:flex-row sm:justify-end">
@@ -140,16 +154,18 @@ export function PaymentDetailsModal({
           >
             Cancel
           </button>
-          <button
-            type="button"
-            disabled={loadingDone}
-            onClick={() => onDone(paymentReference.trim())}
-            className={cn(
-              "rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-bold text-navy-950 hover:bg-gold-400 disabled:opacity-60"
-            )}
-          >
-            {loadingDone ? loadingLabel : doneLabel}
-          </button>
+          {display.showBankTransfer && (
+            <button
+              type="button"
+              disabled={loadingDone}
+              onClick={() => onDone(paymentReference.trim())}
+              className={cn(
+                "rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-bold text-navy-950 hover:bg-gold-400 disabled:opacity-60"
+              )}
+            >
+              {loadingDone ? loadingLabel : doneLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -4,7 +4,10 @@ import {
 } from "@/data/payment-settings-default";
 import { APPOINTMENT_FEE_INFO } from "@/data/darboi-application-form";
 
-/** Fixed consultation fee shown in bank transfer modal */
+/**
+ * @deprecated Use admin → Payment methods and `/api/payment-settings` instead.
+ * Kept only as a fallback reference; do not pass into application flows.
+ */
 export const CONSULTATION_PAYMENT_SETTINGS: PaymentSettings = {
   ...DEFAULT_PAYMENT_SETTINGS,
   title: "Consultation fee",

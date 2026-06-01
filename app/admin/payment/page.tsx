@@ -178,7 +178,9 @@ export default function AdminPaymentPage() {
         <div>
           <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Payment methods</h1>
           <p className="mt-1 max-w-xl text-sm text-slate-600 dark:text-slate-400">
-            Bank details and checkout options shown when clients apply or pay on the site.
+            Changes here update the bank transfer popup on application forms (consultation, services,
+            programs). Visitors see updates within about 15 seconds, or immediately when they open the
+            payment step after you save.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -213,7 +215,7 @@ export default function AdminPaymentPage() {
           <div className="space-y-6 xl:col-span-2">
             <SectionCard
               title="Bank transfer"
-              description="Shown in the payment modal after clients submit an application."
+              description="Same content as the live payment popup on the website (preview on the right)."
               icon={Building2}
             >
               <ToggleRow
@@ -304,7 +306,7 @@ export default function AdminPaymentPage() {
             <div className="sticky top-6 overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
               <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-950/50 px-4 py-3">
                 <Eye className="h-4 w-4 text-slate-500" />
-                <span className="text-sm font-semibold text-white">Live preview</span>
+                <span className="text-sm font-semibold text-white">Payment popup preview</span>
               </div>
               <div className="space-y-4 p-4">
                 {!form.showBankTransfer ? (
@@ -340,7 +342,8 @@ export default function AdminPaymentPage() {
                 )}
 
                 <p className="text-xs text-slate-500">
-                  Clients pay by bank transfer only (copy details in the payment popup).
+                  Click <strong className="text-slate-400">Save changes</strong> to push this to the live
+                  site. The preview matches what clients see in the payment popup.
                 </p>
               </div>
             </div>

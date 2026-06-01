@@ -9,10 +9,12 @@ type UseLiveCmsOptions<T> = {
   /** SSR / first paint data before first client fetch */
   initial?: T;
   enabled?: boolean;
+  /** Override default poll interval (ms) */
+  pollMs?: number;
 };
 
 export function useLiveCms<T>(url: string, options?: UseLiveCmsOptions<T>) {
-  const { initial, enabled = true } = options ?? {};
+  const { initial, enabled = true, pollMs = CMS_LIVE_POLL_MS } = options ?? {};
   const [data, setData] = useState<T | undefined>(initial);
   const [loading, setLoading] = useState(!initial);
   const mounted = useRef(true);
@@ -46,7 +48,7 @@ export function useLiveCms<T>(url: string, options?: UseLiveCmsOptions<T>) {
       mounted.current = false;
     };
 
-    const interval = setInterval(() => void refresh(), CMS_LIVE_POLL_MS);
+    const interval = setInterval(() => void refresh(), pollMs);
 
     const onVisible = () => {
       if (document.visibilityState === "visible") void refresh();
@@ -62,7 +64,7 @@ export function useLiveCms<T>(url: string, options?: UseLiveCmsOptions<T>) {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onFocus);
     };
-  }, [refresh, enabled]);
+  }, [refresh, enabled, pollMs]);
 
   return { data, loading, refresh };
 }

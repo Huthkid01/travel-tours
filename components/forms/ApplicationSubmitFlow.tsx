@@ -11,7 +11,6 @@ import {
 import { notifyApplicationOwner } from "@/lib/notify-owner-client";
 import { submitApplicationViaApi } from "@/lib/submit-application-client";
 import { getApplicationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
-import type { PaymentSettings } from "@/data/payment-settings-default";
 import type { Application, ApplicationFormData } from "@/types";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -26,7 +25,6 @@ interface ApplicationSubmitFlowProps {
   storageSlug: string;
   serviceName: string;
   kind?: "program" | "service" | "consultation";
-  paymentSettings?: PaymentSettings;
   submitAfterPayment?: boolean;
   children: (props: {
     onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
@@ -35,6 +33,7 @@ interface ApplicationSubmitFlowProps {
     submitLabel: string;
     deferPaymentToModal: boolean;
     paymentStepOpensModal: boolean;
+    paymentFeeLabel: string;
     disabled: boolean;
   }) => ReactNode;
 }
@@ -43,7 +42,6 @@ export function ApplicationSubmitFlow({
   storageSlug,
   serviceName,
   kind = "service",
-  paymentSettings: paymentSettingsOverride,
   submitAfterPayment = false,
   children,
 }: ApplicationSubmitFlowProps) {
@@ -59,8 +57,7 @@ export function ApplicationSubmitFlow({
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const applicationIdRef = useRef<string>("");
 
-  const { settings: liveSettings } = usePaymentSettings();
-  const settings = paymentSettingsOverride ?? liveSettings;
+  const { settings } = usePaymentSettings();
 
   useEffect(() => {
     applicationIdRef.current = getOrCreateApplicationId(storageSlug);
@@ -303,6 +300,7 @@ export function ApplicationSubmitFlow({
     submitLabel: submitAfterPayment ? "Make payment" : "Submit Application",
     deferPaymentToModal: !submitAfterPayment,
     paymentStepOpensModal: submitAfterPayment,
+    paymentFeeLabel: settings.feeAmountLabel,
     disabled: submitting || finishing,
   };
 
@@ -334,7 +332,6 @@ export function ApplicationSubmitFlow({
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onDone={handlePaymentDone}
-          settings={settings}
           loadingDone={finishing}
           loadingLabel={modalLoadingLabel}
         />
@@ -349,7 +346,6 @@ export function ApplicationSubmitFlow({
         open={modalOpen}
         onClose={() => !finishing && setModalOpen(false)}
         onDone={handlePaymentDone}
-        settings={settings}
         loadingDone={finishing}
         loadingLabel="Confirming payment…"
         statusHint={

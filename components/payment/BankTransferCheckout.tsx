@@ -81,7 +81,7 @@ export function BankTransferCheckout({
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onDone={handleDone}
-        settings={settings}
+        amountLabel={settings.feeAmountLabel}
         loadingDone={finishing}
         doneLabel="I've made payment — Open WhatsApp"
       />
