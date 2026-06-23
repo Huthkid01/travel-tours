@@ -8,7 +8,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();
   const now = new Date();
 
-  const staticPages: MetadataRoute.Sitemap = [
+  const staticPageDefs: {
+    path: string;
+    priority: number;
+    changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+  }[] = [
     { path: "", priority: 1, changeFrequency: "weekly" },
     { path: "/services", priority: 0.9, changeFrequency: "weekly" },
     { path: "/programs", priority: 0.9, changeFrequency: "weekly" },
@@ -17,7 +21,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/contact", priority: 0.8, changeFrequency: "monthly" },
     { path: "/announcements", priority: 0.7, changeFrequency: "weekly" },
     { path: "/success", priority: 0.3, changeFrequency: "yearly" },
-  ].map(({ path, priority, changeFrequency }) => ({
+  ];
+
+  const staticPages: MetadataRoute.Sitemap = staticPageDefs.map(({ path, priority, changeFrequency }) => ({
     url: `${base}${path}`,
     lastModified: now,
     changeFrequency,
