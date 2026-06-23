@@ -5,6 +5,12 @@ import type { Metadata } from "next";
 const siteUrl = getSiteUrl();
 const defaultOgImage = `${siteUrl}/branding/logo.png`;
 
+/** Google Search Console — HTML tag verification (public, visible in page source) */
+const GOOGLE_SITE_VERIFICATION_CODE = "O0J-YJ_IRPkluzgrmCt5F6-_1gc2-MU73vtCDkzpZhQ";
+
+const googleVerification =
+  process.env.GOOGLE_SITE_VERIFICATION?.trim() || GOOGLE_SITE_VERIFICATION_CODE;
+
 interface PageSeoOptions {
   title: string;
   description?: string;
@@ -61,9 +67,11 @@ const base = buildPageMetadata({
 });
 
 export const defaultMetadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   ...base,
   title: {
     default: `${SITE_CONFIG.name} | Documentation & Travel Consultation`,
     template: `%s | ${SITE_CONFIG.name}`,
   },
+  ...(googleVerification ? { verification: { google: googleVerification } } : {}),
 };

@@ -3,19 +3,30 @@ import { services } from "@/data/services";
 import { getSiteUrl } from "@/lib/env.server";
 import type { MetadataRoute } from "next";
 
+/** Public pages only — admin and API routes are excluded via robots.txt */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();
+  const now = new Date();
 
-  const staticPages = ["", "/services", "/programs", "/consultation", "/announcements", "/about", "/contact", "/success"].map((path) => ({
+  const staticPages: MetadataRoute.Sitemap = [
+    { path: "", priority: 1, changeFrequency: "weekly" },
+    { path: "/services", priority: 0.9, changeFrequency: "weekly" },
+    { path: "/programs", priority: 0.9, changeFrequency: "weekly" },
+    { path: "/consultation", priority: 0.85, changeFrequency: "weekly" },
+    { path: "/about", priority: 0.8, changeFrequency: "monthly" },
+    { path: "/contact", priority: 0.8, changeFrequency: "monthly" },
+    { path: "/announcements", priority: 0.7, changeFrequency: "weekly" },
+    { path: "/success", priority: 0.3, changeFrequency: "yearly" },
+  ].map(({ path, priority, changeFrequency }) => ({
     url: `${base}${path}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: path === "" ? 1 : 0.8,
+    lastModified: now,
+    changeFrequency,
+    priority,
   }));
 
   const programPages = programs.map((p) => ({
     url: `${base}/programs/${p.slug}`,
-    lastModified: new Date(),
+    lastModified: now,
     changeFrequency: "monthly" as const,
     priority: 0.75,
   }));
@@ -23,15 +34,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const servicePages = services.flatMap((s) => [
     {
       url: `${base}/services/${s.slug}`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     },
     {
       url: `${base}/services/${s.slug}/apply`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "monthly" as const,
-      priority: 0.6,
+      priority: 0.65,
     },
   ]);
 

@@ -24,7 +24,8 @@ After changing variables, **Redeploy**.
 
 | Variable | Example |
 |----------|---------|
-| `SITE_URL` | `https://travel-tours-eight.vercel.app` |
+| `SITE_URL` | `https://www.darboiconsults.com` |
+| `GOOGLE_SITE_VERIFICATION` | From Search Console HTML tag (content value only) |
 | `PAYSTACK_PUBLIC_KEY` | Paystack public key |
 | `FLUTTERWAVE_PUBLIC_KEY` | Flutterwave public key |
 
