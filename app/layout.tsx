@@ -3,7 +3,7 @@ import { LayoutShell } from "@/components/layout/LayoutShell";
 import { ConfirmProvider } from "@/components/providers/ConfirmProvider";
 import { LeadTrackerProvider } from "@/components/providers/LeadTrackerProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { defaultMetadata } from "@/lib/seo";
+import { getDefaultMetadata, GOOGLE_SITE_VERIFICATION_CODE } from "@/lib/seo";
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import { Toaster } from "sonner";
@@ -23,7 +23,9 @@ const playfair = Playfair_Display({
   preload: true,
 });
 
-export const metadata: Metadata = defaultMetadata;
+export async function generateMetadata(): Promise<Metadata> {
+  return getDefaultMetadata();
+}
 
 export default function RootLayout({
   children,
@@ -32,6 +34,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION_CODE} />
+      </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider>
           <ConfirmProvider>
