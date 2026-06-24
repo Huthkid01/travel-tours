@@ -1,4 +1,4 @@
-import { getProgramBySlug } from "@/data/programs";
+import { PROGRAM_PHOTO_FALLBACKS } from "@/lib/program-photo-fallbacks";
 import { images } from "@/lib/images";
 
 /** Local flyer assets in /public/programs/flyers */
@@ -53,10 +53,10 @@ export function getProgramFlyerCandidates(
     FLYER_EXTENSIONS.forEach((ext) => ordered.add(`${PROGRAM_FLYERS_DIR}/${slug}${ext}`));
   }
 
-  /** Seed defaults when DB stored a missing flyer path instead of the photo URL */
-  const local = getProgramBySlug(slug);
-  if (local?.image) {
-    ordered.add(local.image);
+  /** Seed photo URLs when DB stored a missing flyer path */
+  const photoFallback = PROGRAM_PHOTO_FALLBACKS[slug];
+  if (photoFallback) {
+    ordered.add(photoFallback);
   }
 
   if (ordered.size === 0) {

@@ -1,8 +1,8 @@
-import { getProgramFlyerPath } from "@/lib/program-flyers";
 import { images } from "@/lib/images";
 import type { Program } from "@/types";
 
 const cta = (slug: string) => `/consultation?program=${slug}`;
+const flyer = (name: string) => `/programs/flyers/${name}`;
 
 /** Programs — local defaults merged with Supabase in CMS */
 export const programs: Program[] = [
@@ -13,7 +13,7 @@ export const programs: Program[] = [
     title: "Student Study Visa — All Destinations",
     description:
       "Our highest success rate: securing student admission and study visas abroad. We support university acceptance, documentation, proof of funds, and embassy filing for Hungary, Malta, UK, Scotland, Ireland, USA, Australia, Canada, New Zealand, France, China, Philippines, Germany, Turkey, Serbia, and across Europe.",
-    image: getProgramFlyerPath("student-visa"),
+    image: flyer("student-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Top Success",
@@ -355,7 +355,7 @@ export const programs: Program[] = [
     title: "Serbia — Warehouse Jobs & Work Permits",
     description:
       "Warehouse jobs available in Serbia, Central Region. Gain valuable work experience with accommodation provided, live in Europe, and possible permit extension. Open doors to career opportunities in the Schengen area.",
-    image: getProgramFlyerPath("serbia-warehouse-jobs"),
+    image: flyer("serbia-warehouse-jobs.png"),
     imageType: "flyer",
     status: "active",
     badge: "Featured",
@@ -369,7 +369,7 @@ export const programs: Program[] = [
     title: "Serbia Visa Program",
     description:
       "Start a new journey in Serbia — affordable living, excellent job opportunities, high-quality education and training, a growing job market, and easy work and residence permits. Live, study, and work in Serbia.",
-    image: getProgramFlyerPath("serbia-visa"),
+    image: flyer("serbia-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Popular",
@@ -383,7 +383,7 @@ export const programs: Program[] = [
     title: "France Tourist Visa",
     description:
       "Schengen tourist visa for France — passport photographs, proof of family ties, bank statement and employment evidence. Processing 15–30 working days. Visa fee €90 (paid at submission).",
-    image: getProgramFlyerPath("france-tourist-visa"),
+    image: flyer("france-tourist-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Tourist",
@@ -397,7 +397,7 @@ export const programs: Program[] = [
     title: "Turkey Tourist Visa",
     description:
       "Unveiling the marvels of Turkey, one step at a time. Tourist visa support for Istanbul, Cappadocia, and more — book your consultation and start your Turkey journey with Darboi Consults.",
-    image: getProgramFlyerPath("turkey-tourist-visa"),
+    image: flyer("turkey-tourist-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Tourist",
@@ -411,7 +411,7 @@ export const programs: Program[] = [
     title: "Italy Tourist Visa — Fast & Guaranteed",
     description:
       "ITALY VISA PACKAGE — fast and guaranteed Schengen tourist visa support. Processing in just 3 weeks, with guarantee or your money back. Submissions ongoing in Lagos and Abuja, open to all nationalities.",
-    image: getProgramFlyerPath("italy-visa"),
+    image: flyer("italy-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Guaranteed",
@@ -426,7 +426,7 @@ export const programs: Program[] = [
     title: "FIFA World Cup 2026 — Mexico Visa",
     description:
       "Let Darboi Consults help you get a visa to Mexico — a FIFA World Cup 2026 host country. 6-month Mexico multiple-entry visa, fast-track processing, and stress-free application.",
-    image: getProgramFlyerPath("mexico-world-cup-2026"),
+    image: flyer("mexico-world-cup-2026.png"),
     imageType: "flyer",
     status: "active",
     badge: "Limited Slots",
@@ -440,7 +440,7 @@ export const programs: Program[] = [
     title: "Kosovo 3-Month Tourist Visa",
     description:
       "Get a Kosovo 3-month tourist visa with Darboi Consults Limited. Requirements: international passport, passport photo, passport data page, and deposit. Processing time: 4–6 weeks.",
-    image: getProgramFlyerPath("kosovo-tourist-visa"),
+    image: flyer("kosovo-tourist-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Tourist",
@@ -454,7 +454,7 @@ export const programs: Program[] = [
     title: "Turkey Visa — Ambassador Contact",
     description:
       "Turkey visa available through ambassador contact — biometric at Turkish Embassy Abuja; visa ready within 10 working days after biometrics. Service charge applies — contact us on WhatsApp.",
-    image: getProgramFlyerPath("turkey-visa-ambassador"),
+    image: flyer("turkey-visa-ambassador.png"),
     imageType: "flyer",
     status: "active",
     badge: "Fast Track",
@@ -468,7 +468,7 @@ export const programs: Program[] = [
     title: "Schengen Working Visa — EU Jobs",
     description:
       "Schengen working visa with accommodation and work permit available in Denmark, Norway, Sweden, Portugal, and more. Live and work in Europe with full support from Darboi Consults.",
-    image: getProgramFlyerPath("schengen-work-visa"),
+    image: flyer("schengen-work-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Work & Stay",
@@ -482,7 +482,7 @@ export const programs: Program[] = [
     title: "Japan Teaching Visa — September Intake",
     description:
       "Teaching slots for September intake in Japan are now available — teachers only. Once you pass your interview, we proceed with your visa application.",
-    image: getProgramFlyerPath("japan-teaching-visa"),
+    image: flyer("japan-teaching-visa.png"),
     imageType: "flyer",
     status: "active",
     badge: "Work",
