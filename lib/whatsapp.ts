@@ -96,6 +96,17 @@ export function openWhatsApp(message: string): string {
   return getWhatsAppUrl(message);
 }
 
+/** Open chat in the same tab — better deep-link handoff on Android/iOS */
+export function openWhatsAppChat(message?: string): void {
+  const url = getWhatsAppUrl(message);
+  const link = document.createElement("a");
+  link.href = url;
+  link.rel = "noopener noreferrer";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 export function redirectToWhatsApp(message: string): void {
-  window.location.href = getWhatsAppUrl(message);
+  openWhatsAppChat(message);
 }

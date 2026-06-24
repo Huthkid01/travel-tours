@@ -54,12 +54,26 @@ export const SOCIAL_LINKS = {
 
 export type SocialPlatform = "tiktok";
 
-export const WHATSAPP_BASE = "https://wa.me";
+export const WHATSAPP_BASE = "https://api.whatsapp.com/send";
 
-export function getWhatsAppUrl(message?: string) {
-  const number = SITE_CONFIG.whatsapp.replace(/\D/g, "");
-  const text = message ? `?text=${encodeURIComponent(message)}` : "";
-  return `${WHATSAPP_BASE}/${number}${text}`;
+/** Nigeria local 080… → international 234… for WhatsApp */
+export function formatWhatsAppPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("0") && digits.length === 11) return `234${digits.slice(1)}`;
+  if (digits.startsWith("234")) return digits;
+  return digits;
+}
+
+/**
+ * Official WhatsApp click-to-chat URL.
+ * Uses api.whatsapp.com (not wa.me) so phones with both WhatsApp and
+ * WhatsApp Business installed open Messenger reliably for visitors.
+ */
+export function getWhatsAppUrl(message?: string): string {
+  const phone = formatWhatsAppPhone(SITE_CONFIG.whatsapp);
+  const params = new URLSearchParams({ phone });
+  if (message?.trim()) params.set("text", message.trim());
+  return `${WHATSAPP_BASE}/?${params.toString()}`;
 }
 
 export const ACCEPTED_FILE_TYPES = [

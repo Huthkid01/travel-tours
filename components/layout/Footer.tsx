@@ -75,7 +75,6 @@ export function Footer() {
             </ul>
             <a
               href={getWhatsAppUrl()}
-              target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-500"
             >

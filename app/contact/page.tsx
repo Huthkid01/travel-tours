@@ -64,7 +64,6 @@ export default function ContactPage() {
               </ul>
               <a
                 href={getWhatsAppUrl()}
-                target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex rounded-full bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-500"
               >

@@ -4,7 +4,7 @@ import { DocumentUpload } from "@/components/upload/DocumentUpload";
 import { Button } from "@/components/ui/Button";
 import { WhatsAppCTA } from "@/components/layout/WhatsAppCTA";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
-import { getConsultationWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
+import { getConsultationWhatsAppMessage, redirectToWhatsApp } from "@/lib/whatsapp";
 import type { ConsultationFormSchema, FormFieldConfig } from "@/types";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -90,7 +90,7 @@ export function DynamicConsultationForm({
 
       toast.success("Consultation submitted! Opening WhatsApp...");
       track({ actionType: "consultation_start", service: contextLabel });
-      window.location.href = openWhatsApp(getConsultationWhatsAppMessage(contextLabel));
+      redirectToWhatsApp(getConsultationWhatsAppMessage(contextLabel));
     } catch {
       toast.error("Something went wrong. Please try WhatsApp.");
     } finally {

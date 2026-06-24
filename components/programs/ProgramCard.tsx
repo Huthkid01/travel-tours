@@ -144,7 +144,6 @@ export function ProgramCard({
 
               <a
                 href={openWhatsApp(getProgramWhatsAppMessage(program.title))}
-                target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
                   track({ actionType: "whatsapp_click", service: program.slug, source: "program_card" });

@@ -33,7 +33,6 @@ export function WhatsAppCTA({
   return (
     <a
       href={href}
-      target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
       onClick={() =>

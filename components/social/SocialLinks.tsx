@@ -30,8 +30,7 @@ export function SocialLinks({ className, variant = "default" }: SocialLinksProps
         <a
           key={key}
           href={href}
-          target="_blank"
-          rel="noopener noreferrer"
+          {...(key === "tiktok" ? { target: "_blank", rel: "noopener noreferrer" } : { rel: "noopener noreferrer" })}
           aria-label={label}
           title={label}
           onClick={() =>
