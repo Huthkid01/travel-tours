@@ -5,17 +5,17 @@ import { fetchPrograms } from "@/services/cms";
 import { ArrowRight } from "lucide-react";
 
 export async function FeaturedProgramsSection() {
-  const programs = await fetchPrograms();
+  const programs = (await fetchPrograms()).slice(0, 9);
 
   if (programs.length === 0) return null;
 
   return (
     <section id="programs" className="section-padding bg-navy-950">
       <div className="container-custom">
-        <SectionHeading
-          label="Featured Programs"
-          title="Programs, Promotions & Special Offers"
-          description="Exclusive packages and campaigns. Contact us for consultation — pricing available on request."
+          <SectionHeading
+            label="Featured Programs"
+            title="Visa Programs & Special Offers"
+            description="Student study visas, work permits, and tourist visit packages — consultation required for pricing and requirements."
           align="center"
           className="[&_h2]:text-white [&_p]:text-navy-300 [&_span]:text-gold-400"
         />

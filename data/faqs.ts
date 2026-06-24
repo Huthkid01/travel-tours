@@ -32,9 +32,15 @@ export const faqs: FAQ[] = [
       "Yes. Your documents are stored securely with private access. Only authorized Darboi Consults personnel can view your submissions.",
   },
   {
-    id: "6",
-    question: "Can I track my application?",
+    id: "7",
+    question: "Do you help with student visas to study abroad?",
     answer:
-      "After you complete payment, you will be directed to WhatsApp with your application details. Message us there with your payment reference for updates.",
+      "Yes — student study visas are one of our strongest services. We support admission and visa filing for Canada, UK, Ireland, USA, Australia, Germany, France, Hungary, Malta, China, Philippines, Turkey, Serbia, and across Europe. Start from the Study Abroad section on our homepage or apply via Consultation.",
+  },
+  {
+    id: "8",
+    question: "Which work and tourist visas do you handle?",
+    answer:
+      "Tourist visit visas: Italy, France, UK, Canada, Brazil, Australia, New Zealand, Ireland, and Europe. Work visas: Ireland, UK, Australia, New Zealand, Canada, Serbia, Oman, Kuwait, Saudi Arabia, Netherlands, Latvia, and Europe. See Visa Services on the homepage for the full list.",
   },
 ];

@@ -64,19 +64,24 @@ export function Hero() {
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-gold-500/30 bg-gold-500/10 px-4 py-1.5 text-sm text-gold-400">
                 <Shield className="h-4 w-4" />
-                Trusted Documentation & Travel Consultancy
+                Student · Tourist · Work Visas
               </span>
               <h1 className="mt-6 font-display text-4xl leading-tight font-bold text-white sm:text-5xl lg:text-6xl">
-                Professional Documentation &{" "}
-                <span className="gradient-text">Travel Consultation</span> Services
+                Student Admission &{" "}
+                <span className="gradient-text">Visa Specialists</span>
               </h1>
               <p className="mt-6 max-w-2xl text-lg text-navy-200">
-                {SITE_CONFIG.description} Based in {SITE_CONFIG.address}.
+                Darboi Consults helps clients secure study visas to Canada, UK, Europe, Turkey, Serbia,
+                China, and more — plus tourist visit and work visas worldwide. Based in{" "}
+                {SITE_CONFIG.address}.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
-                <Button href="/services" size="lg">
-                  Get Started
+                <Button href="/#study-abroad" size="lg">
+                  Study Abroad
                   <ArrowRight className="h-5 w-5" />
+                </Button>
+                <Button href="/programs" variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10">
+                  All Visa Programs
                 </Button>
                 <Button
                   href="/services"

@@ -22,4 +22,13 @@ export const images = {
   contact: "https://images.unsplash.com/photo-1423666639045-f560003c2af3?auto=format&fit=crop&w=1920&q=75",
   reservation: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1920&q=75",
   payment: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1920&q=75",
+  china: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1200&q=75",
+  australia: "https://images.unsplash.com/photo-1523482580670-f6c589a84a19?auto=format&fit=crop&w=1200&q=75",
+  brazil: "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=1200&q=75",
+  ireland: "https://images.unsplash.com/photo-1590089415225-896cad257af2?auto=format&fit=crop&w=1200&q=75",
+  germany: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=1200&q=75",
+  usa: "https://images.unsplash.com/photo-1496442226666-8d0d0e62e049?auto=format&fit=crop&w=1200&q=75",
+  newzealand: "https://images.unsplash.com/photo-1469521668202-4a471178bcd5?auto=format&fit=crop&w=1200&q=75",
+  study: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=75",
+  work: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=75",
 } as const;

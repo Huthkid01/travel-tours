@@ -28,6 +28,10 @@ export function getProgramFlyerPath(slug: string): string {
 export function getProgramFlyerCandidates(slug: string, configuredImage?: string): string[] {
   const ordered = new Set<string>();
 
+  if (configuredImage?.startsWith("http")) {
+    ordered.add(configuredImage);
+  }
+
   if (configuredImage?.startsWith(PROGRAM_FLYERS_DIR)) {
     ordered.add(configuredImage);
   }

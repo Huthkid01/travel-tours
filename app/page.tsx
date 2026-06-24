@@ -5,6 +5,8 @@ import { Hero } from "@/components/home/Hero";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { StatsSection } from "@/components/home/StatsSection";
 import { FeaturedTestimonialsSection } from "@/components/home/FeaturedTestimonialsSection";
+import { StudyAbroadSection } from "@/components/home/StudyAbroadSection";
+import { VisaCategoriesSection } from "@/components/home/VisaCategoriesSection";
 import { FeaturedProgramsSection } from "@/components/programs/FeaturedProgramsSection";
 import { FeaturedServicesGrid } from "@/components/services/FeaturedServicesGrid";
 import { GoogleFormSection } from "@/components/forms/GoogleFormSection";
@@ -24,6 +26,10 @@ export default async function HomePage() {
     <>
       <HashScrollOnLoad />
       <Hero />
+
+      <StudyAbroadSection />
+
+      <VisaCategoriesSection />
 
       <FeaturedProgramsSection />
 
@@ -51,9 +57,9 @@ export default async function HomePage() {
           />
           <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-center">
             <p className="text-lg leading-relaxed text-navy-600 dark:text-navy-300">
-              We simplify complex paperwork — from marriage certificates and police clearance to proof of funds,
-              flight reservations, and embassy appointments. Our automated portal ensures every application is stored
-              securely. Once payment is made, you are directed to WhatsApp to continue.
+              We specialise in student study visas, tourist visit visas, and international work permits —
+              plus marriage certificates, police clearance, proof of funds, flight reservations, and embassy
+              appointments. Applications are stored securely; once payment is made, you continue on WhatsApp.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button href="/about" variant="outline">
