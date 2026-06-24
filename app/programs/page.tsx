@@ -29,23 +29,18 @@ export default async function ProgramsPage() {
       <VisaCategoriesSection />
       <section className="section-padding">
         <div className="container-custom">
-          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12">
-            <div className="min-w-0 flex-1">
-              <SectionHeading
-                label="All Programs"
-                title="Student, Work & Tourist Visas"
-                description="Browse every active program. Pricing and requirements are shared after consultation."
-              />
-              <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4 md:gap-6 lg:grid-cols-2 xl:grid-cols-3 [&>*]:min-w-0">
-                <LiveProgramsGrid initialPrograms={programs} variant="compact" liveUpdates />
-              </div>
-            </div>
+          <SectionHeading
+            label="All Programs"
+            title="Student, Work & Tourist Visas"
+            description="Browse every active program. Pricing and requirements are shared after consultation."
+          />
 
-            <aside className="hidden shrink-0 lg:block lg:w-72 xl:w-80">
-              <div className="sticky top-24">
-                <LiveAnnouncementSidebar initialItems={announcements} />
-              </div>
-            </aside>
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4 md:gap-6 lg:grid-cols-3 xl:grid-cols-4 [&>*]:min-w-0">
+            <LiveProgramsGrid initialPrograms={programs} variant="compact" liveUpdates />
+          </div>
+
+          <div className="mt-12 border-t border-navy-100 pt-10 dark:border-navy-800 lg:mt-16 lg:pt-12">
+            <LiveAnnouncementSidebar initialItems={announcements} />
           </div>
         </div>
       </section>
