@@ -36,7 +36,7 @@ export default async function ProgramsPage() {
                 title="Student, Work & Tourist Visas"
                 description="Browse every active program. Pricing and requirements are shared after consultation."
               />
-              <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 [&>*]:min-w-0">
+              <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3 [&>*]:min-w-0">
                 <LiveProgramsGrid initialPrograms={programs} variant="compact" liveUpdates />
               </div>
             </div>

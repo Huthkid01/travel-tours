@@ -49,9 +49,11 @@ function ProgramFlyerImageInner({
     [program.slug, program.image, program.imageType]
   );
   const [index, setIndex] = useState(0);
+  const [exhausted, setExhausted] = useState(false);
 
   useEffect(() => {
     setIndex(0);
+    setExhausted(false);
   }, [program.slug, program.image]);
 
   const src = candidates[index];
@@ -59,13 +61,21 @@ function ProgramFlyerImageInner({
   const isLocal = src?.startsWith("/");
 
   const onError = useCallback(() => {
-    setIndex((i) => (i < candidates.length - 1 ? i + 1 : i));
+    setIndex((i) => {
+      if (i < candidates.length - 1) return i + 1;
+      setExhausted(true);
+      return i;
+    });
   }, [candidates.length]);
 
   const imageClass = cn(
-    isFlyer ? "object-contain object-center" : "object-cover",
+    isFlyer ? "object-contain object-center" : "object-cover object-center",
     className
   );
+
+  if (exhausted && showPlaceholder) {
+    return <FlyerPlaceholder slug={program.slug} title={program.title} />;
+  }
 
   if (!src && showPlaceholder) {
     return <FlyerPlaceholder slug={program.slug} title={program.title} />;

@@ -5,7 +5,7 @@ import { ProgramImageLightbox } from "@/components/programs/ProgramImageLightbox
 import { PriceLabel } from "@/components/ui/PriceLabel";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
 import { trackEvent } from "@/lib/analytics";
-import { getProgramFlyerCandidates, isProgramFlyerImage } from "@/lib/program-flyers";
+import { getProgramFlyerCandidates } from "@/lib/program-flyers";
 import { openWhatsApp, getProgramWhatsAppMessage } from "@/lib/whatsapp";
 import type { Program } from "@/types";
 import { ArrowRight, Sparkles, ZoomIn } from "lucide-react";
@@ -32,7 +32,7 @@ export function ProgramCard({
 }: ProgramCardProps) {
   const track = useLeadTrackerContext();
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const isFlyer = isProgramFlyerImage(program.image, program.imageType);
+  const isFlyer = program.imageType === "flyer";
 
   const imageSrc = useMemo(
     () => getProgramFlyerCandidates(program.slug, program.image, program.imageType)[0] ?? program.image,
@@ -63,11 +63,13 @@ export function ProgramCard({
           aria-label={`View full size: ${program.title}`}
           className={cn(
             "relative block w-full cursor-zoom-in overflow-hidden bg-navy-950 text-left",
-            isFlyer
-              ? variant === "compact"
-                ? "aspect-[3/4]"
-                : "aspect-[3/4] sm:aspect-[4/5]"
-              : "aspect-[16/10]"
+            variant === "compact"
+              ? isFlyer
+                ? "aspect-[4/5]"
+                : "aspect-[16/10]"
+              : isFlyer
+                ? "aspect-[3/4] sm:aspect-[4/5]"
+                : "aspect-[16/10]"
           )}
         >
           <ProgramFlyerImage

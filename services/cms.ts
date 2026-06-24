@@ -93,19 +93,29 @@ export async function fetchRelatedServices(slug: string, limit = 3): Promise<Ser
 }
 
 function mapProgram(row: Record<string, unknown>): Program {
-  const image = String(row.image);
-  const imageType = (row.image_type as ProgramImageType | undefined) ??
-    (isProgramFlyerImage(image) ? "flyer" : undefined);
+  const rawImage = String(row.image ?? "").trim();
+  const slug = String(row.slug);
+  const explicitType = row.image_type as ProgramImageType | undefined;
+
+  const imageType: ProgramImageType =
+    explicitType ??
+    (rawImage.startsWith("http") ? "photo" : isProgramFlyerImage(rawImage) ? "flyer" : "photo");
+
+  let image = rawImage;
+  if (!rawImage) {
+    image = getProgramFlyerPath(slug);
+  } else if (rawImage.startsWith("http")) {
+    image = rawImage;
+  } else if (!rawImage.startsWith("/")) {
+    image = getProgramFlyerPath(slug);
+  }
 
   return {
     id: String(row.id),
     slug: String(row.slug),
     title: String(row.title),
     description: String(row.description),
-    image:
-      image.startsWith("/") || isProgramFlyerImage(image)
-        ? image
-        : getProgramFlyerPath(String(row.slug)),
+    image,
     imageType,
     optionalPrice: row.optional_price != null ? Number(row.optional_price) : null,
     status: row.status as Program["status"],

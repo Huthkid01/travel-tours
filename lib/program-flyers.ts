@@ -1,3 +1,6 @@
+import { getProgramBySlug } from "@/data/programs";
+import { images } from "@/lib/images";
+
 /** Local flyer assets in /public/programs/flyers */
 export const PROGRAM_FLYERS_DIR = "/programs/flyers";
 
@@ -30,11 +33,12 @@ export function getProgramFlyerCandidates(
   configuredImage?: string,
   imageType?: string
 ): string[] {
-  if (configuredImage?.startsWith("http")) {
-    return [configuredImage];
-  }
-
   const ordered = new Set<string>();
+
+  if (configuredImage?.startsWith("http")) {
+    ordered.add(configuredImage);
+    return [...ordered];
+  }
 
   if (configuredImage?.startsWith(PROGRAM_FLYERS_DIR)) {
     ordered.add(configuredImage);
@@ -49,10 +53,21 @@ export function getProgramFlyerCandidates(
     FLYER_EXTENSIONS.forEach((ext) => ordered.add(`${PROGRAM_FLYERS_DIR}/${slug}${ext}`));
   }
 
+  /** Seed defaults when DB stored a missing flyer path instead of the photo URL */
+  const local = getProgramBySlug(slug);
+  if (local?.image) {
+    ordered.add(local.image);
+  }
+
+  if (ordered.size === 0) {
+    ordered.add(images.travel);
+  }
+
   return [...ordered];
 }
 
 export function isProgramFlyerImage(image: string, imageType?: string): boolean {
+  if (imageType === "photo") return false;
   if (imageType === "flyer") return true;
   return image.startsWith(PROGRAM_FLYERS_DIR);
 }
