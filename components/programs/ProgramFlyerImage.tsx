@@ -45,8 +45,8 @@ function ProgramFlyerImageInner({
   showPlaceholder = true,
 }: ProgramFlyerImageProps) {
   const candidates = useMemo(
-    () => getProgramFlyerCandidates(program.slug, program.image),
-    [program.slug, program.image]
+    () => getProgramFlyerCandidates(program.slug, program.image, program.imageType),
+    [program.slug, program.image, program.imageType]
   );
   const [index, setIndex] = useState(0);
 

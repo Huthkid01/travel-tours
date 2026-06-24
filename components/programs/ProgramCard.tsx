@@ -35,8 +35,8 @@ export function ProgramCard({
   const isFlyer = isProgramFlyerImage(program.image, program.imageType);
 
   const imageSrc = useMemo(
-    () => getProgramFlyerCandidates(program.slug, program.image)[0] ?? program.image,
-    [program.slug, program.image]
+    () => getProgramFlyerCandidates(program.slug, program.image, program.imageType)[0] ?? program.image,
+    [program.slug, program.image, program.imageType]
   );
 
   const handleView = () => {

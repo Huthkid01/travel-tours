@@ -25,12 +25,16 @@ export function getProgramFlyerPath(slug: string): string {
 }
 
 /** URLs to try in order */
-export function getProgramFlyerCandidates(slug: string, configuredImage?: string): string[] {
-  const ordered = new Set<string>();
-
+export function getProgramFlyerCandidates(
+  slug: string,
+  configuredImage?: string,
+  imageType?: string
+): string[] {
   if (configuredImage?.startsWith("http")) {
-    ordered.add(configuredImage);
+    return [configuredImage];
   }
+
+  const ordered = new Set<string>();
 
   if (configuredImage?.startsWith(PROGRAM_FLYERS_DIR)) {
     ordered.add(configuredImage);
@@ -41,7 +45,9 @@ export function getProgramFlyerCandidates(slug: string, configuredImage?: string
     ordered.add(`${PROGRAM_FLYERS_DIR}/${mapped}`);
   }
 
-  FLYER_EXTENSIONS.forEach((ext) => ordered.add(`${PROGRAM_FLYERS_DIR}/${slug}${ext}`));
+  if (imageType !== "photo") {
+    FLYER_EXTENSIONS.forEach((ext) => ordered.add(`${PROGRAM_FLYERS_DIR}/${slug}${ext}`));
+  }
 
   return [...ordered];
 }

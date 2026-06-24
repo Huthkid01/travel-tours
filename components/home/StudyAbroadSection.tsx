@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { RemoteImage } from "@/components/ui/RemoteImage";
 import { STUDY_ABROAD_HIGHLIGHT } from "@/data/visa-offerings";
 import { images } from "@/lib/images";
 import { GraduationCap, MapPin } from "lucide-react";
-import Image from "next/image";
 
 export function StudyAbroadSection() {
   const { title, lead, body, destinations } = STUDY_ABROAD_HIGHLIGHT;
@@ -13,7 +13,7 @@ export function StudyAbroadSection() {
       <div className="container-custom">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-navy-100 shadow-xl dark:border-navy-800">
-            <Image
+            <RemoteImage
               src={images.study}
               alt="Students studying abroad"
               fill

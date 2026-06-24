@@ -17,7 +17,7 @@ export const faqs: FAQ[] = [
     id: "3",
     question: "How long does processing take?",
     answer:
-      "Processing times vary by service — typically from 24 hours for travel reservations to 30 days for complex land documentation. Each service page lists estimated timelines.",
+      "Processing times vary by service — typically from 24 hours for travel reservations to several weeks for visa applications. Each service page lists estimated timelines.",
   },
   {
     id: "4",
