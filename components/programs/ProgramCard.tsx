@@ -65,8 +65,8 @@ export function ProgramCard({
             "relative block w-full cursor-zoom-in overflow-hidden bg-navy-950 text-left",
             variant === "compact"
               ? isFlyer
-                ? "aspect-[4/5]"
-                : "aspect-[16/10]"
+                ? "aspect-[3/4] sm:aspect-[4/5]"
+                : "aspect-[4/3] sm:aspect-[16/10]"
               : isFlyer
                 ? "aspect-[3/4] sm:aspect-[4/5]"
                 : "aspect-[16/10]"
@@ -76,7 +76,7 @@ export function ProgramCard({
             program={program}
             fill
             priority={imagePriority}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 280px"
             className="md:transition-transform md:duration-700 md:group-hover:scale-[1.02]"
           />
           <div
@@ -88,8 +88,8 @@ export function ProgramCard({
             )}
           />
           {program.badge && (
-            <span className="pointer-events-none absolute top-3 left-3 flex items-center gap-1 rounded-full bg-gold-500 px-2.5 py-0.5 text-[10px] font-bold text-navy-950 sm:top-4 sm:left-4 sm:px-3 sm:py-1 sm:text-xs">
-              <Sparkles className="h-3 w-3" />
+            <span className="pointer-events-none absolute top-2 left-2 flex items-center gap-0.5 rounded-full bg-gold-500 px-1.5 py-0.5 text-[9px] font-bold text-navy-950 sm:top-3 sm:left-3 sm:gap-1 sm:px-2.5 sm:py-0.5 sm:text-[10px] md:px-3 md:py-1 md:text-xs">
+              <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               {program.badge}
             </span>
           )}
@@ -98,12 +98,14 @@ export function ProgramCard({
           </span>
         </button>
 
-        <div className={cn("flex flex-1 flex-col", variant === "compact" ? "p-3 sm:p-4" : "p-4 sm:p-6")}>
+        <div className={cn("flex flex-1 flex-col", variant === "compact" ? "p-2.5 sm:p-4" : "p-4 sm:p-6")}>
           <Link href={`/programs/${program.slug}`} prefetch onClick={handleView}>
             <h3
               className={cn(
                 "font-display font-bold text-white transition-colors group-hover:text-gold-400",
-                variant === "compact" ? "text-sm leading-snug sm:text-base" : "text-lg sm:text-xl"
+                variant === "compact"
+                  ? "text-xs leading-snug sm:text-base line-clamp-2"
+                  : "text-lg sm:text-xl"
               )}
             >
               {program.title}
@@ -111,15 +113,15 @@ export function ProgramCard({
           </Link>
           <p
             className={cn(
-              "mt-2 flex-1 leading-relaxed text-navy-300 line-clamp-3",
-              variant === "compact" ? "text-xs sm:text-sm" : "text-sm sm:mt-3"
+              "mt-1.5 flex-1 leading-relaxed text-navy-300",
+              variant === "compact" ? "text-[11px] line-clamp-2 sm:mt-2 sm:text-sm sm:line-clamp-3" : "text-sm sm:mt-3 line-clamp-3"
             )}
           >
             {program.description}
           </p>
 
-          <div className={cn("mt-2", variant === "compact" ? "mt-3" : "mt-3 sm:mt-4")}>
-            <PriceLabel variant="consultation" className={variant === "compact" ? "text-xs sm:text-sm" : undefined} />
+          <div className={cn(variant === "compact" ? "mt-2" : "mt-3 sm:mt-4")}>
+            <PriceLabel variant="consultation" className={variant === "compact" ? "text-[10px] sm:text-sm" : undefined} />
           </div>
 
           {variant === "full" && (
