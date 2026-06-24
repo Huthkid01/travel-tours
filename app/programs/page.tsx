@@ -39,8 +39,11 @@ export default async function ProgramsPage() {
             <LiveProgramsGrid initialPrograms={programs} variant="compact" liveUpdates />
           </div>
 
-          <div className="mt-12 border-t border-navy-100 pt-10 dark:border-navy-800 lg:mt-16 lg:pt-12">
-            <LiveAnnouncementSidebar initialItems={announcements} />
+          <div
+            id="program-announcements"
+            className="mt-12 w-full scroll-mt-24 border-t border-navy-100 pt-10 dark:border-navy-800 sm:mt-14 sm:pt-12 lg:mt-16"
+          >
+            <LiveAnnouncementSidebar initialItems={announcements} layout="footer" />
           </div>
         </div>
       </section>
