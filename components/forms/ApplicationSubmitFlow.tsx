@@ -28,7 +28,7 @@ interface ApplicationSubmitFlowProps {
   submitAfterPayment?: boolean;
   children: (props: {
     onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
-    onStageForPayment: (data: ApplicationFormData, files: File[]) => void;
+    onStageForPayment: (data: ApplicationFormData, files: File[]) => Promise<void>;
     onStepProgress: (data: ApplicationFormData) => void;
     submitLabel: string;
     deferPaymentToModal: boolean;
@@ -53,7 +53,6 @@ export function ApplicationSubmitFlow({
 
   const pendingRef = useRef<PendingSubmission | null>(null);
   const savedApplicationRef = useRef<Application | null>(null);
-  const savePromiseRef = useRef<Promise<Application> | null>(null);
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const applicationIdRef = useRef<string>("");
 
@@ -65,21 +64,17 @@ export function ApplicationSubmitFlow({
 
   const persistFullApplication = useCallback(
     async (form: ApplicationFormData, files: File[], applicationId: string) => {
-      const promise = submitApplicationViaApi(
+      const { application } = await submitApplicationViaApi(
         storageSlug,
         serviceName,
         form,
         files,
         applicationId,
         { skipOwnerEmail: true }
-      ).then(({ application }) => {
-        rememberApplicationId(storageSlug, application.id);
-        savedApplicationRef.current = application;
-        return application;
-      });
-
-      savePromiseRef.current = promise;
-      return promise;
+      );
+      rememberApplicationId(storageSlug, application.id);
+      savedApplicationRef.current = application;
+      return application;
     },
     [storageSlug, serviceName]
   );
@@ -91,95 +86,38 @@ export function ApplicationSubmitFlow({
         const id = applicationIdRef.current || getOrCreateApplicationId(storageSlug);
         applicationIdRef.current = id;
         void saveApplicationDraftViaApi(storageSlug, serviceName, form, id).catch(() => {
-          /* silent — full save runs before payment */
+          /* silent — retried on next field change */
         });
-      }, 600);
+      }, 500);
     },
     [storageSlug, serviceName]
   );
 
-  const startBackgroundFullSave = useCallback(
-    (form: ApplicationFormData, files: File[], applicationId: string) => {
-      setPreparingSave(true);
-      void persistFullApplication(form, files, applicationId)
-        .then(() => setPreparingSave(false))
-        .catch(() => {
-          setPreparingSave(false);
-          toast.error("Could not save your application yet. You can still pay — we will retry when you confirm.");
-        });
-    },
-    [persistFullApplication]
-  );
-
-  const resolveSavedApplication = useCallback(
-    async (pending: PendingSubmission, paymentReference: string): Promise<Application> => {
-      if (savedApplicationRef.current) return savedApplicationRef.current;
-
-      if (savePromiseRef.current) {
-        try {
-          return await savePromiseRef.current;
-        } catch {
-          /* fall through to sync save */
-        }
-      }
-
-      const refNote = paymentReference.trim()
-        ? `\nPayment Reference: ${paymentReference.trim()}`
-        : "";
-      const formWithPayment = {
-        ...pending.form,
-        notes: `${pending.form.notes || ""}${refNote}`.trim(),
-      };
-
-      return persistFullApplication(formWithPayment, pending.files, pending.applicationId);
-    },
-    [persistFullApplication]
-  );
-
-  const finalizePayment = useCallback(
+  const recordPaymentInBackground = useCallback(
     async (application: Application, paymentReference: string) => {
       const amount = settings.feeAmount;
-      const res = await fetch(`/api/applications/${application.id}/complete-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentReference: paymentReference || undefined,
-          amount,
-          paymentType: "booking-fee",
-        }),
-      });
-      const json = (await res.json()) as {
-        error?: string;
-        application?: Application;
-      };
+      try {
+        const res = await fetch(`/api/applications/${application.id}/complete-payment`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            paymentReference: paymentReference || undefined,
+            amount,
+            paymentType: "booking-fee",
+          }),
+        });
+        if (!res.ok) return;
 
-      if (!res.ok) throw new Error(json.error || "Could not record payment");
-
-      const app = json.application ?? application;
-
-      const waMessage = getApplicationWhatsAppMessage({
-        stage: "paid",
-        kind,
-        applicationId: app.id,
-        serviceName,
-        applicantName: app.full_name,
-        reference: paymentReference || app.payment_reference || undefined,
-        paymentAmount: amount,
-        paymentType: "booking-fee",
-      });
-
-      void notifyApplicationOwner(app, { stage: "paid", paymentAmount: amount }).then((notify) => {
-        if (!notify.ok) {
-          toast.error(notify.message ?? "Payment recorded but email could not be sent.");
-        }
-      });
-
-      setModalOpen(false);
-      setFinishing(false);
-      toastPaymentComplete({ emailSent: true });
-      redirectToWhatsApp(waMessage);
+        void notifyApplicationOwner(application, { stage: "paid", paymentAmount: amount }).then((notify) => {
+          if (!notify.ok) {
+            toast.error(notify.message ?? "Payment recorded but confirmation email could not be sent.");
+          }
+        });
+      } catch {
+        /* payment record is best-effort — WhatsApp is the primary confirm step */
+      }
     },
-    [kind, serviceName, settings.feeAmount]
+    [settings.feeAmount]
   );
 
   const handleFormSubmit = async (data: ApplicationFormData, files: File[]) => {
@@ -188,16 +126,7 @@ export function ApplicationSubmitFlow({
     applicationIdRef.current = applicationId;
 
     try {
-      const { application } = await submitApplicationViaApi(
-        storageSlug,
-        serviceName,
-        data,
-        files,
-        applicationId,
-        { skipOwnerEmail: true }
-      );
-      rememberApplicationId(storageSlug, application.id);
-      savedApplicationRef.current = application;
+      const application = await persistFullApplication(data, files, applicationId);
       toastApplicationSaved({ nextStep: "payment" });
       setSubmitted(application);
     } catch (err) {
@@ -212,15 +141,38 @@ export function ApplicationSubmitFlow({
   };
 
   const handleStageForPayment = useCallback(
-    (data: ApplicationFormData, files: File[]) => {
+    async (data: ApplicationFormData, files: File[]) => {
       const applicationId = applicationIdRef.current || getOrCreateApplicationId(storageSlug);
       applicationIdRef.current = applicationId;
-
       pendingRef.current = { form: data, files, applicationId };
-      setModalOpen(true);
-      startBackgroundFullSave(data, files, applicationId);
+
+      setPreparingSave(true);
+      try {
+        const application = await persistFullApplication(data, files, applicationId);
+
+        const notify = await notifyApplicationOwner(application, { stage: "submitted" });
+        if (!notify.ok) {
+          toast.error(
+            notify.message ??
+              "Application saved but email could not be sent. Check Gmail settings in Vercel."
+          );
+        } else {
+          toast.success("Application sent to Darboi Consults. Complete payment below.");
+        }
+
+        setModalOpen(true);
+      } catch (err) {
+        pendingRef.current = null;
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : "Could not save your application. Please try again."
+        );
+      } finally {
+        setPreparingSave(false);
+      }
     },
-    [storageSlug, startBackgroundFullSave]
+    [storageSlug, persistFullApplication]
   );
 
   const finishAfterPayment = async (paymentReference: string) => {
@@ -231,25 +183,48 @@ export function ApplicationSubmitFlow({
     }
 
     setFinishing(true);
+
+    const waMessage = getApplicationWhatsAppMessage({
+      stage: "paid",
+      kind,
+      applicationId: pending.applicationId,
+      serviceName,
+      applicantName: pending.form.fullName,
+      reference: paymentReference || undefined,
+      paymentAmount: settings.feeAmount,
+      paymentType: "booking-fee",
+    });
+
+    let application = savedApplicationRef.current;
+
     try {
-      const application = await resolveSavedApplication(pending, paymentReference);
-      pendingRef.current = null;
-      await finalizePayment(application, paymentReference);
-    } catch {
-      toast.error("Could not confirm payment. Opening WhatsApp — please send your payment reference there.");
+      if (!application) {
+        try {
+          const refNote = paymentReference.trim()
+            ? `\nPayment Reference: ${paymentReference.trim()}`
+            : "";
+          const formWithPayment = {
+            ...pending.form,
+            notes: `${pending.form.notes || ""}${refNote}`.trim(),
+          };
+          application = await persistFullApplication(
+            formWithPayment,
+            pending.files,
+            pending.applicationId
+          );
+        } catch {
+          /* still open WhatsApp */
+        }
+      }
+
+      if (application) {
+        void recordPaymentInBackground(application, paymentReference);
+      }
+
       setModalOpen(false);
-      redirectToWhatsApp(
-        getApplicationWhatsAppMessage({
-          stage: "paid",
-          kind,
-          applicationId: pending.applicationId,
-          serviceName,
-          applicantName: pending.form.fullName,
-          reference: paymentReference || undefined,
-          paymentAmount: settings.feeAmount,
-          paymentType: "booking-fee",
-        })
-      );
+      pendingRef.current = null;
+      toastPaymentComplete({ emailSent: Boolean(application) });
+      redirectToWhatsApp(waMessage);
     } finally {
       setFinishing(false);
     }
@@ -264,23 +239,22 @@ export function ApplicationSubmitFlow({
     if (!submitted) return;
     setFinishing(true);
 
+    const waMessage = getApplicationWhatsAppMessage({
+      stage: "paid",
+      kind,
+      applicationId: submitted.id,
+      serviceName,
+      applicantName: submitted.full_name,
+      reference: paymentReference || undefined,
+      paymentAmount: settings.feeAmount,
+      paymentType: "booking-fee",
+    });
+
     try {
-      await finalizePayment(submitted, paymentReference);
-    } catch {
-      toast.error("Could not save payment. Opening WhatsApp anyway.");
+      void recordPaymentInBackground(submitted, paymentReference);
       setModalOpen(false);
-      redirectToWhatsApp(
-        getApplicationWhatsAppMessage({
-          stage: "paid",
-          kind,
-          applicationId: submitted.id,
-          serviceName,
-          applicantName: submitted.full_name,
-          reference: paymentReference || undefined,
-          paymentAmount: settings.feeAmount,
-          paymentType: "booking-fee",
-        })
-      );
+      toastPaymentComplete({ emailSent: true });
+      redirectToWhatsApp(waMessage);
     } finally {
       setFinishing(false);
     }
@@ -301,13 +275,13 @@ export function ApplicationSubmitFlow({
     deferPaymentToModal: !submitAfterPayment,
     paymentStepOpensModal: submitAfterPayment,
     paymentFeeLabel: settings.feeAmountLabel,
-    disabled: submitting || finishing,
+    disabled: submitting || finishing || preparingSave,
   };
 
   const modalLoadingLabel = finishing
-    ? "Confirming payment…"
+    ? "Opening WhatsApp…"
     : preparingSave
-      ? "Uploading documents…"
+      ? "Saving application & sending email…"
       : "Please wait…";
 
   if (!submitAfterPayment && submitted) {
@@ -344,12 +318,14 @@ export function ApplicationSubmitFlow({
       {children(childProps)}
       <PaymentDetailsModal
         open={modalOpen}
-        onClose={() => !finishing && setModalOpen(false)}
+        onClose={() => !finishing && !preparingSave && setModalOpen(false)}
         onDone={handlePaymentDone}
         loadingDone={finishing}
-        loadingLabel="Confirming payment…"
+        loadingLabel={modalLoadingLabel}
         statusHint={
-          preparingSave ? "Your application is uploading in the background. You can pay now." : undefined
+          preparingSave
+            ? "Saving your application and emailing Darboi Consults…"
+            : undefined
         }
         doneLabel="I've made payment — Open WhatsApp"
       />

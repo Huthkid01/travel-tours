@@ -28,7 +28,15 @@ export async function saveApplicationDraftViaApi(
   form: ApplicationFormData,
   applicationId: string
 ): Promise<void> {
-  if (!form.fullName?.trim() || !form.email?.trim()) return;
+  const hasData =
+    form.fullName?.trim() ||
+    form.email?.trim() ||
+    form.phone?.trim() ||
+    form.address?.trim() ||
+    form.country?.trim() ||
+    form.purpose?.trim();
+
+  if (!hasData) return;
 
   const res = await fetch("/api/applications/draft", {
     method: "POST",

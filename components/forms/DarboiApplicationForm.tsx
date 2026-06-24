@@ -10,7 +10,7 @@ import { MARITAL_STATUS_OPTIONS, SEX_OPTIONS } from "@/data/darboi-application-f
 import { darboiApplicationSchema, type DarboiApplicationFormValues } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreditCard, FileUp, MapPin, Plane, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -31,7 +31,7 @@ export interface DarboiApplicationFormProps {
   disabled?: boolean;
   onSubmit: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => Promise<void>;
   /** Called on step 5 when user taps Make payment (after validation) */
-  onStageForPayment?: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => void;
+  onStageForPayment?: (data: DarboiApplicationFormValues, files: DarboiApplicationFiles) => void | Promise<void>;
   /** Called after each step is validated — parent can save draft */
   onStepComplete?: (data: DarboiApplicationFormValues, stepId: string) => void;
 }
@@ -90,11 +90,28 @@ export function DarboiApplicationForm({
     handleSubmit,
     trigger,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<DarboiApplicationFormValues>({
     resolver: zodResolver(darboiApplicationSchema),
     mode: "onTouched",
   });
+
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const subscription = watch((values) => {
+      if (!onStepComplete) return;
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = setTimeout(() => {
+        onStepComplete(values as DarboiApplicationFormValues, "autosave");
+      }, 700);
+    });
+    return () => {
+      subscription.unsubscribe();
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    };
+  }, [watch, onStepComplete]);
 
   const submit = async (data: DarboiApplicationFormValues) => {
     let valid = true;
@@ -181,7 +198,12 @@ export function DarboiApplicationForm({
         }
         return;
       }
-      onStageForPayment?.(getValues(), { passportPhoto, passportBioPage });
+      setLoading(true);
+      try {
+        await onStageForPayment?.(getValues(), { passportPhoto, passportBioPage });
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 

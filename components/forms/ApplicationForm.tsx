@@ -24,7 +24,7 @@ interface ApplicationFormProps {
   paymentFeeLabel?: string;
   disabled?: boolean;
   onSubmit: (data: ApplicationFormData, files: File[]) => Promise<void>;
-  onStageForPayment?: (data: ApplicationFormData, files: File[]) => void;
+  onStageForPayment?: (data: ApplicationFormData, files: File[]) => void | Promise<void>;
   onStepProgress?: (data: ApplicationFormData) => void;
 }
 
@@ -50,11 +50,14 @@ export function ApplicationForm({
       await onSubmit(mapDarboiToApplicationData(data), [...passportPhoto, ...passportBioPage]);
     };
 
-    const handleVisaStage = (
+    const handleVisaStage = async (
       data: DarboiApplicationFormValues,
       files: DarboiApplicationFiles
     ) => {
-      onStageForPayment?.(mapDarboiToApplicationData(data), [...files.passportPhoto, ...files.passportBioPage]);
+      await onStageForPayment?.(
+        mapDarboiToApplicationData(data),
+        [...files.passportPhoto, ...files.passportBioPage]
+      );
     };
 
     return (
@@ -68,6 +71,11 @@ export function ApplicationForm({
         disabled={disabled}
         onSubmit={handleVisaSubmit}
         onStageForPayment={onStageForPayment ? handleVisaStage : undefined}
+        onStepComplete={
+          onStepProgress
+            ? (data) => onStepProgress(mapDarboiToApplicationData(data))
+            : undefined
+        }
       />
     );
   }
