@@ -1,14 +1,17 @@
 "use client";
 
+import { readJsonResponse } from "@/lib/read-json-response";
 import type { Application, ApplicationFormData } from "@/types";
 
 const draftIdKey = (storageSlug: string) => `app_draft_id_${storageSlug}`;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function getOrCreateApplicationId(storageSlug: string): string {
   if (typeof window === "undefined") return crypto.randomUUID();
   const key = draftIdKey(storageSlug);
   let id = sessionStorage.getItem(key);
-  if (!id) {
+  if (!id || !UUID_RE.test(id)) {
     id = crypto.randomUUID();
     sessionStorage.setItem(key, id);
   }
@@ -45,7 +48,7 @@ export async function saveApplicationDraftViaApi(
   });
 
   if (!res.ok) {
-    const json = (await res.json().catch(() => ({}))) as { error?: string };
+    const json = await readJsonResponse<{ error?: string }>(res);
     throw new Error(json.error || "Could not save draft");
   }
 }

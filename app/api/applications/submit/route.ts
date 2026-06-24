@@ -1,3 +1,4 @@
+import { createApplicationActionToken } from "@/lib/application-action-token";
 import { upsertApplicationServer } from "@/services/applications.server";
 import { uploadApplicationFilesServer } from "@/services/storage.server";
 import type { ApplicationFormData } from "@/types";
@@ -5,6 +6,9 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +27,10 @@ export async function POST(request: Request) {
       skipOwnerEmail?: boolean;
     };
 
-    const applicationId = payload.applicationId || crypto.randomUUID();
+    const applicationId =
+      payload.applicationId && UUID_RE.test(payload.applicationId)
+        ? payload.applicationId
+        : crypto.randomUUID();
     const files: File[] = [];
     for (const [key, value] of formData.entries()) {
       if (key.startsWith("file_") && value instanceof File && value.size > 0) {
@@ -40,7 +47,24 @@ export async function POST(request: Request) {
           files
         );
       } catch (err) {
-        console.error("[applications/submit] upload failed:", err);
+        return NextResponse.json(
+          {
+            error:
+              err instanceof Error
+                ? err.message
+                : "Could not upload your documents. Please use smaller files (under 4 MB total) and try again.",
+          },
+          { status: 500 }
+        );
+      }
+      if (uploaded.length === 0) {
+        return NextResponse.json(
+          {
+            error:
+              "Could not upload your documents. Please use smaller files (under 4 MB total) and try again.",
+          },
+          { status: 500 }
+        );
       }
     }
 
@@ -51,8 +75,9 @@ export async function POST(request: Request) {
       uploaded
     );
 
-    /** Email via Gmail after payment (/api/owner-notify) */
-    return NextResponse.json({ application, emailSent: false });
+    const actionToken = createApplicationActionToken(applicationId);
+
+    return NextResponse.json({ application, emailSent: false, actionToken });
   } catch (err) {
     return NextResponse.json(
       {

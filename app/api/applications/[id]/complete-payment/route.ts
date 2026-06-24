@@ -1,3 +1,4 @@
+import { verifyApplicationActionToken } from "@/lib/application-action-token";
 import { fetchPaymentSettings } from "@/services/cms";
 import {
   getApplicationServer,
@@ -18,11 +19,20 @@ export async function POST(
       paymentReference?: string;
       amount?: number;
       paymentType?: PaymentType;
+      actionToken?: string;
     };
+
+    if (!verifyApplicationActionToken(body.actionToken, id)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     const existing = await getApplicationServer(id);
     if (!existing) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+
+    if (existing.payment_status === "paid") {
+      return NextResponse.json({ ok: true, application: existing, emailSent: false });
     }
 
     const settings = await fetchPaymentSettings();

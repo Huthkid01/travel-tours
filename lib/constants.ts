@@ -87,4 +87,6 @@ export const ACCEPTED_FILE_TYPES = [
 
 export const ACCEPTED_FILE_EXTENSIONS = ".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx";
 
-export const MAX_FILE_SIZE_MB = 10;
+export const MAX_FILE_SIZE_MB = 4;
+/** Vercel serverless request body limit is ~4.5 MB — keep uploads under this total */
+export const MAX_UPLOAD_TOTAL_MB = 4;

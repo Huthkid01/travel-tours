@@ -2,6 +2,9 @@ import { upsertApplicationServer } from "@/services/applications.server";
 import type { ApplicationFormData } from "@/types";
 import { NextResponse } from "next/server";
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 /** Fill required DB columns while the user is still typing */
 function normalizeDraftForm(form: ApplicationFormData): ApplicationFormData {
   return {
@@ -25,7 +28,7 @@ export async function POST(request: Request) {
       applicationId: string;
     };
 
-    if (!body.applicationId || !body.serviceName || !body.form) {
+    if (!body.applicationId || !UUID_RE.test(body.applicationId) || !body.serviceName || !body.form) {
       return NextResponse.json({ error: "Invalid draft payload" }, { status: 400 });
     }
 

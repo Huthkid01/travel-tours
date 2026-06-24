@@ -53,6 +53,7 @@ export function ApplicationSubmitFlow({
 
   const pendingRef = useRef<PendingSubmission | null>(null);
   const savedApplicationRef = useRef<Application | null>(null);
+  const actionTokenRef = useRef<string>("");
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const applicationIdRef = useRef<string>("");
 
@@ -64,7 +65,7 @@ export function ApplicationSubmitFlow({
 
   const persistFullApplication = useCallback(
     async (form: ApplicationFormData, files: File[], applicationId: string) => {
-      const { application } = await submitApplicationViaApi(
+      const { application, actionToken } = await submitApplicationViaApi(
         storageSlug,
         serviceName,
         form,
@@ -74,6 +75,7 @@ export function ApplicationSubmitFlow({
       );
       rememberApplicationId(storageSlug, application.id);
       savedApplicationRef.current = application;
+      actionTokenRef.current = actionToken;
       return application;
     },
     [storageSlug, serviceName]
@@ -96,6 +98,9 @@ export function ApplicationSubmitFlow({
   const recordPaymentInBackground = useCallback(
     async (application: Application, paymentReference: string) => {
       const amount = settings.feeAmount;
+      const actionToken = actionTokenRef.current;
+      if (!actionToken) return;
+
       try {
         const res = await fetch(`/api/applications/${application.id}/complete-payment`, {
           method: "POST",
@@ -104,11 +109,16 @@ export function ApplicationSubmitFlow({
             paymentReference: paymentReference || undefined,
             amount,
             paymentType: "booking-fee",
+            actionToken,
           }),
         });
         if (!res.ok) return;
 
-        void notifyApplicationOwner(application, { stage: "paid", paymentAmount: amount }).then((notify) => {
+        void notifyApplicationOwner(application, {
+          stage: "paid",
+          paymentAmount: amount,
+          actionToken,
+        }).then((notify) => {
           if (!notify.ok) {
             toast.error(notify.message ?? "Payment recorded but confirmation email could not be sent.");
           }
@@ -149,18 +159,22 @@ export function ApplicationSubmitFlow({
       setPreparingSave(true);
       try {
         const application = await persistFullApplication(data, files, applicationId);
-
-        const notify = await notifyApplicationOwner(application, { stage: "submitted" });
-        if (!notify.ok) {
-          toast.error(
-            notify.message ??
-              "Application saved but email could not be sent. Check Gmail settings in Vercel."
-          );
-        } else {
-          toast.success("Application sent to Darboi Consults. Complete payment below.");
-        }
-
+        savedApplicationRef.current = application;
         setModalOpen(true);
+
+        void notifyApplicationOwner(application, {
+          stage: "submitted",
+          actionToken: actionTokenRef.current,
+        }).then((notify) => {
+          if (!notify.ok) {
+            toast.error(
+              notify.message ??
+                "Application saved but email could not be sent. Check Gmail settings in Vercel."
+            );
+            return;
+          }
+          toast.success("Application sent to Darboi Consults. Complete payment below.");
+        });
       } catch (err) {
         pendingRef.current = null;
         toast.error(

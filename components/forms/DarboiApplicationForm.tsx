@@ -7,6 +7,7 @@ import { CountrySelect } from "@/components/forms/CountrySelect";
 import { useLeadTrackerContext } from "@/components/providers/LeadTrackerProvider";
 import { DocumentUpload } from "@/components/upload/DocumentUpload";
 import { MARITAL_STATUS_OPTIONS, SEX_OPTIONS } from "@/data/darboi-application-form";
+import { MAX_UPLOAD_TOTAL_MB } from "@/lib/constants";
 import { darboiApplicationSchema, type DarboiApplicationFormValues } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreditCard, FileUp, MapPin, Plane, User } from "lucide-react";
@@ -156,6 +157,17 @@ export function DarboiApplicationForm({
       setPassportBioError("International passport photo page is required");
       valid = false;
     } else setPassportBioError(undefined);
+
+    const totalBytes = [...passportPhoto, ...passportBioPage].reduce((sum, file) => sum + file.size, 0);
+    const maxBytes = MAX_UPLOAD_TOTAL_MB * 1024 * 1024;
+    if (totalBytes > maxBytes) {
+      const msg = `Total upload size is ${(totalBytes / (1024 * 1024)).toFixed(1)} MB. Please use files under ${MAX_UPLOAD_TOTAL_MB} MB combined.`;
+      setPassportPhotoError(msg);
+      setPassportBioError(msg);
+      toast.error(msg);
+      valid = false;
+    }
+
     return valid;
   };
 

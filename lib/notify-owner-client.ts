@@ -1,5 +1,6 @@
 "use client";
 
+import { readJsonResponse } from "@/lib/read-json-response";
 import type { Application, ContactFormData } from "@/types";
 
 type NotifyMethod = "gmail";
@@ -25,11 +26,11 @@ async function sendViaGmailApi(body: Record<string, unknown>): Promise<NotifyOwn
         submittedFrom: getSubmittedFrom(),
       }),
     });
-    const json = (await res.json()) as {
+    const json = await readJsonResponse<{
       ok?: boolean;
       method?: NotifyMethod;
       error?: string;
-    };
+    }>(res);
     if (res.ok && json.ok) {
       return { ok: true, method: "gmail" };
     }
@@ -46,12 +47,13 @@ async function sendViaGmailApi(body: Record<string, unknown>): Promise<NotifyOwn
 
 export async function notifyApplicationOwner(
   app: Application,
-  options?: { stage?: "submitted" | "paid"; paymentAmount?: number }
+  options?: { stage?: "submitted" | "paid"; paymentAmount?: number; actionToken?: string }
 ): Promise<NotifyOwnerResult> {
   const stage = options?.stage ?? (app.payment_status === "paid" ? "paid" : "submitted");
   return sendViaGmailApi({
     type: "application",
     applicationId: app.id,
+    actionToken: options?.actionToken,
     stage,
     paymentAmount: options?.paymentAmount,
   });

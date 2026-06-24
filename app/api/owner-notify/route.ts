@@ -1,3 +1,4 @@
+import { verifyApplicationActionToken } from "@/lib/application-action-token";
 import { resolveSubmissionUrl } from "@/lib/resolve-submission-url";
 import { getApplicationServer } from "@/services/applications.server";
 import { isGmailSmtpConfigured } from "@/services/owner-mail-fallback";
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       type?: string;
       applicationId?: string;
+      actionToken?: string;
       stage?: "submitted" | "paid";
       paymentAmount?: number;
       submittedFrom?: string;
@@ -35,6 +37,9 @@ export async function POST(request: Request) {
     const submissionUrl = resolveSubmissionUrl(request, body.submittedFrom);
 
     if (body.type === "application" && body.applicationId) {
+      if (!verifyApplicationActionToken(body.actionToken, body.applicationId)) {
+        return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+      }
       const app = await getApplicationServer(body.applicationId);
       if (!app) {
         return NextResponse.json({ ok: false, error: "Application not found" }, { status: 404 });

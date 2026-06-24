@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getServerSupabase } from "@/supabase/server";
+import { getAdminSupabase } from "@/supabase/admin";
 import type { UploadedFileMeta } from "@/types";
 
 const BUCKET = "documents";
@@ -10,7 +10,7 @@ export async function uploadApplicationFilesServer(
   applicationId: string,
   files: File[]
 ): Promise<UploadedFileMeta[]> {
-  const supabase = getServerSupabase();
+  const supabase = getAdminSupabase();
 
   if (!supabase) {
     return files.map((file) => ({

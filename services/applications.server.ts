@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getServerSupabase } from "@/supabase/server";
+import { getAdminSupabase } from "@/supabase/admin";
 import { isSupabaseServerConfigured } from "@/lib/env.server";
 import type {
   Application,
@@ -34,47 +34,52 @@ function buildApplicationRecord(
   };
 }
 
-/** Create or update application (keeps existing files when new upload list is empty) */
+/** Create or update application (keeps existing files and paid status when updating) */
 export async function upsertApplicationServer(
   serviceName: string,
   form: ApplicationFormData,
   id: string,
   uploadedFiles?: UploadedFileMeta[]
 ): Promise<Application> {
+  const existing = await getApplicationServer(id);
+
   let files = uploadedFiles ?? [];
-  if (files.length === 0) {
-    const existing = await getApplicationServer(id);
-    if (existing?.uploaded_files?.length) {
-      files = existing.uploaded_files;
-    }
+  if (files.length === 0 && existing?.uploaded_files?.length) {
+    files = existing.uploaded_files;
   }
 
   const record = buildApplicationRecord(serviceName, form, files, id);
 
-  const supabase = getServerSupabase();
+  if (existing?.payment_status === "paid") {
+    record.payment_status = existing.payment_status;
+    record.payment_reference = existing.payment_reference;
+  }
+
+  const supabase = getAdminSupabase();
   if (!supabase) return record;
 
-  const { data, error } = await supabase
-    .from("applications")
-    .upsert(
-      {
-        id: record.id,
-        service_name: record.service_name,
-        full_name: record.full_name,
-        email: record.email,
-        phone: record.phone,
-        country: record.country,
-        address: record.address,
-        purpose: record.purpose,
-        notes: record.notes,
-        uploaded_files: record.uploaded_files,
-        payment_status: record.payment_status,
-        payment_reference: record.payment_reference,
-      },
-      { onConflict: "id" }
-    )
-    .select()
-    .single();
+  const row: Record<string, unknown> = {
+    id: record.id,
+    service_name: record.service_name,
+    full_name: record.full_name,
+    email: record.email,
+    phone: record.phone,
+    country: record.country,
+    address: record.address,
+    purpose: record.purpose,
+    notes: record.notes,
+    uploaded_files: record.uploaded_files,
+    payment_status: record.payment_status,
+    payment_reference: record.payment_reference,
+  };
+
+  if (existing?.payment_status === "paid") {
+    row.payment_type = existing.payment_type;
+    row.payment_amount = existing.payment_amount;
+    row.payment_provider = existing.payment_provider;
+  }
+
+  const { data, error } = await supabase.from("applications").upsert(row, { onConflict: "id" }).select().single();
 
   if (error) throw new Error(error.message);
   return data as Application;
@@ -91,7 +96,7 @@ export async function createApplicationServer(
 }
 
 export async function getApplicationServer(id: string): Promise<Application | null> {
-  const supabase = getServerSupabase();
+  const supabase = getAdminSupabase();
   if (!supabase) return null;
 
   const { data, error } = await supabase.from("applications").select("*").eq("id", id).single();
@@ -109,7 +114,7 @@ export async function updateApplicationPaymentServer(
     provider: PaymentProvider;
   }
 ): Promise<Application | null> {
-  const supabase = getServerSupabase();
+  const supabase = getAdminSupabase();
   if (!supabase) return null;
 
   const updates = {

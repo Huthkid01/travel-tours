@@ -1,6 +1,11 @@
 "use client";
 
-import { ACCEPTED_FILE_EXTENSIONS, ACCEPTED_FILE_TYPES, MAX_FILE_SIZE_MB } from "@/lib/constants";
+import {
+  ACCEPTED_FILE_EXTENSIONS,
+  ACCEPTED_FILE_TYPES,
+  MAX_FILE_SIZE_MB,
+  MAX_UPLOAD_TOTAL_MB,
+} from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { FileText, ImageIcon, Trash2, Upload } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -67,7 +72,7 @@ export function DocumentUpload({ files, onChange, error, maxFiles = 5 }: Documen
         <Upload className="mx-auto h-10 w-10 text-gold-500" />
         <p className="mt-3 font-medium text-navy-900 dark:text-white">Drag & drop files here</p>
         <p className="mt-1 text-sm text-navy-500">
-          PDF, document, or image — up to {maxFiles} files, max {MAX_FILE_SIZE_MB}MB each
+          PDF, document, or image — up to {maxFiles} files, {MAX_UPLOAD_TOTAL_MB} MB combined max
         </p>
       </div>
 
