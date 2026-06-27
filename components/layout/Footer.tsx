@@ -85,6 +85,17 @@ export function Footer() {
 
         <div className="mt-12 border-t border-navy-800 pt-8 text-center text-sm text-navy-400">
           <p>&copy; {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.</p>
+          <p className="mt-2">
+            Developed by{" "}
+            <a
+              href="https://www.codedbyuthman.online/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline transition-colors hover:text-gold-400"
+            >
+              CodedByUthman
+            </a>
+          </p>
         </div>
       </div>
     </footer>
